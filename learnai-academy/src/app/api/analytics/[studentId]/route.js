@@ -9,6 +9,14 @@ export const revalidate = 0;
 export const runtime = 'nodejs';
 
 export async function GET(request, { params }) {
+  // Early return if executed during build (no real request)
+  if (!request || !request.url || process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json(
+      { error: 'Route not available during build' },
+      { status: 503 }
+    );
+  }
+
   try {
     // Ensure params is available (Next.js 14+)
     if (!params || !params.studentId) {
