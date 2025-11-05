@@ -8,95 +8,315 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role     @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String    @id @default(uuid())
+  email                 String    @unique
+  passwordHash          String
+  role                  Role      @default(STUDENT)
+  subscriptionTier      Tier      @default(FREE)
+  subscriptionExpiresAt DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  lastLogin             DateTime?
 
-  student   Student?
+  students  Student[]
+  parenting Student[] @relation("ParentRelation")
+
+  @@map("users")
 }
 
 model Student {
-  id         String      @id @default(cuid())
-  userId     String      @unique
-  user       User        @relation(fields: [userId], references: [id])
-  name       String
-  grade      String?
-  subjects   SubjectEnrollment[]
-  sessions   Session[]
-  progress   Progress[]
-  achievements Achievement[]
+  id          String   @id @default(uuid())
+  userId      String
+  parentId    String?
+  firstName   String
+  lastName    String?
+  gradeLevel  Int
+  birthDate   DateTime?
+  avatarUrl   String?
+  preferences Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent            User?               @relation("ParentRelation", fields: [parentId], references: [id])
+  progress          StudentProgress[]
+  sessions          LearningSession[]
+  achievements      StudentAchievement[]
+  dailyActivity     DailyActivity[]
+  assessmentResults AssessmentResult[]
+
+  @@map("students")
 }
 
 model Subject {
-  id      String   @id @default(cuid())
-  name    String   @unique
-  topics  Topic[]
-  enrollments SubjectEnrollment[]
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  minGrade    Int
+  maxGrade    Int
+  orderIndex  Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  topics   Topic[]
+  progress StudentProgress[]
+  sessions LearningSession[]
+
+  @@map("subjects")
 }
 
 model Topic {
-  id         String   @id @default(cuid())
-  name       String
-  subjectId  String
-  subject    Subject  @relation(fields: [subjectId], references: [id])
+  id                 String   @id @default(uuid())
+  subjectId          String
+  parentTopicId      String?
+  name               String
+  slug               String
+  description        String?
+  gradeLevel         Int
+  difficulty         Difficulty
+  learningStandards  Json?
+  prerequisites      Json?
+  estimatedHours     Float?
+  orderIndex         Int
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+
+  subject       Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  parentTopic   Topic?            @relation("TopicHierarchy", fields: [parentTopicId], references: [id])
+  childTopics   Topic[]           @relation("TopicHierarchy")
+  contentItems  ContentItem[]
+  progress      StudentProgress[]
+  sessions      LearningSession[]
+
+  @@unique([subjectId, slug])
+  @@map("topics")
 }
 
-model SubjectEnrollment {
-  id         String   @id @default(cuid())
-  studentId  String
-  subjectId  String
-  student    Student  @relation(fields: [studentId], references: [id])
-  subject    Subject  @relation(fields: [subjectId], references: [id])
+model ContentItem {
+  id            String      @id @default(uuid())
+  topicId       String
+  contentType   ContentType
+  title         String
+  content       Json
+  difficulty    Difficulty
+  estimatedTime Int?
+  mediaUrls     Json?
+  metadata      Json?
+  isAiGenerated Boolean     @default(false)
+  qualityScore  Float?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-  @@unique([studentId, subjectId])
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@map("content_items")
 }
 
-model Session {
-  id         String     @id @default(cuid())
-  studentId  String
-  startedAt  DateTime   @default(now())
-  endedAt    DateTime?
-  student    Student    @relation(fields: [studentId], references: [id])
-  messages   Message[]
-  mode       String?    // practice, quiz, explain, etc.
-  subject    String?
-  topic      String?
-  difficulty String?
+model StudentProgress {
+  id                      String   @id @default(uuid())
+  studentId               String
+  subjectId               String
+  topicId                 String
+  masteryLevel            Float    @default(0)
+  totalTimeMinutes        Int      @default(0)
+  sessionsCount           Int      @default(0)
+  lastPracticedAt         DateTime?
+  strengths               Json?
+  weaknesses              Json?
+  nextRecommendedTopics   Json?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topic   Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, topicId])
+  @@map("student_progress")
 }
 
-model Message {
-  id         String   @id @default(cuid())
-  sessionId  String
-  role       String   // 'user' | 'assistant' | 'system'
-  content    String
-  createdAt  DateTime @default(now())
-  session    Session  @relation(fields: [sessionId], references: [id])
+model LearningSession {
+  id                String      @id @default(uuid())
+  studentId         String
+  subjectId         String?
+  topicId           String?
+  sessionMode       SessionMode
+  difficultyLevel   Difficulty
+  startedAt         DateTime
+  endedAt           DateTime?
+  durationMinutes   Int?
+  messagesCount     Int         @default(0)
+  problemsAttempted Int         @default(0)
+  problemsCorrect   Int         @default(0)
+  pointsEarned      Int         @default(0)
+  sessionData       Json?
+  aiAgentUsed       String?
+  qualityRating     Int?
+  createdAt         DateTime    @default(now())
+
+  student          Student                @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject          Subject?               @relation(fields: [subjectId], references: [id])
+  topic            Topic?                 @relation(fields: [topicId], references: [id])
+  messages         SessionMessage[]
+  agentLogs        AgentLog[]
+  assessmentResults AssessmentResult[]
+
+  @@map("learning_sessions")
 }
 
-model Progress {
-  id         String   @id @default(cuid())
-  studentId  String
-  subject    String
-  topic      String
-  score      Int
-  createdAt  DateTime @default(now())
-  student    Student  @relation(fields: [studentId], references: [id])
+model SessionMessage {
+  id             String   @id @default(uuid())
+  sessionId      String
+  role           String
+  content        String
+  metadata       Json?
+  sequenceNumber Int
+  createdAt      DateTime @default(now())
+
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_messages")
 }
 
 model Achievement {
-  id         String   @id @default(cuid())
-  studentId  String
-  name       String
-  description String?
-  createdAt  DateTime @default(now())
-  student    Student  @relation(fields: [studentId], references: [id])
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String
+  icon        String
+  category    String
+  condition   Json
+  pointsReward Int     @default(0)
+  rarity      String
+  orderIndex  Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  studentAchievements StudentAchievement[]
+
+  @@map("achievements")
+}
+
+model StudentAchievement {
+  id            String   @id @default(uuid())
+  studentId     String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  progressData  Json?
+
+  student     Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, achievementId])
+  @@map("student_achievements")
+}
+
+model DailyActivity {
+  id            String   @id @default(uuid())
+  studentId     String
+  activityDate  DateTime @db.Date
+  minutesLearned Int     @default(0)
+  sessionsCount Int      @default(0)
+  pointsEarned  Int      @default(0)
+  topicsStudied Json?
+  streakDay     Int?
+  createdAt     DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, activityDate])
+  @@map("daily_activity")
+}
+
+model Assessment {
+  id              String   @id @default(uuid())
+  name            String
+  assessmentType  String
+  subjectId       String?
+  topics          Json?
+  gradeLevel      Int?
+  totalQuestions  Int
+  timeLimitMinutes Int?
+  passingScore    Float?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  results AssessmentResult[]
+
+  @@map("assessments")
+}
+
+model AssessmentResult {
+  id              String   @id @default(uuid())
+  assessmentId    String
+  studentId       String
+  sessionId       String?
+  score           Float
+  totalCorrect    Int
+  totalQuestions  Int
+  timeTakenMinutes Int?
+  questionResults Json?
+  recommendedTopics Json?
+  takenAt         DateTime @default(now())
+
+  assessment Assessment       @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student    Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  session    LearningSession? @relation(fields: [sessionId], references: [id])
+
+  @@map("assessment_results")
+}
+
+model AgentLog {
+  id              String   @id @default(uuid())
+  sessionId       String
+  agentType       String
+  promptTokens    Int?
+  completionTokens Int?
+  totalCost       Float?
+  responseTimeMs  Int?
+  modelUsed       String?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+
+  session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("agent_logs")
 }
 
 enum Role {
-  ADMIN
-  PARENT
   STUDENT
+  PARENT
+  TEACHER
+  ADMIN
+}
+
+enum Tier {
+  FREE
+  PREMIUM
+  FAMILY
+  SCHOOL
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SessionMode {
+  PRACTICE
+  HELP
+  ASSESSMENT
+  PROJECT
+}
+
+enum ContentType {
+  EXPLANATION
+  EXAMPLE
+  PRACTICE
+  QUIZ
+  PROJECT
 }
