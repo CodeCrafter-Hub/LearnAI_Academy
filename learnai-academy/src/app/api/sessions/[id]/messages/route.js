@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { agentOrchestrator } from '@/services/ai/agentOrchestrator';
 import { contentFilter } from '@/services/ai/contentFilter';
+import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
 const messageSchema = z.object({

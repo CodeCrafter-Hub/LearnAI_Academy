@@ -9,6 +9,8 @@ const createSessionSchema = z.object({
   topicId: z.string().uuid(),
   mode: z.enum(['PRACTICE', 'HELP', 'ASSESSMENT']),
   difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']),
+  isVoiceMode: z.boolean().optional(),
+  agentRole: z.enum(['tutoring', 'curriculum', 'assessment']).optional(),
 });
 
 export async function POST(request) {
@@ -46,6 +48,10 @@ export async function POST(request) {
         sessionMode: data.mode,
         difficultyLevel: data.difficulty,
         startedAt: new Date(),
+        sessionData: {
+          isVoiceMode: data.isVoiceMode || false,
+          agentRole: data.agentRole || 'tutoring',
+        },
       },
       include: {
         student: true,

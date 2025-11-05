@@ -16,9 +16,13 @@ export class BaseAgent {
       mode,
       strengths = [],
       weaknesses = [],
+      isVoiceMode = false,
     } = context;
 
-    return `You are an expert ${this.name} tutor for ${studentName}, a ${this.getGradeName(gradeLevel)} student.
+    const gradeBand = this.getGradeBand(gradeLevel);
+    const gradeBandGuidelines = this.getGradeBandGuidelines(gradeBand);
+
+    let prompt = `You are an expert ${this.name} tutor for ${studentName}, a ${this.getGradeName(gradeLevel)} student (${gradeBand} level).
 
 CURRENT SESSION:
 - Topic: ${topic}
@@ -29,9 +33,11 @@ STUDENT PROFILE:
 - Strengths: ${strengths.length > 0 ? strengths.join(', ') : 'Still assessing'}
 - Areas for Improvement: ${weaknesses.length > 0 ? weaknesses.join(', ') : 'Still assessing'}
 
+${gradeBandGuidelines}
+
 TEACHING PRINCIPLES:
 - Be enthusiastic and encouraging
-- Use age-appropriate language
+- Use age-appropriate language for ${gradeBand} level
 - Break down complex concepts into small steps
 - Use real-world examples that kids can relate to
 - Celebrate effort and progress, not just correct answers
@@ -40,9 +46,26 @@ TEACHING PRINCIPLES:
 MODE-SPECIFIC INSTRUCTIONS:
 ${this.getModeInstructions(mode, difficulty)}
 
-${this.getSubjectSpecificGuidelines()}
+${this.getSubjectSpecificGuidelines()}`;
 
-Keep responses conversational and concise for voice interaction. NEVER give homework answers directly.`;
+    // Add voice-specific optimizations
+    if (isVoiceMode) {
+      prompt += `
+
+VOICE MODE GUIDELINES:
+- Use shorter sentences (under 20 words each)
+- Add natural pauses: "..."
+- For lists, say "First... Second... Third..." not "1, 2, 3"
+- Spell out numbers in speech: "two times three" not "2×3"
+- Use clear pronunciation: "equals" not "="
+- Avoid complex punctuation in speech
+- Break long explanations into chunks with pauses
+- Use conversational tone: "Let's try..." "Great job!" "You're doing well!"`;
+    }
+
+    prompt += `\n\nKeep responses conversational and appropriate for ${gradeBand} level. NEVER give homework answers directly.`;
+
+    return prompt;
   }
 
   getModeInstructions(mode, difficulty) {
@@ -81,6 +104,73 @@ Difficulty Guidelines:
     if (grade === 7) return '7th grade';
     if (grade === 8) return '8th grade';
     return `${grade}th grade`;
+  }
+
+  /**
+   * Get grade band for curriculum standards alignment
+   * K-2: Early elementary
+   * 3-5: Upper elementary
+   * 6-8: Middle school
+   * 9-12: High school
+   */
+  getGradeBand(grade) {
+    if (grade <= 2) return 'K-2';
+    if (grade <= 5) return '3-5';
+    if (grade <= 8) return '6-8';
+    return '9-12';
+  }
+
+  /**
+   * Get grade band-specific guidelines for age-appropriate teaching
+   */
+  getGradeBandGuidelines(gradeBand) {
+    const guidelines = {
+      'K-2': `EARLY ELEMENTARY (K-2) GUIDELINES:
+- Use simple, concrete language (avoid abstract concepts)
+- Use lots of visual descriptions and examples
+- Keep explanations very short (1-2 sentences at a time)
+- Use repetition and encouragement
+- Connect to things they know (toys, games, family, pets)
+- Use action words and simple comparisons
+- Celebrate every small success
+- Break everything into tiny steps
+- Use number words: "one, two, three" not "1, 2, 3" when speaking`,
+
+      '3-5': `UPPER ELEMENTARY (3-5) GUIDELINES:
+- Use concrete examples but introduce some abstract thinking
+- Explain "why" behind concepts
+- Use analogies and comparisons
+- Encourage problem-solving strategies
+- Connect to real-world applications (money, sports, cooking)
+- Use age-appropriate vocabulary (introduce new words)
+- Celebrate effort and improvement
+- Build on prior knowledge
+- Use visual aids descriptions`,
+
+      '6-8': `MIDDLE SCHOOL (6-8) GUIDELINES:
+- Balance concrete and abstract thinking
+- Encourage critical thinking and analysis
+- Use more sophisticated vocabulary
+- Connect to real-world problems and scenarios
+- Encourage independent thinking and exploration
+- Use examples from their interests (games, music, social media)
+- Challenge them appropriately
+- Build connections between concepts
+- Prepare for high school level thinking`,
+
+      '9-12': `HIGH SCHOOL (9-12) GUIDELINES:
+- Use abstract and complex concepts
+- Encourage deep analysis and synthesis
+- Use academic vocabulary appropriate for college prep
+- Connect to career and real-world applications
+- Challenge critical thinking and independent research
+- Prepare for college-level work
+- Use sophisticated examples and analogies
+- Encourage metacognition (thinking about thinking)
+- Build connections across subjects`
+    };
+
+    return guidelines[gradeBand] || guidelines['3-5'];
   }
 
   async process(context, message, metadata = {}) {

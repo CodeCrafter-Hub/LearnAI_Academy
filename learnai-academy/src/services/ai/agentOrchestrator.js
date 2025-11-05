@@ -4,12 +4,16 @@ import { ReadingAgent } from './agents/ReadingAgent.js';
 import { ScienceAgent } from './agents/ScienceAgent.js';
 import { WritingAgent } from './agents/WritingAgent.js';
 import { CodingAgent } from './agents/CodingAgent.js';
+import { MathCurriculumAgent } from './agents/MathCurriculumAgent.js';
+import { AssessmentAgent } from './agents/AssessmentAgent.js';
+import { groqClient } from './groqClient.js';
 import { redis } from '../../lib/redis.js';
 import prisma from '../../lib/prisma.js';
 
 class AgentOrchestrator {
   constructor() {
-    this.agents = {
+    // Tutoring Agents (real-time interactive tutoring)
+    this.tutoringAgents = {
       math: new MathAgent(),
       english: new EnglishAgent(),
       reading: new ReadingAgent(),
@@ -17,18 +21,69 @@ class AgentOrchestrator {
       writing: new WritingAgent(),
       coding: new CodingAgent(),
     };
+
+    // Curriculum Agents (formal teacher role - content generation)
+    this.curriculumAgents = {
+      math: new MathCurriculumAgent(),
+      // TODO: Add other subject curriculum agents as needed
+      // english: new EnglishCurriculumAgent(),
+      // science: new ScienceCurriculumAgent(),
+    };
+
+    // Assessment Agents (evaluator role)
+    this.assessmentAgents = {
+      math: new AssessmentAgent('Math Assessment Specialist', 'math'),
+      // TODO: Add other subject assessment agents as needed
+    };
+
+    // Legacy: Keep agents map for backward compatibility
+    this.agents = this.tutoringAgents;
   }
 
   /**
-   * Route incoming message to appropriate agent
+   * Select the most appropriate agent based on context and role
+   * @param {Object} context - Session context
+   * @param {String} role - Agent role: 'tutoring' (default), 'curriculum', 'assessment'
+   */
+  selectAgent(context, role = 'tutoring') {
+    const { subject } = context;
+
+    if (role === 'curriculum') {
+      // Use curriculum agents for content generation
+      return this.curriculumAgents[subject] || this.curriculumAgents.math;
+    }
+
+    if (role === 'assessment') {
+      // Use assessment agents for evaluation
+      return this.assessmentAgents[subject] || this.assessmentAgents.math;
+    }
+
+    // Default: Use tutoring agents for interactive sessions
+    const agentMap = {
+      'math': this.tutoringAgents.math,
+      'english': this.tutoringAgents.english,
+      'reading': this.tutoringAgents.reading,
+      'science': this.tutoringAgents.science,
+      'writing': this.tutoringAgents.writing,
+      'coding': this.tutoringAgents.coding,
+    };
+
+    return agentMap[subject] || this.tutoringAgents.math;
+  }
+
+  /**
+   * Route message to appropriate agent (with role support)
    */
   async routeMessage(sessionId, message, metadata = {}) {
     try {
       // Get session context
       const context = await this.getSessionContext(sessionId);
       
+      // Determine agent role from metadata or context
+      const role = metadata.role || context.agentRole || 'tutoring';
+      
       // Select appropriate agent
-      const agent = this.selectAgent(context);
+      const agent = this.selectAgent(context, role);
       
       // Add message to context
       context.messages.push({
@@ -46,6 +101,7 @@ class AgentOrchestrator {
         content: response.content,
         timestamp: Date.now(),
         agentUsed: agent.name,
+        agentRole: role,
       });
 
       // Update session in cache and database
@@ -54,7 +110,7 @@ class AgentOrchestrator {
       await this.saveMessageToDb(sessionId, 'assistant', response.content);
       
       // Log agent interaction for analytics
-      await this.logAgentInteraction(sessionId, agent.name, response);
+      await this.logAgentInteraction(sessionId, agent.name, response, role);
       
       return response;
     } catch (error) {
@@ -64,21 +120,66 @@ class AgentOrchestrator {
   }
 
   /**
-   * Select the most appropriate agent based on context
+   * Generate curriculum content (lesson plans, practice problems, etc.)
    */
-  selectAgent(context) {
-    const { subject } = context;
-    
-    const agentMap = {
-      'math': this.agents.math,
-      'english': this.agents.english,
-      'reading': this.agents.reading,
-      'science': this.agents.science,
-      'writing': this.agents.writing,
-      'coding': this.agents.coding,
-    };
-    
-    return agentMap[subject] || this.agents.math;
+  async generateCurriculum(task, subject, topic, gradeLevel, options = {}) {
+    try {
+      const curriculumAgent = this.curriculumAgents[subject] || this.curriculumAgents.math;
+
+      switch (task) {
+        case 'lessonPlan':
+          return await curriculumAgent.generateLessonPlan(topic, gradeLevel, options);
+        
+        case 'practiceProblems':
+          return await curriculumAgent.generatePracticeProblems(
+            topic,
+            gradeLevel,
+            options.count || 10,
+            options.difficulty || 'MEDIUM'
+          );
+        
+        case 'contentItems':
+          return await curriculumAgent.generateContentItems(
+            topic,
+            gradeLevel,
+            options.contentType || 'EXPLANATION',
+            options.count || 5
+          );
+        
+        default:
+          throw new Error(`Unknown curriculum task: ${task}`);
+      }
+    } catch (error) {
+      console.error('Error generating curriculum:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate assessment
+   */
+  async generateAssessment(subject, topic, gradeLevel, options = {}) {
+    try {
+      const assessmentAgent = this.assessmentAgents[subject] || this.assessmentAgents.math;
+      return await assessmentAgent.generateDiagnosticAssessment(topic, gradeLevel, options);
+    } catch (error) {
+      console.error('Error generating assessment:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Grade assessment
+   */
+  async gradeAssessment(assessmentId, studentAnswers, context) {
+    try {
+      const { subject } = context;
+      const assessmentAgent = this.assessmentAgents[subject] || this.assessmentAgents.math;
+      return await assessmentAgent.gradeAssessment(assessmentId, studentAnswers, context);
+    } catch (error) {
+      console.error('Error grading assessment:', error);
+      throw error;
+    }
   }
 
   /**
@@ -139,6 +240,8 @@ class AgentOrchestrator {
         weaknesses: progress?.weaknesses || [],
         masteryLevel: progress?.masteryLevel || 0,
         startTime: session.startedAt.getTime(),
+        isVoiceMode: session.sessionData?.isVoiceMode || false,
+        agentRole: session.sessionData?.agentRole || 'tutoring',
       };
       
       // Cache for 1 hour
@@ -195,7 +298,7 @@ class AgentOrchestrator {
   /**
    * Log agent interaction for analytics and cost tracking
    */
-  async logAgentInteraction(sessionId, agentName, response) {
+  async logAgentInteraction(sessionId, agentName, response, role = 'tutoring') {
     try {
       // Calculate cost (Groq is very cheap, but track anyway)
       const inputCost = (response.usage?.promptTokens || 0) / 1_000_000 * 0.05;
@@ -205,7 +308,7 @@ class AgentOrchestrator {
       await prisma.agentLog.create({
         data: {
           sessionId,
-          agentType: agentName,
+          agentType: `${role}:${agentName}`,
           promptTokens: response.usage?.promptTokens || 0,
           completionTokens: response.usage?.completionTokens || 0,
           totalCost,
