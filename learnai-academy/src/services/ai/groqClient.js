@@ -2,15 +2,63 @@ import Groq from 'groq-sdk';
 
 class GroqClient {
   constructor() {
-    this.client = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
-    });
-    
     // Groq models
     this.models = {
       fast: 'llama-3.1-8b-instant', // Fast, cheap
       smart: 'llama-3.1-70b-versatile', // Best quality
       code: 'llama-3.1-70b-versatile', // Good for coding
+    };
+
+    // Lazy initialization - only create client when needed and API key is available
+    this._client = null;
+  }
+
+  /**
+   * Get or create Groq client (lazy initialization)
+   */
+  getClient() {
+    if (this._client) {
+      return this._client;
+    }
+
+    // Only initialize if API key is available
+    if (!process.env.GROQ_API_KEY) {
+      // Return a mock client during build or when API key is missing
+      return this._createMockClient();
+    }
+
+    try {
+      this._client = new Groq({
+        apiKey: process.env.GROQ_API_KEY,
+      });
+      return this._client;
+    } catch (error) {
+      console.warn('Groq client initialization failed:', error.message);
+      return this._createMockClient();
+    }
+  }
+
+  /**
+   * Create a mock client for build time or when API key is missing
+   */
+  _createMockClient() {
+    return {
+      chat: {
+        completions: {
+          create: async () => ({
+            choices: [{
+              message: {
+                content: 'AI service not available. Please configure GROQ_API_KEY.',
+              },
+            }],
+            usage: {
+              prompt_tokens: 0,
+              completion_tokens: 0,
+              total_tokens: 0,
+            },
+          }),
+        },
+      },
     };
   }
 
@@ -23,9 +71,10 @@ class GroqClient {
     } = options;
 
     try {
+      const client = this.getClient();
       const startTime = Date.now();
 
-      const response = await this.client.chat.completions.create({
+      const response = await client.chat.completions.create({
         model,
         messages,
         temperature,
@@ -59,7 +108,8 @@ class GroqClient {
     } = options;
 
     try {
-      const stream = await this.client.chat.completions.create({
+      const client = this.getClient();
+      const stream = await client.chat.completions.create({
         model,
         messages,
         temperature,
