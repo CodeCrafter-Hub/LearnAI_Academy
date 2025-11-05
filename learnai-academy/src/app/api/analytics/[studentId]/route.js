@@ -4,10 +4,20 @@ import { verifyToken } from '@/lib/auth';
 
 // Force dynamic rendering - this route should never be statically generated
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 export const revalidate = 0;
+export const runtime = 'nodejs';
 
 export async function GET(request, { params }) {
   try {
+    // Ensure params is available (Next.js 14+)
+    if (!params || !params.studentId) {
+      return NextResponse.json(
+        { error: 'Invalid request parameters' },
+        { status: 400 }
+      );
+    }
+
     // Verify authentication
     const user = await verifyToken(request);
     if (!user) {

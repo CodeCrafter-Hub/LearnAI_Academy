@@ -10,9 +10,24 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
-  webpack: (config) => {
+  // Exclude API routes from static optimization
+  generateBuildId: async () => {
+    return 'build-' + Date.now();
+  },
+  webpack: (config, { isServer }) => {
     // Add alias support for "@/..."
     config.resolve.alias["@"] = path.resolve(__dirname, "src");
+    
+    // Ignore Prisma during client-side builds
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
     return config;
   },
 };
