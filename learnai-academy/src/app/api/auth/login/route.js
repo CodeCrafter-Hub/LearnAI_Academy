@@ -11,16 +11,45 @@ const loginSchema = z.object({
 
 export async function POST(request) {
   try {
+    // Check if JWT_SECRET is set
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return NextResponse.json(
+        { error: 'Server configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = loginSchema.parse(body);
 
     // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        students: true,
-      },
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          students: true,
+        },
+      });
+    } catch (dbError) {
+      console.error('Database error during login:', dbError);
+      // Check if it's a connection error
+      if (dbError.message?.includes('connection') || dbError.message?.includes('timeout')) {
+        return NextResponse.json(
+          { error: 'Database connection error. Please try again later.' },
+          { status: 503 }
+        );
+      }
+      // Check if tables don't exist
+      if (dbError.message?.includes('does not exist') || dbError.message?.includes('relation')) {
+        return NextResponse.json(
+          { error: 'Database not initialized. Please run migrations first.' },
+          { status: 500 }
+        );
+      }
+      throw dbError;
+    }
 
     if (!user) {
       return NextResponse.json(
