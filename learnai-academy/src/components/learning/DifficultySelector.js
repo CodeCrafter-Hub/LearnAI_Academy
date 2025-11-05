@@ -3,11 +3,8 @@
 /**
  * DifficultySelector Component
  *
- * Allows students to choose the difficulty level for their learning session.
- * Different difficulties provide different point multipliers:
- * - Easy: 1x points (perfect for learning new concepts)
- * - Medium: 1.2x points (balanced challenge)
- * - Hard: 1.5x points (maximum challenge)
+ * Glassy, minimal design for choosing difficulty level.
+ * Uses design system tokens for fluid, responsive styling.
  */
 export default function DifficultySelector({
   onSelect,
@@ -22,9 +19,8 @@ export default function DifficultySelector({
       title: 'Easy',
       description: 'Perfect for learning new concepts',
       pointMultiplier: '1x',
-      borderColor: 'border-green-200',
-      hoverBorderColor: 'hover:border-green-400',
-      badgeColor: 'bg-green-100 text-green-700',
+      accentColor: 'hsl(145, 55%, 45%)', // green
+      subtleColor: 'hsl(145, 50%, 96%)',
     },
     {
       level: 'MEDIUM',
@@ -32,9 +28,8 @@ export default function DifficultySelector({
       title: 'Medium',
       description: 'Good balance of challenge',
       pointMultiplier: '1.2x',
-      borderColor: 'border-yellow-200',
-      hoverBorderColor: 'hover:border-yellow-400',
-      badgeColor: 'bg-yellow-100 text-yellow-700',
+      accentColor: 'hsl(40, 85%, 50%)', // yellow/orange
+      subtleColor: 'hsl(40, 90%, 96%)',
     },
     {
       level: 'HARD',
@@ -42,35 +37,79 @@ export default function DifficultySelector({
       title: 'Hard',
       description: 'Maximum challenge',
       pointMultiplier: '1.5x',
-      borderColor: 'border-red-200',
-      hoverBorderColor: 'hover:border-red-400',
-      badgeColor: 'bg-red-100 text-red-700',
+      accentColor: 'hsl(355, 70%, 55%)', // red
+      subtleColor: 'hsl(355, 70%, 96%)',
     },
   ];
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      <h1 style={{
+        fontSize: 'var(--text-3xl)',
+        fontWeight: 'var(--weight-bold)',
+        color: 'var(--color-text-primary)',
+        marginBottom: 'var(--space-xs)',
+      }}>
         Choose Difficulty
       </h1>
-      <p className="text-gray-600 mb-6">
-        {topicName} - {mode === 'PRACTICE' ? 'Practice' : 'Help'} Mode
+      <p style={{
+        fontSize: 'var(--text-base)',
+        color: 'var(--color-text-secondary)',
+        marginBottom: 'var(--space-lg)',
+      }}>
+        {topicName} • {mode === 'PRACTICE' ? 'Practice' : 'Help'} Mode
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {difficulties.map((difficulty) => (
+      <div className="grid" style={{
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
+        gap: 'var(--space-md)',
+      }}>
+        {difficulties.map((difficulty, idx) => (
           <button
             key={difficulty.level}
             onClick={() => onSelect(difficulty.level)}
             disabled={isLoading}
-            className={`bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 ${difficulty.borderColor} ${difficulty.hoverBorderColor} disabled:opacity-50 disabled:cursor-not-allowed`}
+            className="surface-interactive animate-scale-in"
+            style={{
+              padding: 'var(--space-lg)',
+              textAlign: 'center',
+              border: '2px solid var(--color-border-subtle)',
+              background: 'var(--color-bg-elevated)',
+              opacity: isLoading ? 0.5 : 1,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              animationDelay: `${idx * 50}ms`,
+            }}
           >
-            <div className="text-5xl mb-3">{difficulty.emoji}</div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">
+            <div style={{
+              fontSize: 'var(--text-5xl)',
+              marginBottom: 'var(--space-sm)',
+            }}>
+              {difficulty.emoji}
+            </div>
+            <h3 style={{
+              fontSize: 'var(--text-2xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-xs)',
+            }}>
               {difficulty.title}
             </h3>
-            <p className="text-gray-600 mb-4">{difficulty.description}</p>
-            <div className={`${difficulty.badgeColor} px-3 py-1 rounded-full text-sm font-medium inline-block`}>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-secondary)',
+              marginBottom: 'var(--space-md)',
+            }}>
+              {difficulty.description}
+            </p>
+            <div style={{
+              display: 'inline-block',
+              padding: 'var(--space-2xs) var(--space-sm)',
+              borderRadius: 'var(--radius-full)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 'var(--weight-medium)',
+              background: difficulty.subtleColor,
+              color: difficulty.accentColor,
+            }}>
               Points: {difficulty.pointMultiplier}
             </div>
           </button>

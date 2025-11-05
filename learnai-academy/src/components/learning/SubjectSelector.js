@@ -1,39 +1,57 @@
 'use client';
 
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+
 /**
  * SubjectSelector Component
  *
- * Displays a grid of subjects filtered by the student's grade level.
- * Each subject card shows the subject name and description.
- * Students can click on a subject to proceed to topic selection.
+ * Glassy subject cards with staggered animations.
  */
 export default function SubjectSelector({ subjects = [], onSelect }) {
   if (subjects.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-500 text-lg">Loading subjects...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Loading subjects..." />;
   }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+      <h1 style={{
+        fontSize: 'var(--text-3xl)',
+        fontWeight: 'var(--weight-bold)',
+        color: 'var(--color-text-primary)',
+        marginBottom: 'var(--space-lg)',
+      }}>
         Choose a Subject
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {subjects.map((subject) => (
+      <div className="grid grid-auto-fit">
+        {subjects.map((subject, idx) => (
           <button
             key={subject.id}
             onClick={() => onSelect(subject)}
-            className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left transform hover:-translate-y-1"
+            className="surface-interactive animate-fade-in"
+            style={{
+              padding: 'var(--space-lg)',
+              textAlign: 'left',
+              border: '1px solid var(--color-border-subtle)',
+              background: 'var(--color-bg-elevated)',
+              animationDelay: `${idx * 50}ms`,
+            }}
           >
-            <h3 className="text-xl font-bold text-gray-800 mb-2">
+            <h3 style={{
+              fontSize: 'var(--text-xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-xs)',
+            }}>
               {subject.name}
             </h3>
-            <p className="text-sm text-gray-600">{subject.description}</p>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 'var(--leading-relaxed)',
+            }}>
+              {subject.description}
+            </p>
           </button>
         ))}
       </div>

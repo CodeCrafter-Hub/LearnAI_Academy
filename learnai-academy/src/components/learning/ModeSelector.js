@@ -3,9 +3,8 @@
 /**
  * ModeSelector Component
  *
- * Allows students to choose between two learning modes:
- * - PRACTICE: Structured problem-solving with instant feedback and bonus points
- * - HELP: Open Q&A with explanations using Socratic method for deep learning
+ * Glassy cards for choosing Practice vs Help mode.
+ * Uses subtle gradients and elevation for visual hierarchy.
  */
 export default function ModeSelector({ onSelect, topicName = '' }) {
   const modes = [
@@ -14,43 +13,105 @@ export default function ModeSelector({ onSelect, topicName = '' }) {
       emoji: '🎯',
       title: 'Practice Mode',
       description: 'Solve problems and get instant feedback',
-      gradient: 'from-orange-400 to-red-500',
-      features: ['✓ Structured practice', '✓ Bonus points'],
+      gradient: 'linear-gradient(135deg, hsl(30, 90%, 60%) 0%, hsl(15, 85%, 55%) 100%)',
+      features: ['Structured practice', 'Bonus points'],
     },
     {
       type: 'HELP',
       emoji: '💡',
       title: 'Help Mode',
       description: 'Ask questions and get explanations',
-      gradient: 'from-blue-400 to-purple-500',
-      features: ['✓ Open Q&A', '✓ Deep learning'],
+      gradient: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+      features: ['Open Q&A', 'Deep learning'],
     },
   ];
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      <h1 style={{
+        fontSize: 'var(--text-3xl)',
+        fontWeight: 'var(--weight-bold)',
+        color: 'var(--color-text-primary)',
+        marginBottom: 'var(--space-xs)',
+      }}>
         {topicName}
       </h1>
-      <p className="text-gray-600 mb-6">Choose your learning mode</p>
+      <p style={{
+        fontSize: 'var(--text-base)',
+        color: 'var(--color-text-secondary)',
+        marginBottom: 'var(--space-lg)',
+      }}>
+        Choose your learning mode
+      </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {modes.map((mode) => (
+      <div className="grid" style={{
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+        gap: 'var(--space-lg)',
+      }}>
+        {modes.map((mode, idx) => (
           <button
             key={mode.type}
             onClick={() => onSelect(mode.type)}
-            className={`bg-gradient-to-br ${mode.gradient} rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all text-left transform hover:scale-105`}
+            className="animate-scale-in"
+            style={{
+              padding: 'var(--space-xl)',
+              textAlign: 'left',
+              background: mode.gradient,
+              borderRadius: 'var(--radius-2xl)',
+              border: 'none',
+              boxShadow: 'var(--shadow-lg)',
+              color: 'white',
+              transition: 'all var(--transition-base)',
+              cursor: 'pointer',
+              animationDelay: `${idx * 50}ms`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+            }}
           >
-            <div className="text-5xl mb-4">{mode.emoji}</div>
-            <h2 className="text-2xl font-bold mb-3">{mode.title}</h2>
-            <p className="text-white/90 mb-4">{mode.description}</p>
-            <div className="flex flex-wrap gap-2 text-sm">
+            <div style={{
+              fontSize: 'var(--text-5xl)',
+              marginBottom: 'var(--space-md)',
+            }}>
+              {mode.emoji}
+            </div>
+            <h2 style={{
+              fontSize: 'var(--text-2xl)',
+              fontWeight: 'var(--weight-bold)',
+              marginBottom: 'var(--space-sm)',
+            }}>
+              {mode.title}
+            </h2>
+            <p style={{
+              fontSize: 'var(--text-base)',
+              opacity: 0.9,
+              marginBottom: 'var(--space-md)',
+              lineHeight: 'var(--leading-relaxed)',
+            }}>
+              {mode.description}
+            </p>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 'var(--space-xs)',
+              fontSize: 'var(--text-sm)',
+            }}>
               {mode.features.map((feature, index) => (
                 <span
                   key={index}
-                  className="bg-white/20 px-3 py-1 rounded-full"
+                  style={{
+                    padding: 'var(--space-2xs) var(--space-sm)',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(4px)',
+                  }}
                 >
-                  {feature}
+                  ✓ {feature}
                 </span>
               ))}
             </div>

@@ -9,7 +9,7 @@ import TopicSelector from '@/components/learning/TopicSelector';
 import ModeSelector from '@/components/learning/ModeSelector';
 import DifficultySelector from '@/components/learning/DifficultySelector';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Home, X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 
 function LearnPageContent() {
   const router = useRouter();
@@ -128,28 +128,49 @@ function LearnPageContent() {
   // Session View (Chat Interface)
   if (step === 'session' && sessionId) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        {/* Session Header */}
-        <div className={`${selectedSubject.color} text-white p-4 shadow-md`}>
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--color-bg-base)' }}>
+        {/* Session Header - Glassy */}
+        <div className="glass" style={{
+          padding: 'var(--space-md)',
+          borderBottom: '1px solid var(--color-border-subtle)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 'var(--z-sticky)',
+        }}>
+          <div className="container" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
             <div>
-              <h2 className="text-xl font-bold">{selectedTopic.name}</h2>
-              <p className="text-sm opacity-90">
-                {selectedMode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'} • {selectedMode}
+              <h2 style={{
+                fontSize: 'var(--text-xl)',
+                fontWeight: 'var(--weight-semibold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-3xs)',
+              }}>
+                {selectedTopic.name}
+              </h2>
+              <p style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-text-secondary)',
+              }}>
+                {selectedMode === 'PRACTICE' ? '🎯 Practice Mode' : '💡 Help Mode'}
               </p>
             </div>
             <button
               onClick={endSession}
-              className="bg-white/20 hover:bg-white/30 rounded-lg px-4 py-2 font-medium transition-colors flex items-center gap-2"
+              className="btn btn-secondary"
+              style={{ gap: 'var(--space-2xs)' }}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
               End Session
             </button>
           </div>
         </div>
 
         {/* Chat Interface */}
-        <div className="flex-1 overflow-hidden">
+        <div style={{ flex: 1, overflow: 'hidden' }}>
           <ChatInterface sessionId={sessionId} onSessionEnd={endSession} />
         </div>
       </div>
@@ -158,65 +179,109 @@ function LearnPageContent() {
 
   // Selection Flow View
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
       <Header />
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Back Button */}
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6 transition-colors"
-        >
-          <Home className="w-5 h-5" />
-          {step === 'subject' ? 'Back to Dashboard' : 'Back'}
-        </button>
+      <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
+        {/* Breadcrumb Navigation */}
+        <nav style={{ marginBottom: 'var(--space-lg)' }}>
+          <button
+            onClick={handleBack}
+            className="btn btn-ghost"
+            style={{ padding: 'var(--space-xs) var(--space-sm)' }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {step === 'subject' ? 'Dashboard' : 'Back'}
+          </button>
+        </nav>
+
+        {/* Progress Indicator */}
+        <div style={{
+          display: 'flex',
+          gap: 'var(--space-xs)',
+          marginBottom: 'var(--space-2xl)',
+          justifyContent: 'center',
+          maxWidth: '480px',
+          marginInline: 'auto',
+        }}>
+          {['subject', 'topic', 'mode', 'difficulty'].map((stepName, index) => {
+            const stepIndex = ['subject', 'topic', 'mode', 'difficulty'].indexOf(step);
+            const currentIndex = ['subject', 'topic', 'mode', 'difficulty'].indexOf(stepName);
+            const isActive = currentIndex <= stepIndex;
+
+            return (
+              <div
+                key={stepName}
+                style={{
+                  flex: 1,
+                  height: '4px',
+                  borderRadius: 'var(--radius-full)',
+                  background: isActive ? 'var(--color-accent)' : 'var(--color-bg-muted)',
+                  transition: 'all var(--transition-base)',
+                }}
+              />
+            );
+          })}
+        </div>
 
         {/* Subject Selection */}
         {step === 'subject' && (
-          <SubjectSelector
-            subjects={subjects}
-            onSelect={(subject) => {
-              setSelectedSubject(subject);
-              setStep('topic');
-            }}
-          />
+          <div className="animate-fade-in">
+            <SubjectSelector
+              subjects={subjects}
+              onSelect={(subject) => {
+                setSelectedSubject(subject);
+                setStep('topic');
+              }}
+            />
+          </div>
         )}
 
         {/* Topic Selection */}
         {step === 'topic' && selectedSubject && (
-          <TopicSelector
-            subject={selectedSubject}
-            onSelect={(topic) => {
-              setSelectedTopic(topic);
-              setStep('mode');
-            }}
-          />
+          <div className="animate-fade-in">
+            <TopicSelector
+              subject={selectedSubject}
+              onSelect={(topic) => {
+                setSelectedTopic(topic);
+                setStep('mode');
+              }}
+            />
+          </div>
         )}
 
         {/* Mode Selection */}
         {step === 'mode' && selectedTopic && (
-          <ModeSelector
-            topicName={selectedTopic.name}
-            onSelect={(mode) => {
-              setSelectedMode(mode);
-              setStep('difficulty');
-            }}
-          />
+          <div className="animate-fade-in">
+            <ModeSelector
+              topicName={selectedTopic.name}
+              onSelect={(mode) => {
+                setSelectedMode(mode);
+                setStep('difficulty');
+              }}
+            />
+          </div>
         )}
 
         {/* Difficulty Selection */}
         {step === 'difficulty' && selectedMode && (
-          <DifficultySelector
-            topicName={selectedTopic.name}
-            mode={selectedMode}
-            onSelect={startSession}
-            isLoading={isLoading}
-          />
+          <div className="animate-fade-in">
+            <DifficultySelector
+              topicName={selectedTopic.name}
+              mode={selectedMode}
+              onSelect={startSession}
+              isLoading={isLoading}
+            />
+          </div>
         )}
 
         {/* Loading State */}
-        {isLoading && <LoadingSpinner message="Starting your session..." />}
-      </div>
+        {isLoading && (
+          <div style={{ marginTop: 'var(--space-xl)' }}>
+            <LoadingSpinner message="Starting your session..." />
+          </div>
+        )}
+      </main>
     </div>
   );
 }
@@ -224,7 +289,13 @@ function LearnPageContent() {
 export default function LearnPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div style={{
+        minHeight: '100vh',
+        background: 'var(--color-bg-base)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         <LoadingSpinner message="Loading..." />
       </div>
     }>

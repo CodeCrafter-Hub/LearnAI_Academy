@@ -3,37 +3,72 @@
 /**
  * TopicSelector Component
  *
- * Displays a grid of topics for a selected subject.
- * Each topic card shows the topic name and description.
- * Students can click on a topic to proceed to mode selection.
+ * Glassy cards for topic selection with staggered animations.
  */
 export default function TopicSelector({ subject, onSelect }) {
   if (!subject || !subject.topics || subject.topics.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No topics available for this subject.</p>
+      <div style={{
+        textAlign: 'center',
+        padding: 'var(--space-2xl)',
+      }}>
+        <p style={{
+          fontSize: 'var(--text-lg)',
+          color: 'var(--color-text-tertiary)',
+        }}>
+          No topics available for this subject.
+        </p>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      <h1 style={{
+        fontSize: 'var(--text-3xl)',
+        fontWeight: 'var(--weight-bold)',
+        color: 'var(--color-text-primary)',
+        marginBottom: 'var(--space-xs)',
+      }}>
         {subject.name}
       </h1>
-      <p className="text-gray-600 mb-6">Choose a topic to study</p>
+      <p style={{
+        fontSize: 'var(--text-base)',
+        color: 'var(--color-text-secondary)',
+        marginBottom: 'var(--space-lg)',
+      }}>
+        Choose a topic to study
+      </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {subject.topics.map((topic) => (
+      <div className="grid grid-auto-fit">
+        {subject.topics.map((topic, idx) => (
           <button
             key={topic.id}
             onClick={() => onSelect(topic)}
-            className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left transform hover:-translate-y-1"
+            className="surface-interactive animate-fade-in"
+            style={{
+              padding: 'var(--space-lg)',
+              textAlign: 'left',
+              border: '1px solid var(--color-border-subtle)',
+              background: 'var(--color-bg-elevated)',
+              animationDelay: `${idx * 50}ms`,
+            }}
           >
-            <h3 className="text-lg font-bold text-gray-800 mb-2">
+            <h3 style={{
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--weight-semibold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-xs)',
+            }}>
               {topic.name}
             </h3>
-            <p className="text-sm text-gray-600">{topic.description}</p>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 'var(--leading-relaxed)',
+            }}>
+              {topic.description}
+            </p>
           </button>
         ))}
       </div>
