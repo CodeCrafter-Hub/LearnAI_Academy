@@ -1,0 +1,1 @@
+export function withErrorHandler(h){ return h }

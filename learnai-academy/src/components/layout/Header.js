@@ -1,0 +1,1 @@
+export default function Header(){return <header className='container'><h3>Header</h3></header>}

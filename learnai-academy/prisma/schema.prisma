@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student   Student?
+}
+
+model Student {
+  id         String      @id @default(cuid())
+  userId     String      @unique
+  user       User        @relation(fields: [userId], references: [id])
+  name       String
+  grade      String?
+  subjects   SubjectEnrollment[]
+  sessions   Session[]
+  progress   Progress[]
+  achievements Achievement[]
+}
+
+model Subject {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  topics  Topic[]
+  enrollments SubjectEnrollment[]
+}
+
+model Topic {
+  id         String   @id @default(cuid())
+  name       String
+  subjectId  String
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+}
+
+model SubjectEnrollment {
+  id         String   @id @default(cuid())
+  studentId  String
+  subjectId  String
+  student    Student  @relation(fields: [studentId], references: [id])
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+
+  @@unique([studentId, subjectId])
+}
+
+model Session {
+  id         String     @id @default(cuid())
+  studentId  String
+  startedAt  DateTime   @default(now())
+  endedAt    DateTime?
+  student    Student    @relation(fields: [studentId], references: [id])
+  messages   Message[]
+  mode       String?    // practice, quiz, explain, etc.
+  subject    String?
+  topic      String?
+  difficulty String?
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  sessionId  String
+  role       String   // 'user' | 'assistant' | 'system'
+  content    String
+  createdAt  DateTime @default(now())
+  session    Session  @relation(fields: [sessionId], references: [id])
+}
+
+model Progress {
+  id         String   @id @default(cuid())
+  studentId  String
+  subject    String
+  topic      String
+  score      Int
+  createdAt  DateTime @default(now())
+  student    Student  @relation(fields: [studentId], references: [id])
+}
+
+model Achievement {
+  id         String   @id @default(cuid())
+  studentId  String
+  name       String
+  description String?
+  createdAt  DateTime @default(now())
+  student    Student  @relation(fields: [studentId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  PARENT
+  STUDENT
+}

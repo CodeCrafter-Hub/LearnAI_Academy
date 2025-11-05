@@ -1,0 +1,1 @@
+export function cacheGet(){return null} export function cacheSet(){return}

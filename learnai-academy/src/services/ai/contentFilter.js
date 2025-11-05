@@ -1,0 +1,1 @@
+export function filterContent(text){ return text; }

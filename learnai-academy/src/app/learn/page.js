@@ -1,0 +1,1 @@
+export default function Page(){return <div className='container'><h2>Learn</h2></div>}
