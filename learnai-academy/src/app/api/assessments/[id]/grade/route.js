@@ -4,6 +4,9 @@ import { agentOrchestrator } from '@/services/ai/agentOrchestrator';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 const gradeAssessmentSchema = z.object({
   studentId: z.string().uuid(),
   answers: z.array(z.object({

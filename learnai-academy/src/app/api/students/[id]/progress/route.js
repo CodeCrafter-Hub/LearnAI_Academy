@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { cacheService } from '@/services/cache/cacheService';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
   try {
@@ -15,12 +17,6 @@ export async function GET(request, { params }) {
     }
 
     const studentId = params.id;
-
-    // Check cache first
-    const cached = await cacheService.getStudentProgress(studentId);
-    if (cached) {
-      return NextResponse.json(cached);
-    }
 
     // Verify access
     const student = await prisma.student.findUnique({
@@ -145,9 +141,6 @@ export async function GET(request, { params }) {
         points: d.pointsEarned,
       })),
     };
-
-    // Cache for 5 minutes
-    await cacheService.setStudentProgress(studentId, result, 300);
 
     return NextResponse.json(result);
   } catch (error) {

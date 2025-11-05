@@ -4,6 +4,9 @@ import { recommendationEngine } from '@/services/analytics/recommendationEngine'
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
+// Force dynamic rendering - recommendations require runtime data
+export const dynamic = 'force-dynamic';
+
 const recommendationsSchema = z.object({
   studentId: z.string().uuid(),
   subjectId: z.string().uuid().optional(),

@@ -4,6 +4,9 @@ import { agentOrchestrator } from '@/services/ai/agentOrchestrator';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
+// Force dynamic rendering - assessment generation requires runtime execution
+export const dynamic = 'force-dynamic';
+
 const generateAssessmentSchema = z.object({
   subjectId: z.string().uuid().optional(),
   topicId: z.string().uuid().optional(),

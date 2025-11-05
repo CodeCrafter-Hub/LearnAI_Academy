@@ -4,6 +4,9 @@ import { agentOrchestrator } from '@/services/ai/agentOrchestrator';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
+// Force dynamic rendering - curriculum generation requires runtime execution
+export const dynamic = 'force-dynamic';
+
 const curriculumRequestSchema = z.object({
   task: z.enum(['lessonPlan', 'practiceProblems', 'contentItems']),
   subjectId: z.string().uuid(),

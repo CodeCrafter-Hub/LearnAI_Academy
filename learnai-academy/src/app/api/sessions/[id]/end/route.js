@@ -5,6 +5,9 @@ import { agentOrchestrator } from '@/services/ai/agentOrchestrator';
 import { progressTracker } from '@/services/analytics/progressTracker';
 import { achievementChecker } from '@/services/analytics/achievementChecker';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function POST(request, { params }) {
   try {
     // Verify authentication

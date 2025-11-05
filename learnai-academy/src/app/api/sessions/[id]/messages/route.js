@@ -5,6 +5,9 @@ import { contentFilter } from '@/services/ai/contentFilter';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 const messageSchema = z.object({
   content: z.string().min(1, 'Message cannot be empty').max(2000),
 });
