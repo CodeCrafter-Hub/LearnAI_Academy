@@ -1,5 +1,6 @@
 import { cacheService } from '@/services/cache/cacheService';
 import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 
 export async function rateLimitMiddleware(request, maxRequests = 100, windowSeconds = 900) {
   try {

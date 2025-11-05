@@ -45,6 +45,9 @@ model Student {
   dailyActivity     DailyActivity[]
   assessmentResults AssessmentResult[]
 
+  @@index([userId])
+  @@index([parentId])
+  @@index([gradeLevel])
   @@map("students")
 }
 
@@ -65,6 +68,8 @@ model Subject {
   progress StudentProgress[]
   sessions LearningSession[]
 
+  @@index([isActive, orderIndex])
+  @@index([minGrade, maxGrade])
   @@map("subjects")
 }
 
@@ -92,6 +97,10 @@ model Topic {
   sessions      LearningSession[]
 
   @@unique([subjectId, slug])
+  @@index([subjectId, gradeLevel])
+  @@index([gradeLevel, difficulty])
+  @@index([isActive, orderIndex])
+  @@index([parentTopicId])
   @@map("topics")
 }
 
@@ -164,6 +173,11 @@ model LearningSession {
   agentLogs        AgentLog[]
   assessmentResults AssessmentResult[]
 
+  @@index([studentId, startedAt])
+  @@index([subjectId])
+  @@index([topicId])
+  @@index([sessionMode])
+  @@index([createdAt])
   @@map("learning_sessions")
 }
 
@@ -178,6 +192,7 @@ model SessionMessage {
 
   session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
+  @@index([sessionId, sequenceNumber])
   @@map("session_messages")
 }
 
@@ -228,6 +243,8 @@ model DailyActivity {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, activityDate])
+  @@index([studentId, activityDate])
+  @@index([activityDate])
   @@map("daily_activity")
 }
 

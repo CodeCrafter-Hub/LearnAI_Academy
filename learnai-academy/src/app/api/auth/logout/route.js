@@ -1,9 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { clearAuthCookies } from '@/lib/auth';
 
-export async function GET() {
-  return NextResponse.json({"ok": true, "route": "auth/logout", "method": "GET"});
-}
+/**
+ * Logout endpoint - clears authentication cookies
+ */
 export async function POST(request) {
-  const body = await request.json().catch(() => ({}));
-  return NextResponse.json({"ok": true, "route": "auth/logout", "method": "POST", body});
+  try {
+    // Clear authentication cookies
+    clearAuthCookies();
+
+    return NextResponse.json({
+      success: true,
+      message: 'Logged out successfully',
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return NextResponse.json(
+      { error: 'Logout failed' },
+      { status: 500 }
+    );
+  }
 }

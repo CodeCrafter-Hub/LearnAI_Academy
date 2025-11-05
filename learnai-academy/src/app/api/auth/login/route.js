@@ -11,6 +11,13 @@ const loginSchema = z.object({
 
 export async function POST(request) {
   try {
+    // Rate limiting: 5 login attempts per 15 minutes per IP
+    const { rateLimitMiddleware } = await import('@/middleware/rateLimit');
+    const rateLimitResponse = await rateLimitMiddleware(request, 5, 900);
+    if (rateLimitResponse) {
+      return rateLimitResponse; // Return rate limit error
+    }
+
     // Check if JWT_SECRET is set
     if (!process.env.JWT_SECRET) {
       console.error('JWT_SECRET is not set in environment variables');
@@ -74,16 +81,23 @@ export async function POST(request) {
       data: { lastLogin: new Date() },
     });
 
-    // Generate JWT token
+    // Generate JWT token and CSRF token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
+    // Import auth utilities
+    const { setAuthCookies, generateCSRFToken } = await import('@/lib/auth');
+    const csrfToken = generateCSRFToken();
+
+    // Set secure httpOnly cookies
+    setAuthCookies(token, csrfToken);
+
     return NextResponse.json({
       success: true,
-      token,
+      csrfToken, // Send CSRF token to client (they'll send it back in headers)
       user: {
         id: user.id,
         email: user.email,
