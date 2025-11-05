@@ -4,6 +4,11 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import ChatInterface from '@/components/learning/ChatInterface';
+import SubjectSelector from '@/components/learning/SubjectSelector';
+import TopicSelector from '@/components/learning/TopicSelector';
+import ModeSelector from '@/components/learning/ModeSelector';
+import DifficultySelector from '@/components/learning/DifficultySelector';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Home, X } from 'lucide-react';
 
 function LearnPageContent() {
@@ -14,21 +19,15 @@ function LearnPageContent() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedMode, setSelectedMode] = useState(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadSubjects();
-    
-    // Check if subject is pre-selected from URL
-    const subjectSlug = searchParams.get('subject');
-    if (subjectSlug) {
-      // Will be loaded after subjects are fetched
-    }
   }, []);
 
   useEffect(() => {
+    // Check if subject is pre-selected from URL
     const subjectSlug = searchParams.get('subject');
     if (subjectSlug && subjects.length > 0) {
       const subject = subjects.find(s => s.slug === subjectSlug);
@@ -43,14 +42,14 @@ function LearnPageContent() {
     try {
       const token = localStorage.getItem('token');
       const userData = JSON.parse(localStorage.getItem('user'));
-      
+
       const response = await fetch(
         `/api/subjects?gradeLevel=${userData.students[0].gradeLevel}`,
         {
           headers: { 'Authorization': `Bearer ${token}` },
         }
       );
-      
+
       const data = await response.json();
       setSubjects(data);
     } catch (error) {
@@ -58,7 +57,7 @@ function LearnPageContent() {
     }
   };
 
-  const startSession = async () => {
+  const startSession = async (difficulty) => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -76,12 +75,12 @@ function LearnPageContent() {
           subjectId: selectedSubject.id,
           topicId: selectedTopic.id,
           mode: selectedMode,
-          difficulty: selectedDifficulty,
+          difficulty,
         }),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setSessionId(data.session.id);
         setStep('session');
@@ -103,7 +102,7 @@ function LearnPageContent() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       router.push('/dashboard');
     } catch (error) {
       console.error('Error ending session:', error);
@@ -111,6 +110,22 @@ function LearnPageContent() {
     }
   };
 
+  const handleBack = () => {
+    if (step === 'subject') {
+      router.push('/dashboard');
+    } else if (step === 'topic') {
+      setStep('subject');
+      setSelectedSubject(null);
+    } else if (step === 'mode') {
+      setStep('topic');
+      setSelectedTopic(null);
+    } else if (step === 'difficulty') {
+      setStep('mode');
+      setSelectedMode(null);
+    }
+  };
+
+  // Session View (Chat Interface)
   if (step === 'session' && sessionId) {
     return (
       <div className="flex flex-col h-screen bg-gray-50">
@@ -120,7 +135,7 @@ function LearnPageContent() {
             <div>
               <h2 className="text-xl font-bold">{selectedTopic.name}</h2>
               <p className="text-sm opacity-90">
-                {selectedMode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'} • {selectedDifficulty}
+                {selectedMode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'} • {selectedMode}
               </p>
             </div>
             <button
@@ -141,6 +156,7 @@ function LearnPageContent() {
     );
   }
 
+  // Selection Flow View
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <Header />
@@ -148,21 +164,8 @@ function LearnPageContent() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <button
-          onClick={() => {
-            if (step === 'subject') {
-              router.push('/dashboard');
-            } else if (step === 'topic') {
-              setStep('subject');
-              setSelectedSubject(null);
-            } else if (step === 'mode') {
-              setStep('topic');
-              setSelectedTopic(null);
-            } else if (step === 'difficulty') {
-              setStep('mode');
-              setSelectedMode(null);
-            }
-          }}
-          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6"
+          onClick={handleBack}
+          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6 transition-colors"
         >
           <Home className="w-5 h-5" />
           {step === 'subject' ? 'Back to Dashboard' : 'Back'}
@@ -170,171 +173,49 @@ function LearnPageContent() {
 
         {/* Subject Selection */}
         {step === 'subject' && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">
-              Choose a Subject
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {subjects.map(subject => (
-                <button
-                  key={subject.id}
-                  onClick={() => {
-                    setSelectedSubject(subject);
-                    setStep('topic');
-                  }}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
-                >
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {subject.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{subject.description}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+          <SubjectSelector
+            subjects={subjects}
+            onSelect={(subject) => {
+              setSelectedSubject(subject);
+              setStep('topic');
+            }}
+          />
         )}
 
         {/* Topic Selection */}
         {step === 'topic' && selectedSubject && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              {selectedSubject.name}
-            </h1>
-            <p className="text-gray-600 mb-6">Choose a topic to study</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {selectedSubject.topics?.map(topic => (
-                <button
-                  key={topic.id}
-                  onClick={() => {
-                    setSelectedTopic(topic);
-                    setStep('mode');
-                  }}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
-                >
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">
-                    {topic.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{topic.description}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+          <TopicSelector
+            subject={selectedSubject}
+            onSelect={(topic) => {
+              setSelectedTopic(topic);
+              setStep('mode');
+            }}
+          />
         )}
 
         {/* Mode Selection */}
         {step === 'mode' && selectedTopic && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              {selectedTopic.name}
-            </h1>
-            <p className="text-gray-600 mb-6">Choose your learning mode</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <button
-                onClick={() => {
-                  setSelectedMode('PRACTICE');
-                  setStep('difficulty');
-                }}
-                className="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all text-left"
-              >
-                <div className="text-5xl mb-4">🎯</div>
-                <h2 className="text-2xl font-bold mb-3">Practice Mode</h2>
-                <p className="text-white/90 mb-4">
-                  Solve problems and get instant feedback
-                </p>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Structured practice</span>
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Bonus points</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedMode('HELP');
-                  setStep('difficulty');
-                }}
-                className="bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all text-left"
-              >
-                <div className="text-5xl mb-4">💡</div>
-                <h2 className="text-2xl font-bold mb-3">Help Mode</h2>
-                <p className="text-white/90 mb-4">
-                  Ask questions and get explanations
-                </p>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Open Q&A</span>
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Deep learning</span>
-                </div>
-              </button>
-            </div>
-          </div>
+          <ModeSelector
+            topicName={selectedTopic.name}
+            onSelect={(mode) => {
+              setSelectedMode(mode);
+              setStep('difficulty');
+            }}
+          />
         )}
 
         {/* Difficulty Selection */}
-        {step === 'difficulty' && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Choose Difficulty
-            </h1>
-            <p className="text-gray-600 mb-6">
-              {selectedTopic.name} - {selectedMode === 'PRACTICE' ? 'Practice' : 'Help'} Mode
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => {
-                  setSelectedDifficulty('EASY');
-                  startSession();
-                }}
-                disabled={isLoading}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 border-green-200 hover:border-green-400 disabled:opacity-50"
-              >
-                <div className="text-5xl mb-3">🌱</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Easy</h3>
-                <p className="text-gray-600 mb-4">Perfect for learning new concepts</p>
-                <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Points: 1x
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedDifficulty('MEDIUM');
-                  startSession();
-                }}
-                disabled={isLoading}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 border-yellow-200 hover:border-yellow-400 disabled:opacity-50"
-              >
-                <div className="text-5xl mb-3">🌟</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Medium</h3>
-                <p className="text-gray-600 mb-4">Good balance of challenge</p>
-                <div className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Points: 1.2x
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedDifficulty('HARD');
-                  startSession();
-                }}
-                disabled={isLoading}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 border-red-200 hover:border-red-400 disabled:opacity-50"
-              >
-                <div className="text-5xl mb-3">🔥</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Hard</h3>
-                <p className="text-gray-600 mb-4">Maximum challenge</p>
-                <div className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Points: 1.5x
-                </div>
-              </button>
-            </div>
-          </div>
+        {step === 'difficulty' && selectedMode && (
+          <DifficultySelector
+            topicName={selectedTopic.name}
+            mode={selectedMode}
+            onSelect={startSession}
+            isLoading={isLoading}
+          />
         )}
 
-        {isLoading && (
-          <div className="text-center mt-8">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Starting your session...</p>
-          </div>
-        )}
+        {/* Loading State */}
+        {isLoading && <LoadingSpinner message="Starting your session..." />}
       </div>
     </div>
   );
@@ -344,10 +225,7 @@ export default function LearnPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
+        <LoadingSpinner message="Loading..." />
       </div>
     }>
       <LearnPageContent />
