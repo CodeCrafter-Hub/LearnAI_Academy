@@ -15,10 +15,16 @@ export async function GET(request) {
       );
     }
 
-    // Try cache first
-    const cached = await cacheService.getCachedSubjects();
-    if (cached) {
-      return NextResponse.json(cached);
+    // Try cache first (gracefully handle Redis failures)
+    let cached = null;
+    try {
+      cached = await cacheService.getCachedSubjects();
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    } catch (cacheError) {
+      // Continue without cache if Redis fails
+      console.warn('Cache unavailable, fetching from database:', cacheError.message);
     }
 
     // Get grade level from query params
@@ -48,14 +54,28 @@ export async function GET(request) {
       orderBy: { orderIndex: 'asc' },
     });
 
-    // Cache for 24 hours
-    await cacheService.setCachedSubjects(subjects, 86400);
+    // Cache for 24 hours (gracefully handle Redis failures)
+    try {
+      await cacheService.setCachedSubjects(subjects, 86400);
+    } catch (cacheError) {
+      // Continue even if caching fails
+      console.warn('Failed to cache subjects:', cacheError.message);
+    }
 
     return NextResponse.json(subjects);
   } catch (error) {
     console.error('Error fetching subjects:', error);
+    
+    // Provide more details in development
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error.message 
+      : 'Failed to fetch subjects';
+    
     return NextResponse.json(
-      { error: 'Failed to fetch subjects' },
+      { 
+        error: errorMessage,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      },
       { status: 500 }
     );
   }
