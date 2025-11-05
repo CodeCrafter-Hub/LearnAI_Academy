@@ -55,6 +55,18 @@ export default function Header() {
               <span>Learn</span>
             </button>
             <button
+              onClick={() => router.push('/curriculum')}
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors"
+            >
+              <span>Curriculum</span>
+            </button>
+            <button
+              onClick={() => router.push('/assessments')}
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors"
+            >
+              <span>Assessments</span>
+            </button>
+            <button
               onClick={() => router.push('/progress')}
               className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors"
             >

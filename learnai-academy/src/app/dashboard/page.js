@@ -6,13 +6,15 @@ import Header from '@/components/layout/Header';
 import SubjectCard from '@/components/learning/SubjectCard';
 import ProgressCard from '@/components/progress/ProgressCard';
 import StreakDisplay from '@/components/progress/StreakDisplay';
-import { Flame, Sparkles, Trophy } from 'lucide-react';
+import RecommendationCard from '@/components/recommendations/RecommendationCard';
+import { Flame, Sparkles, Trophy, Lightbulb } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [subjects, setSubjects] = useState([]);
   const [progress, setProgress] = useState(null);
   const [student, setStudent] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +54,20 @@ export default function DashboardPage() {
       });
       const progressData = await progressRes.json();
       setProgress(progressData);
+
+      // Load recommendations
+      try {
+        const recommendationsRes = await fetch(`/api/recommendations?studentId=${studentId}&limit=5`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (recommendationsRes.ok) {
+          const recommendationsData = await recommendationsRes.json();
+          setRecommendations(recommendationsData.recommendations || []);
+        }
+      } catch (recError) {
+        console.error('Error loading recommendations:', recError);
+        // Continue even if recommendations fail
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -126,6 +142,31 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* Recommendations */}
+        {recommendations.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <Lightbulb className="w-6 h-6 text-yellow-500" />
+              <h2 className="text-2xl font-bold text-gray-800">Recommended for You</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommendations.slice(0, 6).map((rec, idx) => (
+                <RecommendationCard
+                  key={idx}
+                  recommendation={rec}
+                  onSelect={() => {
+                    if (rec.topic?.slug) {
+                      router.push(`/learn?subject=${rec.subject?.slug || 'math'}&topic=${rec.topic.slug}`);
+                    } else {
+                      router.push(`/learn?subject=${rec.subject?.slug || 'math'}`);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recent Activity */}
         {progress?.recentSessions && progress.recentSessions.length > 0 && (

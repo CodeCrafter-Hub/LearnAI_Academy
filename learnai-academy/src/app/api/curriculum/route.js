@@ -7,10 +7,13 @@ import { z } from 'zod';
 // Force dynamic rendering - curriculum generation requires runtime execution
 export const dynamic = 'force-dynamic';
 
+// Flexible schema that accepts either IDs or slugs/names
 const curriculumRequestSchema = z.object({
   task: z.enum(['lessonPlan', 'practiceProblems', 'contentItems']),
-  subjectId: z.string().uuid(),
-  topicId: z.string().uuid(),
+  subjectId: z.string().uuid().optional(),
+  topicId: z.string().uuid().optional(),
+  subject: z.string().optional(), // Subject slug
+  topic: z.string().optional(), // Topic name
   gradeLevel: z.number().int().min(0).max(12),
   options: z.object({
     count: z.number().int().min(1).max(50).optional(),
@@ -20,7 +23,10 @@ const curriculumRequestSchema = z.object({
     includeAssessments: z.boolean().optional(),
     includePracticeProblems: z.boolean().optional(),
   }).optional(),
-});
+}).refine(
+  (data) => (data.subjectId || data.subject) && (data.topicId || data.topic),
+  { message: 'Either subjectId/subject and topicId/topic must be provided' }
+);
 
 /**
  * POST /api/curriculum
@@ -40,24 +46,51 @@ export async function POST(request) {
     const body = await request.json();
     const data = curriculumRequestSchema.parse(body);
 
-    // Verify subject and topic exist
-    const subject = await prisma.subject.findUnique({
-      where: { id: data.subjectId },
-    });
+    // Find subject by ID or slug
+    let subject;
+    if (data.subjectId) {
+      subject = await prisma.subject.findUnique({
+        where: { id: data.subjectId },
+      });
+    } else if (data.subject) {
+      subject = await prisma.subject.findFirst({
+        where: { slug: data.subject },
+      });
+    }
 
-    const topic = await prisma.topic.findUnique({
-      where: { id: data.topicId },
-      include: { subject: true },
-    });
-
-    if (!subject || !topic) {
+    if (!subject) {
       return NextResponse.json(
-        { error: 'Subject or topic not found' },
+        { error: 'Subject not found' },
         { status: 404 }
       );
     }
 
-    if (topic.subjectId !== data.subjectId) {
+    // Find topic by ID or name
+    let topic;
+    if (data.topicId) {
+      topic = await prisma.topic.findUnique({
+        where: { id: data.topicId },
+        include: { subject: true },
+      });
+    } else if (data.topic) {
+      topic = await prisma.topic.findFirst({
+        where: {
+          name: { contains: data.topic, mode: 'insensitive' },
+          subjectId: subject.id,
+        },
+        include: { subject: true },
+      });
+    }
+
+    // If topic not found, create a temporary topic object for generation
+    if (!topic) {
+      topic = {
+        id: null,
+        name: data.topic || 'Custom Topic',
+        subjectId: subject.id,
+        subject: subject,
+      };
+    } else if (topic.subjectId !== subject.id) {
       return NextResponse.json(
         { error: 'Topic does not belong to subject' },
         { status: 400 }
@@ -119,15 +152,35 @@ export async function POST(request) {
     let savedItems = [];
     if (result && !result.error) {
       try {
-        if (data.task === 'practiceProblems' && Array.isArray(result)) {
-          // Save each practice problem as a content item
-          for (const problem of result) {
+        // Only save to database if we have a valid topicId
+        if (topic.id) {
+          if (data.task === 'practiceProblems' && Array.isArray(result)) {
+            // Save each practice problem as a content item
+            for (const problem of result) {
+              const saved = await prisma.contentItem.create({
+                data: {
+                  topicId: topic.id,
+                  contentType: 'PRACTICE',
+                  title: `Practice Problem: ${topic.name}`,
+                  content: problem,
+                  difficulty: options.difficulty || 'MEDIUM',
+                  isAiGenerated: true,
+                  metadata: {
+                    gradeLevel: data.gradeLevel,
+                    generatedAt: new Date().toISOString(),
+                  },
+                },
+              });
+              savedItems.push(saved);
+            }
+          } else if (data.task === 'lessonPlan') {
+            // Save lesson plan as a content item
             const saved = await prisma.contentItem.create({
               data: {
-                topicId: data.topicId,
-                contentType: 'PRACTICE',
-                title: `Practice Problem: ${topic.name}`,
-                content: problem,
+                topicId: topic.id,
+                contentType: 'EXPLANATION',
+                title: `Lesson Plan: ${topic.name}`,
+                content: result,
                 difficulty: options.difficulty || 'MEDIUM',
                 isAiGenerated: true,
                 metadata: {
@@ -137,42 +190,25 @@ export async function POST(request) {
               },
             });
             savedItems.push(saved);
-          }
-        } else if (data.task === 'lessonPlan') {
-          // Save lesson plan as a content item
-          const saved = await prisma.contentItem.create({
-            data: {
-              topicId: data.topicId,
-              contentType: 'EXPLANATION',
-              title: `Lesson Plan: ${topic.name}`,
-              content: result,
-              difficulty: options.difficulty || 'MEDIUM',
-              isAiGenerated: true,
-              metadata: {
-                gradeLevel: data.gradeLevel,
-                generatedAt: new Date().toISOString(),
-              },
-            },
-          });
-          savedItems.push(saved);
-        } else if (data.task === 'contentItems' && Array.isArray(result)) {
-          // Save content items
-          for (const item of result) {
-            const saved = await prisma.contentItem.create({
-              data: {
-                topicId: data.topicId,
-                contentType: options.contentType || 'EXPLANATION',
-                title: item.title || `Content: ${topic.name}`,
-                content: item,
-                difficulty: options.difficulty || 'MEDIUM',
-                isAiGenerated: true,
-                metadata: {
-                  gradeLevel: data.gradeLevel,
-                  generatedAt: new Date().toISOString(),
+          } else if (data.task === 'contentItems' && Array.isArray(result)) {
+            // Save content items
+            for (const item of result) {
+              const saved = await prisma.contentItem.create({
+                data: {
+                  topicId: topic.id,
+                  contentType: options.contentType || 'EXPLANATION',
+                  title: item.title || `Content: ${topic.name}`,
+                  content: item,
+                  difficulty: options.difficulty || 'MEDIUM',
+                  isAiGenerated: true,
+                  metadata: {
+                    gradeLevel: data.gradeLevel,
+                    generatedAt: new Date().toISOString(),
+                  },
                 },
-              },
-            });
-            savedItems.push(saved);
+              });
+              savedItems.push(saved);
+            }
           }
         }
       } catch (dbError) {

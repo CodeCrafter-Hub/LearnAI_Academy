@@ -5,6 +5,8 @@ import { ScienceAgent } from './agents/ScienceAgent.js';
 import { WritingAgent } from './agents/WritingAgent.js';
 import { CodingAgent } from './agents/CodingAgent.js';
 import { MathCurriculumAgent } from './agents/MathCurriculumAgent.js';
+import { EnglishCurriculumAgent } from './agents/EnglishCurriculumAgent.js';
+import { ScienceCurriculumAgent } from './agents/ScienceCurriculumAgent.js';
 import { AssessmentAgent } from './agents/AssessmentAgent.js';
 import { groqClient } from './groqClient.js';
 import { redis } from '../../lib/redis.js';
@@ -25,15 +27,21 @@ class AgentOrchestrator {
     // Curriculum Agents (formal teacher role - content generation)
     this.curriculumAgents = {
       math: new MathCurriculumAgent(),
-      // TODO: Add other subject curriculum agents as needed
-      // english: new EnglishCurriculumAgent(),
-      // science: new ScienceCurriculumAgent(),
+      english: new EnglishCurriculumAgent(),
+      science: new ScienceCurriculumAgent(),
+      // Reading and Writing can use English curriculum agent
+      reading: new EnglishCurriculumAgent(),
+      writing: new EnglishCurriculumAgent(),
     };
 
     // Assessment Agents (evaluator role)
     this.assessmentAgents = {
       math: new AssessmentAgent('Math Assessment Specialist', 'math'),
-      // TODO: Add other subject assessment agents as needed
+      english: new AssessmentAgent('English Assessment Specialist', 'english'),
+      science: new AssessmentAgent('Science Assessment Specialist', 'science'),
+      reading: new AssessmentAgent('Reading Assessment Specialist', 'reading'),
+      writing: new AssessmentAgent('Writing Assessment Specialist', 'writing'),
+      coding: new AssessmentAgent('Coding Assessment Specialist', 'coding'),
     };
 
     // Legacy: Keep agents map for backward compatibility
@@ -50,7 +58,9 @@ class AgentOrchestrator {
 
     if (role === 'curriculum') {
       // Use curriculum agents for content generation
-      return this.curriculumAgents[subject] || this.curriculumAgents.math;
+      // Reading and writing use English curriculum agent
+      const curriculumSubject = (subject === 'reading' || subject === 'writing') ? 'english' : subject;
+      return this.curriculumAgents[curriculumSubject] || this.curriculumAgents.math;
     }
 
     if (role === 'assessment') {
