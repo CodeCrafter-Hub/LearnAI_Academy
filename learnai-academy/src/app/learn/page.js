@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import ChatInterface from '@/components/learning/ChatInterface';
 import { Home, X } from 'lucide-react';
 
-export default function LearnPage() {
+function LearnPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState('subject'); // subject, topic, mode, difficulty, session
@@ -337,5 +337,20 @@ export default function LearnPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LearnPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <LearnPageContent />
+    </Suspense>
   );
 }
