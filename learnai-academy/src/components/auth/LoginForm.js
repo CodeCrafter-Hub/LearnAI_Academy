@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 export default function LoginForm() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -34,10 +36,17 @@ export default function LoginForm() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      addToast('Welcome back!', 'success');
+      
+      // Check if student profile exists
+      if (!data.user.students || data.user.students.length === 0) {
+        router.push('/onboarding');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err.message);
+      addToast(err.message || 'Login failed. Please try again.', 'error');
     } finally {
       setIsLoading(false);
     }

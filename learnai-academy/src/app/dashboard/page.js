@@ -7,6 +7,8 @@ import SubjectCard from '@/components/learning/SubjectCard';
 import ProgressCard from '@/components/progress/ProgressCard';
 import StreakDisplay from '@/components/progress/StreakDisplay';
 import RecommendationCard from '@/components/recommendations/RecommendationCard';
+import { ProgressCardSkeleton, SubjectCardSkeleton, ListSkeleton } from '@/components/ui/LoadingSkeleton';
+import { EmptySubjects, EmptyRecommendations } from '@/components/ui/EmptyState';
 import { Flame, Sparkles, Trophy, Lightbulb } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -81,10 +83,26 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading your dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="mb-8">
+            <div className="h-10 bg-gray-200 rounded w-1/4 mb-2 animate-pulse"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <ProgressCardSkeleton />
+            <ProgressCardSkeleton />
+            <ProgressCardSkeleton />
+          </div>
+          <div className="mb-8">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4 animate-pulse"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <SubjectCardSkeleton />
+              <SubjectCardSkeleton />
+              <SubjectCardSkeleton />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -131,25 +149,31 @@ export default function DashboardPage() {
         {/* Subjects Grid */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Choose Your Subject</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjects.map(subject => (
-              <SubjectCard
-                key={subject.id}
-                subject={subject}
-                progress={progress?.progressBySubject?.[subject.slug]}
-                onClick={() => handleSubjectClick(subject)}
-              />
-            ))}
-          </div>
+          {subjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {subjects.map(subject => (
+                <SubjectCard
+                  key={subject.id}
+                  subject={subject}
+                  progress={progress?.progressBySubject?.[subject.slug]}
+                  onClick={() => handleSubjectClick(subject)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl p-12 shadow-md">
+              <EmptySubjects />
+            </div>
+          )}
         </div>
 
         {/* Recommendations */}
-        {recommendations.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Lightbulb className="w-6 h-6 text-yellow-500" />
-              <h2 className="text-2xl font-bold text-gray-800">Recommended for You</h2>
-            </div>
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Lightbulb className="w-6 h-6 text-yellow-500" />
+            <h2 className="text-2xl font-bold text-gray-800">Recommended for You</h2>
+          </div>
+          {recommendations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {recommendations.slice(0, 6).map((rec, idx) => (
                 <RecommendationCard
@@ -165,8 +189,12 @@ export default function DashboardPage() {
                 />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="bg-white rounded-xl p-8 shadow-md">
+              <EmptyRecommendations />
+            </div>
+          )}
+        </div>
 
         {/* Recent Activity */}
         {progress?.recentSessions && progress.recentSessions.length > 0 && (

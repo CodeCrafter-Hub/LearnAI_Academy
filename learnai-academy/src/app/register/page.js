@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,6 +22,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+
+    // Validation
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      addToast('Password must be at least 6 characters', 'error');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -38,10 +48,17 @@ export default function RegisterPage() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      addToast('Account created successfully!', 'success');
+
+      // Redirect based on role
+      if (formData.role === 'STUDENT' && (!data.user.students || data.user.students.length === 0)) {
+        router.push('/onboarding');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err.message);
+      addToast(err.message || 'Registration failed. Please try again.', 'error');
     } finally {
       setIsLoading(false);
     }
