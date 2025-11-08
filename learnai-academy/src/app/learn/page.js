@@ -10,6 +10,7 @@ import SubjectSelector from '@/components/learning/SubjectSelector';
 import TopicSelector from '@/components/learning/TopicSelector';
 import ModeSelector from '@/components/learning/ModeSelector';
 import DifficultySelector from '@/components/learning/DifficultySelector';
+import GradePasswordPrompt from '@/components/learning/GradePasswordPrompt';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { ArrowLeft, X } from 'lucide-react';
 
@@ -25,6 +26,8 @@ function LearnPageContent() {
   const [selectedMode, setSelectedMode] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [requestedGrade, setRequestedGrade] = useState(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -48,10 +51,25 @@ function LearnPageContent() {
     }
   }, [subjects, searchParams]);
 
-  const loadSubjects = async () => {
+  const checkGradeAccess = (gradeLevel) => {
+    // Check if grade is already unlocked in this session
+    const unlockedGrades = JSON.parse(sessionStorage.getItem('unlockedGrades') || '[]');
+    return unlockedGrades.includes(gradeLevel);
+  };
+
+  const loadSubjects = async (gradeLevel = null) => {
     try {
+      const targetGrade = gradeLevel || user.students[0].gradeLevel;
+
+      // Check if grade requires password and isn't unlocked
+      if (targetGrade !== user.students[0].gradeLevel && !checkGradeAccess(targetGrade)) {
+        setRequestedGrade(targetGrade);
+        setShowPasswordPrompt(true);
+        return;
+      }
+
       const response = await fetch(
-        `/api/subjects?gradeLevel=${user.students[0].gradeLevel}`,
+        `/api/subjects?gradeLevel=${targetGrade}`,
         { credentials: 'include' }
       );
 
@@ -60,6 +78,12 @@ function LearnPageContent() {
     } catch (error) {
       addToast('Failed to load subjects', 'error');
     }
+  };
+
+  const handlePasswordSuccess = () => {
+    setShowPasswordPrompt(false);
+    addToast(`Grade ${requestedGrade === 0 ? 'Kindergarten' : requestedGrade} unlocked!`, 'success');
+    loadSubjects(requestedGrade);
   };
 
   const startSession = async (difficulty) => {
@@ -184,7 +208,7 @@ function LearnPageContent() {
 
       <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
         {/* Breadcrumb Navigation */}
-        <nav style={{ marginBottom: 'var(--space-lg)' }}>
+        <nav style={{ marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button
             onClick={handleBack}
             className="btn btn-ghost"
@@ -193,6 +217,37 @@ function LearnPageContent() {
             <ArrowLeft className="w-4 h-4" />
             {step === 'subject' ? 'Dashboard' : 'Back'}
           </button>
+
+          {/* Grade Selector for Testing */}
+          {step === 'subject' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+              <label style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+              }}>
+                Test Grade:
+              </label>
+              <select
+                onChange={(e) => loadSubjects(parseInt(e.target.value))}
+                defaultValue={user?.students[0]?.gradeLevel || 5}
+                style={{
+                  padding: 'var(--space-xs) var(--space-sm)',
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-primary)',
+                  background: 'var(--color-bg-base)',
+                  border: '1px solid var(--color-border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="0">Kindergarten</option>
+                {[...Array(12)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>Grade {i + 1}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </nav>
 
         {/* Progress Indicator */}
@@ -282,6 +337,18 @@ function LearnPageContent() {
           </div>
         )}
       </main>
+
+      {/* Password Prompt Modal */}
+      {showPasswordPrompt && requestedGrade !== null && (
+        <GradePasswordPrompt
+          gradeLevel={requestedGrade}
+          onSuccess={handlePasswordSuccess}
+          onCancel={() => {
+            setShowPasswordPrompt(false);
+            setRequestedGrade(null);
+          }}
+        />
+      )}
     </div>
   );
 }
