@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import SubjectCard from '@/components/learning/SubjectCard';
 import ProgressCard from '@/components/progress/ProgressCard';
@@ -13,6 +14,7 @@ import { Flame, Sparkles, Trophy, Lightbulb } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [progress, setProgress] = useState(null);
   const [student, setStudent] = useState(null);
@@ -20,39 +22,37 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadData();
+      }
+    }
+  }, [authLoading, isAuthenticated]);
 
   const loadData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-
-      if (!token || !userData) {
-        router.push('/login');
-        return;
-      }
-
       // Get student ID (first student for now)
-      const studentId = userData.students?.[0]?.id;
+      const studentId = user?.students?.[0]?.id;
       if (!studentId) {
         // Need to create student profile
         router.push('/onboarding');
         return;
       }
 
-      setStudent(userData.students[0]);
+      setStudent(user.students[0]);
 
-      // Load subjects
-      const subjectsRes = await fetch(`/api/subjects?gradeLevel=${userData.students[0].gradeLevel}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+      // Load subjects - using httpOnly cookies (credentials: 'include')
+      const subjectsRes = await fetch(`/api/subjects?gradeLevel=${user.students[0].gradeLevel}`, {
+        credentials: 'include',
       });
       const subjectsData = await subjectsRes.json();
       setSubjects(subjectsData);
 
       // Load progress
       const progressRes = await fetch(`/api/students/${studentId}/progress`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       const progressData = await progressRes.json();
       setProgress(progressData);
@@ -60,18 +60,17 @@ export default function DashboardPage() {
       // Load recommendations
       try {
         const recommendationsRes = await fetch(`/api/recommendations?studentId=${studentId}&limit=5`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+          credentials: 'include',
         });
         if (recommendationsRes.ok) {
           const recommendationsData = await recommendationsRes.json();
           setRecommendations(recommendationsData.recommendations || []);
         }
       } catch (recError) {
-        console.error('Error loading recommendations:', recError);
         // Continue even if recommendations fail
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      // Error loading data
     } finally {
       setIsLoading(false);
     }

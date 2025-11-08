@@ -1,26 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Home, User, LogOut, Settings } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import MobileMenu from './MobileMenu';
 
 export default function Header() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/');
+  const handleLogout = async () => {
+    await logout();
   };
 
   return (

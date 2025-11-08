@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginForm() {
   const router = useRouter();
   const { addToast } = useToast();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,24 +22,11 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-
-      // Store token
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Use secure cookie-based authentication
+      const data = await login(formData.email, formData.password);
 
       addToast('Welcome back!', 'success');
-      
+
       // Check if student profile exists
       if (!data.user.students || data.user.students.length === 0) {
         router.push('/onboarding');
@@ -112,12 +101,6 @@ export default function LoginForm() {
             Sign up
           </a>
         </p>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Demo Account: demo@learnai.com / demo123
-          </p>
-        </div>
       </div>
     </div>
   );
