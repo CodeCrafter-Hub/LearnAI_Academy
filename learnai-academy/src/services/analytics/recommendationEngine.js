@@ -118,71 +118,92 @@ class RecommendationEngine {
 
       const recommendations = [];
 
-      // For each topic student has worked on, find next topics
-      for (const progress of studentProgress) {
-        // If mastered (80%+), recommend child topics or next topics
-        if (progress.masteryLevel >= 80) {
-          const topic = progress.topic;
+      // Collect all topic IDs we need to check progress for (batch query optimization)
+      const allTopicIdsToCheck = new Set();
 
-          // Get child topics
-          if (topic.childTopics && topic.childTopics.length > 0) {
-            for (const childTopic of topic.childTopics) {
-              // Check if student hasn't started this topic
-              const childProgress = await prisma.studentProgress.findUnique({
-                where: {
-                  studentId_topicId: {
-                    studentId,
-                    topicId: childTopic.id,
-                  },
-                },
-              });
+      // Collect child topics and next topics for each mastered progress
+      const masteredProgress = studentProgress.filter(p => p.masteryLevel >= 80);
 
-              if (!childProgress || childProgress.masteryLevel < 80) {
-                recommendations.push({
-                  topicId: childTopic.id,
-                  topicName: childTopic.name,
-                  subjectId: childTopic.subjectId,
-                  subjectName: topic.subject.name,
-                  reason: `Next step after mastering ${topic.name}`,
-                  priority: progress.masteryLevel,
-                  type: 'learning_path',
-                });
-              }
-            }
-          }
+      for (const progress of masteredProgress) {
+        const topic = progress.topic;
 
-          // Get next topics in same subject at same grade level
-          const nextTopics = await prisma.topic.findMany({
-            where: {
-              subjectId: topic.subjectId,
-              gradeLevel: topic.gradeLevel,
-              isActive: true,
-              id: { not: topic.id },
-            },
-            take: 3,
-          });
+        // Collect child topic IDs
+        if (topic.childTopics && topic.childTopics.length > 0) {
+          topic.childTopics.forEach(child => allTopicIdsToCheck.add(child.id));
+        }
+      }
 
-          for (const nextTopic of nextTopics) {
-            const nextProgress = await prisma.studentProgress.findUnique({
-              where: {
-                studentId_topicId: {
-                  studentId,
-                  topicId: nextTopic.id,
-                },
-              },
-            });
+      // Also get next topics for all mastered subjects (batch)
+      const masteredSubjects = [...new Set(masteredProgress.map(p => p.topic.subjectId))];
+      const masteredGradeLevels = [...new Set(masteredProgress.map(p => p.topic.gradeLevel))];
 
-            if (!nextProgress || nextProgress.masteryLevel < 50) {
+      const allNextTopics = await prisma.topic.findMany({
+        where: {
+          subjectId: { in: masteredSubjects },
+          gradeLevel: { in: masteredGradeLevels },
+          isActive: true,
+        },
+      });
+
+      // Add next topic IDs to check
+      allNextTopics.forEach(topic => allTopicIdsToCheck.add(topic.id));
+
+      // Batch query: Get all progress records for topics we need to check
+      const existingProgress = await prisma.studentProgress.findMany({
+        where: {
+          studentId,
+          topicId: { in: Array.from(allTopicIdsToCheck) },
+        },
+      });
+
+      // Create a map for quick lookup
+      const progressMap = new Map(
+        existingProgress.map(p => [p.topicId, p])
+      );
+
+      // Now process recommendations without N+1 queries
+      for (const progress of masteredProgress) {
+        const topic = progress.topic;
+
+        // Process child topics
+        if (topic.childTopics && topic.childTopics.length > 0) {
+          for (const childTopic of topic.childTopics) {
+            const childProgress = progressMap.get(childTopic.id);
+
+            if (!childProgress || childProgress.masteryLevel < 80) {
               recommendations.push({
-                topicId: nextTopic.id,
-                topicName: nextTopic.name,
-                subjectId: nextTopic.subjectId,
+                topicId: childTopic.id,
+                topicName: childTopic.name,
+                subjectId: childTopic.subjectId,
                 subjectName: topic.subject.name,
-                reason: `Continue learning ${topic.subject.name}`,
-                priority: 70,
+                reason: `Next step after mastering ${topic.name}`,
+                priority: progress.masteryLevel,
                 type: 'learning_path',
               });
             }
+          }
+        }
+
+        // Process next topics in same subject/grade
+        const nextTopics = allNextTopics.filter(
+          t => t.subjectId === topic.subjectId &&
+               t.gradeLevel === topic.gradeLevel &&
+               t.id !== topic.id
+        ).slice(0, 3);
+
+        for (const nextTopic of nextTopics) {
+          const nextProgress = progressMap.get(nextTopic.id);
+
+          if (!nextProgress || nextProgress.masteryLevel < 50) {
+            recommendations.push({
+              topicId: nextTopic.id,
+              topicName: nextTopic.name,
+              subjectId: nextTopic.subjectId,
+              subjectName: topic.subject.name,
+              reason: `Continue learning ${topic.subject.name}`,
+              priority: 70,
+              type: 'learning_path',
+            });
           }
         }
       }
@@ -250,26 +271,54 @@ class RecommendationEngine {
 
       const recommendations = [];
 
+      // Collect all prerequisite topic IDs (batch query optimization)
+      const allPrereqTopicIds = new Set();
+      strugglingTopics.forEach(progress => {
+        const prerequisites = progress.topic.prerequisites || [];
+        if (Array.isArray(prerequisites)) {
+          prerequisites.forEach(id => allPrereqTopicIds.add(id));
+        }
+      });
+
+      if (allPrereqTopicIds.size === 0) {
+        return recommendations;
+      }
+
+      // Batch query: Get all prerequisite topics
+      const prereqTopics = await prisma.topic.findMany({
+        where: {
+          id: { in: Array.from(allPrereqTopicIds) },
+        },
+        include: { subject: true },
+      });
+
+      const prereqTopicMap = new Map(
+        prereqTopics.map(t => [t.id, t])
+      );
+
+      // Batch query: Get progress for all prerequisite topics
+      const prereqProgressRecords = await prisma.studentProgress.findMany({
+        where: {
+          studentId,
+          topicId: { in: Array.from(allPrereqTopicIds) },
+        },
+      });
+
+      const prereqProgressMap = new Map(
+        prereqProgressRecords.map(p => [p.topicId, p])
+      );
+
+      // Process recommendations without N+1 queries
       for (const progress of strugglingTopics) {
         const prerequisites = progress.topic.prerequisites || [];
 
         if (Array.isArray(prerequisites) && prerequisites.length > 0) {
           for (const prereqTopicId of prerequisites) {
-            const prereqProgress = await prisma.studentProgress.findUnique({
-              where: {
-                studentId_topicId: {
-                  studentId,
-                  topicId: prereqTopicId,
-                },
-              },
-            });
+            const prereqProgress = prereqProgressMap.get(prereqTopicId);
 
             // If prerequisite not mastered, recommend it
             if (!prereqProgress || prereqProgress.masteryLevel < 80) {
-              const prereqTopic = await prisma.topic.findUnique({
-                where: { id: prereqTopicId },
-                include: { subject: true },
-              });
+              const prereqTopic = prereqTopicMap.get(prereqTopicId);
 
               if (prereqTopic) {
                 recommendations.push({
@@ -319,34 +368,54 @@ class RecommendationEngine {
 
       const recommendations = [];
 
-      // Recommend next grade level topics in same subjects
-      for (const progress of excellentProgress) {
-        const nextGradeTopics = await prisma.topic.findMany({
-          where: {
-            subjectId: progress.subjectId,
-            gradeLevel: { gt: gradeLevel },
-            isActive: true,
-          },
-          take: 2,
-        });
+      // Get unique subject IDs where student excels (batch query optimization)
+      const excellentSubjectIds = [...new Set(excellentProgress.map(p => p.subjectId))];
 
-        for (const topic of nextGradeTopics) {
-          const topicProgress = await prisma.studentProgress.findUnique({
-            where: {
-              studentId_topicId: {
-                studentId,
-                topicId: topic.id,
-              },
-            },
-          });
+      // Batch query: Get all next grade level topics for excellent subjects
+      const nextGradeTopics = await prisma.topic.findMany({
+        where: {
+          subjectId: { in: excellentSubjectIds },
+          gradeLevel: { gt: gradeLevel },
+          isActive: true,
+        },
+      });
+
+      // Collect all next grade topic IDs
+      const nextGradeTopicIds = nextGradeTopics.map(t => t.id);
+
+      // Batch query: Get progress for all next grade topics
+      const nextGradeProgress = await prisma.studentProgress.findMany({
+        where: {
+          studentId,
+          topicId: { in: nextGradeTopicIds },
+        },
+      });
+
+      const progressMap = new Map(
+        nextGradeProgress.map(p => [p.topicId, p])
+      );
+
+      // Create subject name lookup map
+      const subjectNameMap = new Map(
+        excellentProgress.map(p => [p.subjectId, p.topic.subject.name])
+      );
+
+      // Process recommendations without N+1 queries
+      for (const progress of excellentProgress) {
+        const subjectNextGradeTopics = nextGradeTopics
+          .filter(t => t.subjectId === progress.subjectId)
+          .slice(0, 2);
+
+        for (const topic of subjectNextGradeTopics) {
+          const topicProgress = progressMap.get(topic.id);
 
           if (!topicProgress || topicProgress.masteryLevel < 50) {
             recommendations.push({
               topicId: topic.id,
               topicName: topic.name,
               subjectId: topic.subjectId,
-              subjectName: progress.topic.subject.name,
-              reason: `Advanced topic for ${progress.topic.subject.name}`,
+              subjectName: subjectNameMap.get(topic.subjectId) || 'Unknown',
+              reason: `Advanced topic for ${subjectNameMap.get(topic.subjectId)}`,
               priority: 60,
               type: 'advanced',
             });
