@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
+import { useAuth } from '@/hooks/useAuth';
 import { ArrowRight, GraduationCap, Sparkles } from 'lucide-react';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { addToast } = useToast();
+  const { user, refreshUser } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -50,21 +52,18 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-
       // Create student profile
       const response = await fetch('/api/students', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
           gradeLevel: formData.gradeLevel,
-          parentId: userData.id,
+          parentId: user.id,
         }),
       });
 
@@ -72,15 +71,7 @@ export default function OnboardingPage() {
         throw new Error('Failed to create student profile');
       }
 
-      const data = await response.json();
-      
-      // Update user data
-      const updatedUser = {
-        ...userData,
-        students: [data.student],
-      };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-
+      await refreshUser(); // Refresh user data from server
       addToast('Profile created successfully!', 'success');
       router.push('/dashboard');
     } catch (error) {

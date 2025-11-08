@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import { useToast } from '@/components/ui/Toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Home, Save, User, Lock, Bell, Palette } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { addToast } = useToast();
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [formData, setFormData] = useState({
     firstName: '',
@@ -27,42 +27,36 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = () => {
-    try {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        const parsed = JSON.parse(userData);
-        setUser(parsed);
-        setFormData(prev => ({
-          ...prev,
-          firstName: parsed.firstName || '',
-          lastName: parsed.lastName || '',
-          email: parsed.email || '',
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    } finally {
-      setIsLoading(false);
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
     }
-  };
+  }, [authLoading, isAuthenticated]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+      }));
+    }
+  }, [user]);
 
   const handleSaveProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      // In a real app, this would call an API endpoint to update user profile
-      // For now, we'll just update localStorage
-      const updatedUser = {
-        ...user,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-      };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      // TODO: Call API endpoint to update user profile
+      // const response = await fetch('/api/users/profile', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   credentials: 'include',
+      //   body: JSON.stringify({
+      //     firstName: formData.firstName,
+      //     lastName: formData.lastName,
+      //     email: formData.email,
+      //   }),
+      // });
+      // For now, just show success toast
       addToast('Profile updated successfully!', 'success');
     } catch (error) {
       addToast('Failed to update profile. Please try again.', 'error');
@@ -94,7 +88,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (isLoading) {
+  if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

@@ -4,27 +4,33 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import AchievementBadge from '@/components/progress/AchievementBadge';
+import { useAuth } from '@/hooks/useAuth';
 import { Home, Trophy } from 'lucide-react';
 
 export default function AchievementsPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [achievements, setAchievements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadAchievements();
-  }, []);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadAchievements();
+      }
+    }
+  }, [authLoading, isAuthenticated]);
 
   const loadAchievements = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      const studentId = userData.students?.[0]?.id;
+      const studentId = user?.students?.[0]?.id;
 
       if (!studentId) return;
 
       const response = await fetch(`/api/achievements?studentId=${studentId}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
 
       const data = await response.json();

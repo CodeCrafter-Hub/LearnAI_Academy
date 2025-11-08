@@ -5,28 +5,34 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import ProgressCard from '@/components/progress/ProgressCard';
 import ProgressChart from '@/components/progress/ProgressChart';
+import { useAuth } from '@/hooks/useAuth';
 import { Home, TrendingUp, Clock, Star, BookMarked } from 'lucide-react';
 
 export default function ProgressPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [progress, setProgress] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
   useEffect(() => {
-    loadProgress();
-  }, []);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadProgress();
+      }
+    }
+  }, [authLoading, isAuthenticated]);
 
   const loadProgress = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      const studentId = userData.students?.[0]?.id;
+      const studentId = user?.students?.[0]?.id;
 
       if (!studentId) return;
 
       const response = await fetch(`/api/students/${studentId}/progress`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
 
       const data = await response.json();

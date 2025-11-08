@@ -4,38 +4,44 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import ProgressChart from '@/components/progress/ProgressChart';
+import { useAuth } from '@/hooks/useAuth';
 import { Home, Download, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function ParentDashboard() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [analytics, setAnalytics] = useState(null);
   const [progress, setProgress] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
   useEffect(() => {
-    loadData();
-  }, [selectedPeriod]);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadData();
+      }
+    }
+  }, [authLoading, isAuthenticated, selectedPeriod]);
 
   const loadData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      const studentId = userData.students?.[0]?.id;
+      const studentId = user?.students?.[0]?.id;
 
       if (!studentId) return;
 
       // Load analytics
       const analyticsRes = await fetch(
         `/api/analytics/${studentId}?period=${selectedPeriod}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
+        { credentials: 'include' }
       );
       const analyticsData = await analyticsRes.json();
       setAnalytics(analyticsData);
 
       // Load progress
       const progressRes = await fetch(`/api/students/${studentId}/progress`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       const progressData = await progressRes.json();
       setProgress(progressData);
