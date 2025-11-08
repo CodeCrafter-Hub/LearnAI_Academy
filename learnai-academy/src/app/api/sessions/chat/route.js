@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { AgentOrchestrator } from '@/services/ai/agentOrchestrator';
+import agentOrchestrator from '@/services/ai/agentOrchestrator';
 import { z } from 'zod';
 
 const chatSchema = z.object({
@@ -11,8 +11,6 @@ const chatSchema = z.object({
     isVoiceInput: z.boolean().optional(),
   }).optional(),
 });
-
-const orchestrator = new AgentOrchestrator();
 
 /**
  * POST /api/sessions/chat
@@ -107,7 +105,7 @@ export async function POST(request) {
 
     // Get AI response
     const agentRole = session.sessionData?.agentRole || 'tutoring';
-    const aiResponse = await orchestrator.routeMessage(
+    const aiResponse = await agentOrchestrator.routeMessage(
       data.message,
       context,
       agentRole
