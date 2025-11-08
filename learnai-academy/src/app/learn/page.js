@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/Toast';
 import Header from '@/components/layout/Header';
 import ChatInterface from '@/components/learning/ChatInterface';
 import { Home, X } from 'lucide-react';
@@ -9,6 +11,8 @@ import { Home, X } from 'lucide-react';
 function LearnPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addToast } = useToast();
   const [step, setStep] = useState('subject'); // subject, topic, mode, difficulty, session
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -19,14 +23,14 @@ function LearnPageContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    loadSubjects();
-    
-    // Check if subject is pre-selected from URL
-    const subjectSlug = searchParams.get('subject');
-    if (subjectSlug) {
-      // Will be loaded after subjects are fetched
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadSubjects();
+      }
     }
-  }, []);
+  }, [authLoading, isAuthenticated]);
 
   useEffect(() => {
     const subjectSlug = searchParams.get('subject');
@@ -41,36 +45,27 @@ function LearnPageContent() {
 
   const loadSubjects = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      
       const response = await fetch(
-        `/api/subjects?gradeLevel=${userData.students[0].gradeLevel}`,
-        {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }
+        `/api/subjects?gradeLevel=${user.students[0].gradeLevel}`,
+        { credentials: 'include' }
       );
-      
+
       const data = await response.json();
       setSubjects(data);
     } catch (error) {
-      console.error('Error loading subjects:', error);
+      addToast('Failed to load subjects', 'error');
     }
   };
 
   const startSession = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      const studentId = userData.students[0].id;
+      const studentId = user.students[0].id;
 
       const response = await fetch('/api/sessions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           studentId,
           subjectId: selectedSubject.id,
@@ -81,14 +76,16 @@ function LearnPageContent() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setSessionId(data.session.id);
         setStep('session');
+        addToast('Session started! Let\'s learn!', 'success');
+      } else {
+        addToast('Failed to start session', 'error');
       }
     } catch (error) {
-      console.error('Error starting session:', error);
-      alert('Failed to start session. Please try again.');
+      addToast('Failed to start session. Please try again.', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -96,17 +93,14 @@ function LearnPageContent() {
 
   const endSession = async () => {
     try {
-      const token = localStorage.getItem('token');
       await fetch(`/api/sessions/${sessionId}/end`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
-      
+
+      addToast('Great work! Session completed.', 'success');
       router.push('/dashboard');
     } catch (error) {
-      console.error('Error ending session:', error);
       router.push('/dashboard');
     }
   };

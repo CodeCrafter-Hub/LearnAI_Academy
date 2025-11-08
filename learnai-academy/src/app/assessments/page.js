@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/Toast';
 import Header from '@/components/layout/Header';
 import AssessmentCard from '@/components/assessment/AssessmentCard';
 import Loading from '@/components/ui/Loading';
@@ -9,6 +11,8 @@ import { FileText, Plus, Search, Filter } from 'lucide-react';
 
 export default function AssessmentsPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addToast } = useToast();
   const [assessments, setAssessments] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,22 +20,25 @@ export default function AssessmentsPage() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedType, setSelectedType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [assessmentTopic, setAssessmentTopic] = useState('');
+  const [assessmentGrade, setAssessmentGrade] = useState('5');
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadData();
+      }
+    }
+  }, [authLoading, isAuthenticated]);
 
   const loadData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
       // Load subjects
       const subjectsRes = await fetch('/api/subjects', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       const subjectsData = await subjectsRes.json();
       setSubjects(subjectsData);
@@ -39,37 +46,39 @@ export default function AssessmentsPage() {
       // TODO: Load existing assessments from API
       // For now, we'll generate on demand
     } catch (error) {
-      console.error('Error loading data:', error);
+      addToast('Failed to load assessment data', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGenerateAssessment = async () => {
+  const handleGenerateAssessment = () => {
     if (!selectedSubject) {
-      alert('Please select a subject');
+      addToast('Please select a subject', 'error');
       return;
     }
 
-    const topic = prompt('Enter a topic for the assessment:');
-    if (!topic) return;
+    setShowGenerateModal(true);
+  };
 
-    const gradeLevel = prompt('Enter grade level (0-12):', '5');
-    if (!gradeLevel) return;
+  const generateAssessment = async () => {
+    if (!assessmentTopic.trim()) {
+      addToast('Please enter a topic', 'error');
+      return;
+    }
 
+    setShowGenerateModal(false);
     setIsGenerating(true);
+
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/assessments/generate', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           subject: selectedSubject.slug,
-          topicName: topic,
-          gradeLevel: parseInt(gradeLevel),
+          topicName: assessmentTopic,
+          gradeLevel: parseInt(assessmentGrade),
           assessmentType: 'diagnostic',
           questionCount: 10,
         }),
@@ -81,10 +90,10 @@ export default function AssessmentsPage() {
 
       const data = await response.json();
       setAssessments([...assessments, data.assessment]);
-      alert('Assessment generated successfully!');
+      addToast('Assessment generated successfully!', 'success');
+      setAssessmentTopic('');
     } catch (error) {
-      console.error('Error generating assessment:', error);
-      alert('Failed to generate assessment. Please try again.');
+      addToast('Failed to generate assessment. Please try again.', 'error');
     } finally {
       setIsGenerating(false);
     }

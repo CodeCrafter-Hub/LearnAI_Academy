@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/Toast';
 import Header from '@/components/layout/Header';
 import LessonPlanCard from '@/components/curriculum/LessonPlanCard';
 import Loading from '@/components/ui/Loading';
@@ -9,6 +11,8 @@ import { BookOpen, Plus, Search } from 'lucide-react';
 
 export default function CurriculumPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addToast } = useToast();
   const [lessonPlans, setLessonPlans] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -16,35 +20,36 @@ export default function CurriculumPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [topicInput, setTopicInput] = useState('');
+  const [showTopicModal, setShowTopicModal] = useState(false);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadData();
+      }
+    }
+  }, [authLoading, isAuthenticated]);
 
   const loadData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
       // Load subjects
       const subjectsRes = await fetch('/api/subjects', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       const subjectsData = await subjectsRes.json();
       setSubjects(subjectsData);
 
       // Get user's student grade level
-      const userData = JSON.parse(localStorage.getItem('user'));
-      const studentGrade = userData?.students?.[0]?.gradeLevel || 5;
+      const studentGrade = user?.students?.[0]?.gradeLevel || 5;
       setSelectedGrade(studentGrade);
 
       // Load existing curriculum (if any)
       // TODO: Implement API to fetch saved curriculum
     } catch (error) {
-      console.error('Error loading data:', error);
+      addToast('Failed to load curriculum data', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -52,29 +57,32 @@ export default function CurriculumPage() {
 
   const handleGenerateCurriculum = async () => {
     if (!selectedSubject || !selectedGrade) {
-      alert('Please select a subject and grade level');
+      addToast('Please select a subject and grade level', 'error');
       return;
     }
 
-    setIsGenerating(true);
-    try {
-      const token = localStorage.getItem('token');
-      const topic = prompt('Enter a topic for the lesson plan:');
-      if (!topic) {
-        setIsGenerating(false);
-        return;
-      }
+    // Show modal for topic input
+    setShowTopicModal(true);
+  };
 
+  const generateLessonPlan = async () => {
+    if (!topicInput.trim()) {
+      addToast('Please enter a topic', 'error');
+      return;
+    }
+
+    setShowTopicModal(false);
+    setIsGenerating(true);
+
+    try {
       const response = await fetch('/api/curriculum', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           task: 'lessonPlan',
           subject: selectedSubject.slug,
-          topic,
+          topic: topicInput,
           gradeLevel: selectedGrade,
           options: {
             includeStandards: true,
@@ -90,10 +98,10 @@ export default function CurriculumPage() {
 
       const data = await response.json();
       setLessonPlans([...lessonPlans, data]);
-      alert('Lesson plan generated successfully!');
+      addToast('Lesson plan generated successfully!', 'success');
+      setTopicInput('');
     } catch (error) {
-      console.error('Error generating curriculum:', error);
-      alert('Failed to generate curriculum. Please try again.');
+      addToast('Failed to generate curriculum. Please try again.', 'error');
     } finally {
       setIsGenerating(false);
     }
