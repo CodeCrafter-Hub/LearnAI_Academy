@@ -204,20 +204,26 @@ export function ClassroomEncouragement({ gradeLevel, type = 'start' }) {
 /**
  * Subject Selection Card with Grade-Appropriate Styling
  */
-export function SubjectClassroomCard({ gradeLevel, subject, onClick }) {
+export function SubjectClassroomCard({ gradeLevel, subject, onClick, progress }) {
   const classroom = getSubjectClassroom(subject.slug);
   const styles = getClassroomStyles(gradeLevel, subject.slug);
 
   return (
     <button
       onClick={onClick}
-      className={`${styles.card} ${styles.spacing} hover:shadow-2xl transition-all transform hover:scale-105 text-left w-full group`}
+      className={`${styles.card} ${styles.spacing} hover:shadow-2xl transition-all transform hover:scale-105 text-left w-full group relative overflow-hidden`}
     >
       {/* Subject Icon */}
       <div className="flex items-start justify-between mb-4">
         <div className={`${classroom.color} ${styles.card} p-4 group-hover:scale-110 transition-transform`}>
           <span className="text-5xl">{classroom.icon}</span>
         </div>
+        {/* Progress Badge */}
+        {progress && progress.percentComplete > 0 && (
+          <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+            {Math.round(progress.percentComplete)}%
+          </div>
+        )}
       </div>
 
       {/* Subject Name */}
@@ -230,8 +236,28 @@ export function SubjectClassroomCard({ gradeLevel, subject, onClick }) {
         {subject.description || `Learn ${classroom.name} in a fun way!`}
       </p>
 
+      {/* Progress Bar */}
+      {progress && (
+        <div className="mb-4">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={`${classroom.color} h-2 rounded-full transition-all duration-500`}
+              style={{ width: `${progress.percentComplete || 0}%` }}
+            />
+          </div>
+          <div className={`${styles.text.body} text-gray-500 mt-1 flex items-center justify-between`}>
+            <span>{progress.topicsCompleted || 0} topics completed</span>
+            {progress.pointsEarned > 0 && (
+              <span className="text-yellow-600 font-semibold">
+                {progress.pointsEarned} pts
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Decorative Elements */}
-      <div className="flex gap-2 text-2xl">
+      <div className="flex gap-2 text-2xl mb-4">
         {classroom.classroom.elements.slice(0, 4).map((element, i) => (
           <span key={i} className="opacity-40 group-hover:opacity-100 transition-opacity">
             {element}
@@ -240,7 +266,7 @@ export function SubjectClassroomCard({ gradeLevel, subject, onClick }) {
       </div>
 
       {/* Enter Classroom Indicator */}
-      <div className={`mt-4 ${classroom.color} bg-opacity-10 border-2 ${classroom.borderColor} rounded-lg p-3 text-center font-semibold`}>
+      <div className={`${classroom.color} bg-opacity-10 border-2 border-current rounded-lg p-3 text-center font-semibold group-hover:bg-opacity-20 transition-all`}>
         Enter {classroom.name} Classroom →
       </div>
     </button>

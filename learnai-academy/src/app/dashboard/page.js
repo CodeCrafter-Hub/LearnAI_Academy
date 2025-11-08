@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import SubjectCard from '@/components/learning/SubjectCard';
+import { SubjectClassroomCard } from '@/components/learning/Classroom';
+import { getGradeTheme } from '@/lib/classroomThemes';
 import ProgressCard from '@/components/progress/ProgressCard';
 import StreakDisplay from '@/components/progress/StreakDisplay';
 import RecommendationCard from '@/components/recommendations/RecommendationCard';
@@ -107,21 +109,30 @@ export default function DashboardPage() {
     );
   }
 
+  // Get grade level and theme
+  const gradeLevel = student?.gradeLevel || 5;
+  const gradeTheme = getGradeTheme(gradeLevel);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-8" role="main">
         {/* Welcome Section */}
-        <section className="mb-8" aria-labelledby="welcome-heading">
-          <h1 id="welcome-heading" className="text-4xl font-bold text-gray-800 mb-2">
-            Welcome Back, {student?.firstName}! 🌟
+        <section className="mb-8 animate-fadeIn" aria-labelledby="welcome-heading">
+          <h1
+            id="welcome-heading"
+            className={`${gradeTheme.style.fontSize === 'large' ? 'text-5xl' : 'text-4xl'} font-bold text-gray-800 mb-2`}
+          >
+            Welcome Back, {student?.firstName}! {gradeTheme.emojis ? '🌟' : ''}
           </h1>
-          <p className="text-gray-600">Ready to learn something awesome today?</p>
+          <p className={`${gradeTheme.style.fontSize === 'large' ? 'text-xl' : 'text-base'} text-gray-600`}>
+            {gradeTheme.emojis ? 'Ready to learn something awesome today? 🚀' : 'Ready to continue your learning journey?'}
+          </p>
         </section>
 
         {/* Stats Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label="Learning statistics">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn" aria-label="Learning statistics">
           <ProgressCard
             title="Current Streak"
             value={`${progress?.summary?.currentStreak || 0} days`}
@@ -146,16 +157,22 @@ export default function DashboardPage() {
         </div>
 
         {/* Subjects Grid */}
-        <section className="mb-8" aria-labelledby="subjects-heading">
-          <h2 id="subjects-heading" className="text-2xl font-bold text-gray-800 mb-4">Choose Your Subject</h2>
+        <section className="mb-8 animate-fadeIn" aria-labelledby="subjects-heading">
+          <h2
+            id="subjects-heading"
+            className={`${gradeTheme.style.fontSize === 'large' ? 'text-3xl' : 'text-2xl'} font-bold text-gray-800 mb-6`}
+          >
+            {gradeTheme.emojis ? '📚 Choose Your Classroom' : 'Choose Your Subject'}
+          </h2>
           {subjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
               {subjects.map(subject => (
                 <div key={subject.id} role="listitem">
-                  <SubjectCard
+                  <SubjectClassroomCard
+                    gradeLevel={gradeLevel}
                     subject={subject}
-                    progress={progress?.progressBySubject?.[subject.slug]}
                     onClick={() => handleSubjectClick(subject)}
+                    progress={progress?.progressBySubject?.[subject.slug]}
                   />
                 </div>
               ))}
@@ -168,10 +185,15 @@ export default function DashboardPage() {
         </section>
 
         {/* Recommendations */}
-        <section className="mb-8" aria-labelledby="recommendations-heading">
-          <div className="flex items-center gap-3 mb-4">
+        <section className="mb-8 animate-fadeIn" aria-labelledby="recommendations-heading">
+          <div className="flex items-center gap-3 mb-6">
             <Lightbulb className="w-6 h-6 text-yellow-500" aria-hidden="true" />
-            <h2 id="recommendations-heading" className="text-2xl font-bold text-gray-800">Recommended for You</h2>
+            <h2
+              id="recommendations-heading"
+              className={`${gradeTheme.style.fontSize === 'large' ? 'text-3xl' : 'text-2xl'} font-bold text-gray-800`}
+            >
+              {gradeTheme.emojis ? '💡 Recommended for You' : 'Recommended for You'}
+            </h2>
           </div>
           {recommendations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -198,8 +220,18 @@ export default function DashboardPage() {
 
         {/* Recent Activity */}
         {progress?.recentSessions && progress.recentSessions.length > 0 && (
-          <section className="bg-white rounded-2xl p-6 shadow-md" aria-labelledby="recent-sessions-heading">
-            <h2 id="recent-sessions-heading" className="text-2xl font-bold text-gray-800 mb-4">Recent Sessions</h2>
+          <section
+            className={`bg-white ${
+              gradeTheme.style.corners === 'very-rounded' ? 'rounded-3xl' : 'rounded-2xl'
+            } p-6 shadow-md animate-fadeIn`}
+            aria-labelledby="recent-sessions-heading"
+          >
+            <h2
+              id="recent-sessions-heading"
+              className={`${gradeTheme.style.fontSize === 'large' ? 'text-3xl' : 'text-2xl'} font-bold text-gray-800 mb-4`}
+            >
+              {gradeTheme.emojis ? '📊 Recent Sessions' : 'Recent Sessions'}
+            </h2>
             <div className="space-y-3">
               {progress.recentSessions.slice(0, 5).map((session, i) => (
                 <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -222,20 +254,28 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Actions */}
-        <nav className="mt-8 flex gap-4" aria-label="Quick actions">
+        <nav className="mt-8 flex gap-4 animate-fadeIn" aria-label="Quick actions">
           <button
             onClick={() => router.push('/progress')}
-            className="flex-1 bg-blue-500 text-white rounded-xl py-3 px-6 font-semibold hover:bg-blue-600 transition-colors"
+            className={`flex-1 bg-blue-500 text-white ${
+              gradeTheme.style.corners === 'very-rounded' ? 'rounded-2xl' : 'rounded-xl'
+            } py-3 px-6 ${
+              gradeTheme.style.fontSize === 'large' ? 'text-xl' : 'text-base'
+            } font-semibold hover:bg-blue-600 transition-all transform hover:scale-105`}
             aria-label="View your learning progress"
           >
-            View Progress
+            {gradeTheme.emojis ? '📈 ' : ''}View Progress
           </button>
           <button
             onClick={() => router.push('/achievements')}
-            className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl py-3 px-6 font-semibold hover:from-yellow-600 hover:to-orange-600 transition-all"
+            className={`flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white ${
+              gradeTheme.style.corners === 'very-rounded' ? 'rounded-2xl' : 'rounded-xl'
+            } py-3 px-6 ${
+              gradeTheme.style.fontSize === 'large' ? 'text-xl' : 'text-base'
+            } font-semibold hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105`}
             aria-label="View your achievements and badges"
           >
-            Achievements
+            {gradeTheme.emojis ? '🏆 ' : ''}Achievements
           </button>
         </nav>
       </main>
