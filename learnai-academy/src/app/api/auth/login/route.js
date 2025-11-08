@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 import { getClientIdentifier, rateLimit, addRateLimitHeaders } from '@/middleware/rateLimit';
+import { logAuth, logError } from '@/lib/logger';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -38,7 +39,7 @@ export async function POST(request) {
 
     // Check if JWT_SECRET is set
     if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET is not set in environment variables');
+      logError('JWT_SECRET is not set in environment variables');
       return NextResponse.json(
         { error: 'Server configuration error. Please contact support.' },
         { status: 500 }
@@ -58,7 +59,7 @@ export async function POST(request) {
         },
       });
     } catch (dbError) {
-      console.error('Database error during login:', dbError);
+      logError('Database error during login', dbError);
       // Check if it's a connection error
       if (dbError.message?.includes('connection') || dbError.message?.includes('timeout')) {
         return NextResponse.json(
@@ -77,6 +78,7 @@ export async function POST(request) {
     }
 
     if (!user) {
+      logAuth('login_attempt', email, false, { reason: 'user_not_found' });
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
@@ -87,6 +89,7 @@ export async function POST(request) {
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValidPassword) {
+      logAuth('login_attempt', user.id, false, { reason: 'invalid_password' });
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
@@ -98,6 +101,9 @@ export async function POST(request) {
       where: { id: user.id },
       data: { lastLogin: new Date() },
     });
+
+    // Log successful authentication
+    logAuth('login_success', user.id, true, { role: user.role });
 
     // Generate JWT token
     const token = jwt.sign(
@@ -140,8 +146,8 @@ export async function POST(request) {
       'X-RateLimit-Reset': rateLimitResult.resetAt.toString(),
     });
   } catch (error) {
-    console.error('Login error:', error);
-    
+    logError('Login error', error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },

@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { progressTracker } from './progressTracker.js';
+import { logError, logPerformance } from '../../lib/logger.js';
 
 /**
  * RecommendationEngine Service
@@ -89,7 +90,7 @@ class RecommendationEngine {
         },
       };
     } catch (error) {
-      console.error('Error getting recommendations:', error);
+      logError('Error getting recommendations', error, { studentId, options });
       throw error;
     }
   }
@@ -210,7 +211,7 @@ class RecommendationEngine {
 
       return recommendations;
     } catch (error) {
-      console.error('Error getting learning path recommendations:', error);
+      logError('Error getting learning path recommendations', error, { studentId, subjectId });
       return [];
     }
   }
@@ -246,7 +247,7 @@ class RecommendationEngine {
         currentMastery: progress.masteryLevel,
       }));
     } catch (error) {
-      console.error('Error getting strengthen recommendations:', error);
+      logError('Error getting strengthen recommendations', error, { studentId, subjectId });
       return [];
     }
   }
@@ -338,7 +339,7 @@ class RecommendationEngine {
 
       return recommendations;
     } catch (error) {
-      console.error('Error getting prerequisite recommendations:', error);
+      logError('Error getting prerequisite recommendations', error, { studentId, subjectId });
       return [];
     }
   }
@@ -425,7 +426,7 @@ class RecommendationEngine {
 
       return recommendations;
     } catch (error) {
-      console.error('Error getting advanced recommendations:', error);
+      logError('Error getting advanced recommendations', error, { studentId, subjectId, gradeLevel });
       return [];
     }
   }
@@ -488,7 +489,7 @@ class RecommendationEngine {
         strategies: recommendations.strategies,
       };
     } catch (error) {
-      console.error('Error getting learning path:', error);
+      logError('Error getting learning path', error, { studentId, subjectId });
       throw error;
     }
   }
