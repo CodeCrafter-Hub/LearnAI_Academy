@@ -6,7 +6,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
 import Header from '@/components/layout/Header';
 import ChatInterface from '@/components/learning/ChatInterface';
-import { Home, X } from 'lucide-react';
+import SubjectSelector from '@/components/learning/SubjectSelector';
+import TopicSelector from '@/components/learning/TopicSelector';
+import ModeSelector from '@/components/learning/ModeSelector';
+import DifficultySelector from '@/components/learning/DifficultySelector';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { ArrowLeft, X } from 'lucide-react';
 
 function LearnPageContent() {
   const router = useRouter();
@@ -18,7 +23,6 @@ function LearnPageContent() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedMode, setSelectedMode] = useState(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +37,7 @@ function LearnPageContent() {
   }, [authLoading, isAuthenticated]);
 
   useEffect(() => {
+    // Check if subject is pre-selected from URL
     const subjectSlug = searchParams.get('subject');
     if (subjectSlug && subjects.length > 0) {
       const subject = subjects.find(s => s.slug === subjectSlug);
@@ -57,7 +62,7 @@ function LearnPageContent() {
     }
   };
 
-  const startSession = async () => {
+  const startSession = async (difficulty) => {
     setIsLoading(true);
     try {
       const studentId = user.students[0].id;
@@ -71,7 +76,7 @@ function LearnPageContent() {
           subjectId: selectedSubject.id,
           topicId: selectedTopic.id,
           mode: selectedMode,
-          difficulty: selectedDifficulty,
+          difficulty,
         }),
       });
 
@@ -105,237 +110,178 @@ function LearnPageContent() {
     }
   };
 
+  const handleBack = () => {
+    if (step === 'subject') {
+      router.push('/dashboard');
+    } else if (step === 'topic') {
+      setStep('subject');
+      setSelectedSubject(null);
+    } else if (step === 'mode') {
+      setStep('topic');
+      setSelectedTopic(null);
+    } else if (step === 'difficulty') {
+      setStep('mode');
+      setSelectedMode(null);
+    }
+  };
+
+  // Session View (Chat Interface)
   if (step === 'session' && sessionId) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        {/* Session Header */}
-        <header className={`${selectedSubject.color} text-white p-4 shadow-md`} role="banner">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--color-bg-base)' }}>
+        {/* Session Header - Glassy */}
+        <div className="glass" style={{
+          padding: 'var(--space-md)',
+          borderBottom: '1px solid var(--color-border-subtle)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 'var(--z-sticky)',
+        }}>
+          <div className="container" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
             <div>
-              <h2 className="text-xl font-bold">{selectedTopic.name}</h2>
-              <p className="text-sm opacity-90">
-                <span aria-label={`${selectedMode === 'PRACTICE' ? 'Practice mode' : 'Help mode'}`}>
-                  {selectedMode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'}
-                </span>
-                {' • '}
-                {selectedDifficulty}
+              <h2 style={{
+                fontSize: 'var(--text-xl)',
+                fontWeight: 'var(--weight-semibold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-3xs)',
+              }}>
+                {selectedTopic.name}
+              </h2>
+              <p style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-text-secondary)',
+              }}>
+                {selectedMode === 'PRACTICE' ? '🎯 Practice Mode' : '💡 Help Mode'}
               </p>
             </div>
             <button
               onClick={endSession}
-              className="bg-white/20 hover:bg-white/30 rounded-lg px-4 py-2 font-medium transition-colors flex items-center gap-2"
-              aria-label="End current learning session"
+              className="btn btn-secondary"
+              style={{ gap: 'var(--space-2xs)' }}
             >
-              <X className="w-5 h-5" aria-hidden="true" />
+              <X className="w-4 h-4" />
               End Session
             </button>
           </div>
-        </header>
+        </div>
 
         {/* Chat Interface */}
-        <div className="flex-1 overflow-hidden">
+        <div style={{ flex: 1, overflow: 'hidden' }}>
           <ChatInterface sessionId={sessionId} onSessionEnd={endSession} />
         </div>
       </div>
     );
   }
 
+  // Selection Flow View
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 py-8" role="main">
-        {/* Back Button */}
-        <button
-          onClick={() => {
-            if (step === 'subject') {
-              router.push('/dashboard');
-            } else if (step === 'topic') {
-              setStep('subject');
-              setSelectedSubject(null);
-            } else if (step === 'mode') {
-              setStep('topic');
-              setSelectedTopic(null);
-            } else if (step === 'difficulty') {
-              setStep('mode');
-              setSelectedMode(null);
-            }
-          }}
-          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6"
-          aria-label={step === 'subject' ? 'Back to Dashboard' : 'Go back to previous step'}
-        >
-          <Home className="w-5 h-5" aria-hidden="true" />
-          {step === 'subject' ? 'Back to Dashboard' : 'Back'}
-        </button>
+      <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
+        {/* Breadcrumb Navigation */}
+        <nav style={{ marginBottom: 'var(--space-lg)' }}>
+          <button
+            onClick={handleBack}
+            className="btn btn-ghost"
+            style={{ padding: 'var(--space-xs) var(--space-sm)' }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {step === 'subject' ? 'Dashboard' : 'Back'}
+          </button>
+        </nav>
+
+        {/* Progress Indicator */}
+        <div style={{
+          display: 'flex',
+          gap: 'var(--space-xs)',
+          marginBottom: 'var(--space-2xl)',
+          justifyContent: 'center',
+          maxWidth: '480px',
+          marginInline: 'auto',
+        }}>
+          {['subject', 'topic', 'mode', 'difficulty'].map((stepName, index) => {
+            const stepIndex = ['subject', 'topic', 'mode', 'difficulty'].indexOf(step);
+            const currentIndex = ['subject', 'topic', 'mode', 'difficulty'].indexOf(stepName);
+            const isActive = currentIndex <= stepIndex;
+
+            return (
+              <div
+                key={stepName}
+                style={{
+                  flex: 1,
+                  height: '4px',
+                  borderRadius: 'var(--radius-full)',
+                  background: isActive ? 'var(--color-accent)' : 'var(--color-bg-muted)',
+                  transition: 'all var(--transition-base)',
+                }}
+              />
+            );
+          })}
+        </div>
 
         {/* Subject Selection */}
         {step === 'subject' && (
-          <section aria-labelledby="subject-selection-heading">
-            <h1 id="subject-selection-heading" className="text-3xl font-bold text-gray-800 mb-6">
-              Choose a Subject
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {subjects.map(subject => (
-                <button
-                  key={subject.id}
-                  onClick={() => {
-                    setSelectedSubject(subject);
-                    setStep('topic');
-                  }}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
-                >
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {subject.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{subject.description}</p>
-                </button>
-              ))}
-            </div>
+          <div className="animate-fade-in">
+            <SubjectSelector
+              subjects={subjects}
+              onSelect={(subject) => {
+                setSelectedSubject(subject);
+                setStep('topic');
+              }}
+            />
           </div>
         )}
 
         {/* Topic Selection */}
         {step === 'topic' && selectedSubject && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              {selectedSubject.name}
-            </h1>
-            <p className="text-gray-600 mb-6">Choose a topic to study</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {selectedSubject.topics?.map(topic => (
-                <button
-                  key={topic.id}
-                  onClick={() => {
-                    setSelectedTopic(topic);
-                    setStep('mode');
-                  }}
-                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
-                >
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">
-                    {topic.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{topic.description}</p>
-                </button>
-              ))}
-            </div>
+          <div className="animate-fade-in">
+            <TopicSelector
+              subject={selectedSubject}
+              onSelect={(topic) => {
+                setSelectedTopic(topic);
+                setStep('mode');
+              }}
+            />
           </div>
         )}
 
         {/* Mode Selection */}
         {step === 'mode' && selectedTopic && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              {selectedTopic.name}
-            </h1>
-            <p className="text-gray-600 mb-6">Choose your learning mode</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <button
-                onClick={() => {
-                  setSelectedMode('PRACTICE');
-                  setStep('difficulty');
-                }}
-                className="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all text-left"
-              >
-                <div className="text-5xl mb-4">🎯</div>
-                <h2 className="text-2xl font-bold mb-3">Practice Mode</h2>
-                <p className="text-white/90 mb-4">
-                  Solve problems and get instant feedback
-                </p>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Structured practice</span>
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Bonus points</span>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedMode('HELP');
-                  setStep('difficulty');
-                }}
-                className="bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl p-8 text-white shadow-lg hover:shadow-xl transition-all text-left"
-              >
-                <div className="text-5xl mb-4">💡</div>
-                <h2 className="text-2xl font-bold mb-3">Help Mode</h2>
-                <p className="text-white/90 mb-4">
-                  Ask questions and get explanations
-                </p>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Open Q&A</span>
-                  <span className="bg-white/20 px-3 py-1 rounded-full">✓ Deep learning</span>
-                </div>
-              </button>
-            </div>
+          <div className="animate-fade-in">
+            <ModeSelector
+              topicName={selectedTopic.name}
+              onSelect={(mode) => {
+                setSelectedMode(mode);
+                setStep('difficulty');
+              }}
+            />
           </div>
         )}
 
         {/* Difficulty Selection */}
-        {step === 'difficulty' && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Choose Difficulty
-            </h1>
-            <p className="text-gray-600 mb-6">
-              {selectedTopic.name} - {selectedMode === 'PRACTICE' ? 'Practice' : 'Help'} Mode
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => {
-                  setSelectedDifficulty('EASY');
-                  startSession();
-                }}
-                disabled={isLoading}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 border-green-200 hover:border-green-400 disabled:opacity-50"
-              >
-                <div className="text-5xl mb-3">🌱</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Easy</h3>
-                <p className="text-gray-600 mb-4">Perfect for learning new concepts</p>
-                <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Points: 1x
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedDifficulty('MEDIUM');
-                  startSession();
-                }}
-                disabled={isLoading}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 border-yellow-200 hover:border-yellow-400 disabled:opacity-50"
-              >
-                <div className="text-5xl mb-3">🌟</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Medium</h3>
-                <p className="text-gray-600 mb-4">Good balance of challenge</p>
-                <div className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Points: 1.2x
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedDifficulty('HARD');
-                  startSession();
-                }}
-                disabled={isLoading}
-                className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all text-center border-4 border-red-200 hover:border-red-400 disabled:opacity-50"
-              >
-                <div className="text-5xl mb-3">🔥</div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Hard</h3>
-                <p className="text-gray-600 mb-4">Maximum challenge</p>
-                <div className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
-                  Points: 1.5x
-                </div>
-              </button>
-            </div>
+        {step === 'difficulty' && selectedMode && (
+          <div className="animate-fade-in">
+            <DifficultySelector
+              topicName={selectedTopic.name}
+              mode={selectedMode}
+              onSelect={startSession}
+              isLoading={isLoading}
+            />
           </div>
         )}
 
+        {/* Loading State */}
         {isLoading && (
-          <div className="text-center mt-8">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Starting your session...</p>
+          <div style={{ marginTop: 'var(--space-xl)' }}>
+            <LoadingSpinner message="Starting your session..." />
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
@@ -343,11 +289,14 @@ function LearnPageContent() {
 export default function LearnPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
+      <div style={{
+        minHeight: '100vh',
+        background: 'var(--color-bg-base)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <LoadingSpinner message="Loading..." />
       </div>
     }>
       <LearnPageContent />

@@ -16,105 +16,296 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white border-b shadow-sm sticky top-0 z-50" role="banner">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+    <header className="glass" style={{
+      borderBottom: '1px solid var(--color-border-subtle)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 'var(--z-sticky)',
+    }}>
+      <div className="container" style={{
+        padding: 'var(--space-md)',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
           {/* Logo */}
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            aria-label="Go to dashboard home"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-xs)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'opacity var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+            aria-label="Go to dashboard"
           >
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-2">
-              <span className="text-white font-bold text-xl" aria-hidden="true">LA</span>
+            <div style={{
+              background: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+              borderRadius: 'var(--radius-xl)',
+              padding: 'var(--space-xs)',
+              boxShadow: 'var(--shadow-sm)',
+            }}>
+              <span style={{
+                color: 'white',
+                fontWeight: 'var(--weight-bold)',
+                fontSize: 'var(--text-xl)',
+              }}>LA</span>
             </div>
-            <span className="text-xl font-bold text-gray-800 hidden sm:inline">
+            <span className="hidden sm:inline" style={{
+              fontSize: 'var(--text-xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+            }}>
               LearnAI Academy
             </span>
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+          <nav className="hidden md:flex" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-md)',
+          }}>
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors font-medium"
-              aria-label="Go to dashboard"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2xs)',
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
             >
               <Home className="w-5 h-5" aria-hidden="true" />
               <span>Dashboard</span>
             </button>
             <button
               onClick={() => router.push('/learn')}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors font-medium"
-              aria-label="Go to learning page"
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
             >
-              <span>Learn</span>
+              Learn
             </button>
             <button
               onClick={() => router.push('/curriculum')}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors font-medium"
-              aria-label="Go to curriculum page"
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
             >
-              <span>Curriculum</span>
+              Curriculum
             </button>
             <button
               onClick={() => router.push('/assessments')}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors font-medium"
-              aria-label="Go to assessments page"
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
             >
-              <span>Assessments</span>
+              Assessments
             </button>
             <button
               onClick={() => router.push('/progress')}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors font-medium"
-              aria-label="View your progress"
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
             >
-              <span>Progress</span>
+              Progress
             </button>
             {user?.role === 'PARENT' && (
               <button
                 onClick={() => router.push('/parent')}
-                className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors font-medium"
-                aria-label="Go to parent dashboard"
+                style={{
+                  padding: 'var(--space-xs) var(--space-sm)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-secondary)',
+                  fontWeight: 'var(--weight-medium)',
+                  fontSize: 'var(--text-base)',
+                  cursor: 'pointer',
+                  borderRadius: 'var(--radius-lg)',
+                  transition: 'all var(--transition-fast)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-accent)';
+                  e.currentTarget.style.background = 'var(--color-bg-muted)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  e.currentTarget.style.background = 'none';
+                }}
               >
-                <span>Parent Dashboard</span>
+                Parent Dashboard
               </button>
             )}
           </nav>
 
           {/* Desktop User Menu */}
-          <div className="hidden md:block relative">
+          <div className="hidden md:block" style={{ position: 'relative' }}>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-full px-4 py-2 transition-colors"
-              aria-label="Open user menu"
-              aria-expanded={showMenu}
-              aria-haspopup="true"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-xs)',
+                background: 'var(--color-bg-muted)',
+                border: 'none',
+                borderRadius: 'var(--radius-full)',
+                padding: 'var(--space-xs) var(--space-md)',
+                cursor: 'pointer',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-elevated)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              aria-label="User menu"
             >
-              <User className="w-5 h-5" aria-hidden="true" />
-              <span className="hidden lg:inline">{user?.email}</span>
+              <User className="w-5 h-5" style={{ color: 'var(--color-text-secondary)' }} />
+              <span className="hidden lg:inline" style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-text-secondary)',
+              }}>
+                {user?.email}
+              </span>
             </button>
 
             {showMenu && (
               <>
                 <div
-                  className="fixed inset-0 z-10"
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 10,
+                  }}
                   onClick={() => setShowMenu(false)}
                   aria-hidden="true"
                 />
-                <div
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 z-20"
-                  role="menu"
-                  aria-label="User menu"
-                >
+                <div className="surface-elevated animate-fade-in" style={{
+                  position: 'absolute',
+                  right: 0,
+                  marginTop: 'var(--space-xs)',
+                  width: '192px',
+                  padding: 'var(--space-xs)',
+                  zIndex: 20,
+                }}>
                   <button
                     onClick={() => {
                       setShowMenu(false);
                       router.push('/settings');
                     }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 transition-colors"
-                    role="menuitem"
-                    aria-label="Go to settings"
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm) var(--space-md)',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-xs)',
+                      background: 'none',
+                      border: 'none',
+                      borderRadius: 'var(--radius-lg)',
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--text-sm)',
+                      cursor: 'pointer',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--color-bg-muted)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
                   >
                     <Settings className="w-4 h-4" aria-hidden="true" />
                     Settings
@@ -124,9 +315,27 @@ export default function Header() {
                       setShowMenu(false);
                       handleLogout();
                     }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600 transition-colors"
-                    role="menuitem"
-                    aria-label="Log out of your account"
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm) var(--space-md)',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-xs)',
+                      background: 'none',
+                      border: 'none',
+                      borderRadius: 'var(--radius-lg)',
+                      color: 'hsl(0, 70%, 55%)',
+                      fontSize: 'var(--text-sm)',
+                      cursor: 'pointer',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'hsla(0, 70%, 95%, 1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
                   >
                     <LogOut className="w-4 h-4" aria-hidden="true" />
                     Logout

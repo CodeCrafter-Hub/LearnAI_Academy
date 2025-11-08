@@ -5,12 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import SubjectCard from '@/components/learning/SubjectCard';
-import ProgressCard from '@/components/progress/ProgressCard';
-import StreakDisplay from '@/components/progress/StreakDisplay';
-import RecommendationCard from '@/components/recommendations/RecommendationCard';
-import { ProgressCardSkeleton, SubjectCardSkeleton, ListSkeleton } from '@/components/ui/LoadingSkeleton';
-import { EmptySubjects, EmptyRecommendations } from '@/components/ui/EmptyState';
-import { Flame, Sparkles, Trophy, Lightbulb } from 'lucide-react';
+import { Flame, Sparkles, Trophy, Lightbulb, TrendingUp, Clock } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -20,6 +15,7 @@ export default function DashboardPage() {
   const [student, setStudent] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showRecentActivity, setShowRecentActivity] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
@@ -36,7 +32,6 @@ export default function DashboardPage() {
       // Get student ID (first student for now)
       const studentId = user?.students?.[0]?.id;
       if (!studentId) {
-        // Need to create student profile
         router.push('/onboarding');
         return;
       }
@@ -82,76 +77,208 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="mb-8">
-            <div className="h-10 bg-gray-200 rounded w-1/4 mb-2 animate-pulse"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+        <main className="container" style={{ paddingBlock: 'var(--space-xl)' }}>
+          <div className="skeleton" style={{ height: '40px', width: '300px', marginBottom: 'var(--space-sm)' }}></div>
+          <div className="skeleton" style={{ height: '24px', width: '400px', marginBottom: 'var(--space-xl)' }}></div>
+
+          <div className="grid grid-auto-fit" style={{ marginBottom: 'var(--space-xl)' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} className="skeleton" style={{ height: '140px', borderRadius: 'var(--radius-xl)' }}></div>
+            ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <ProgressCardSkeleton />
-            <ProgressCardSkeleton />
-            <ProgressCardSkeleton />
+
+          <div className="grid grid-auto-fit">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="skeleton" style={{ height: '200px', borderRadius: 'var(--radius-xl)' }}></div>
+            ))}
           </div>
-          <div className="mb-8">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4 animate-pulse"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <SubjectCardSkeleton />
-              <SubjectCardSkeleton />
-              <SubjectCardSkeleton />
-            </div>
-          </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 py-8" role="main">
-        {/* Welcome Section */}
-        <section className="mb-8" aria-labelledby="welcome-heading">
-          <h1 id="welcome-heading" className="text-4xl font-bold text-gray-800 mb-2">
-            Welcome Back, {student?.firstName}! 🌟
+      <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
+        {/* Hero Welcome */}
+        <section style={{ marginBottom: 'var(--space-2xl)' }}>
+          <h1 style={{
+            fontSize: 'var(--text-5xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-xs)',
+            letterSpacing: '-0.03em',
+          }}>
+            Welcome back, {student?.firstName}
           </h1>
-          <p className="text-gray-600">Ready to learn something awesome today?</p>
+          <p style={{
+            fontSize: 'var(--text-lg)',
+            color: 'var(--color-text-secondary)',
+            lineHeight: 'var(--leading-relaxed)',
+          }}>
+            Ready to continue your learning journey?
+          </p>
         </section>
 
-        {/* Stats Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label="Learning statistics">
-          <ProgressCard
-            title="Current Streak"
-            value={`${progress?.summary?.currentStreak || 0} days`}
-            subtitle="Keep it going!"
-            icon={Flame}
-            color="bg-gradient-to-br from-yellow-400 to-orange-500"
-          />
-          <ProgressCard
-            title="Total Points"
-            value={progress?.summary?.totalPoints || 0}
-            subtitle="Amazing work!"
-            icon={Sparkles}
-            color="bg-gradient-to-br from-purple-500 to-pink-500"
-          />
-          <ProgressCard
-            title="Achievements"
-            value={`${progress?.achievements?.length || 0}/${10}`}
-            subtitle="Badges earned"
-            icon={Trophy}
-            color="bg-gradient-to-br from-blue-500 to-cyan-500"
-          />
-        </div>
+        {/* Stats Grid - Glassy Cards */}
+        <section className="grid grid-auto-fit" style={{ gap: 'var(--space-md)', marginBottom: 'var(--space-2xl)' }}>
+          <div className="surface-elevated animate-scale-in" style={{
+            padding: 'var(--space-lg)',
+            transition: 'all var(--transition-base)',
+            cursor: 'default',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: 'var(--radius-lg)',
+                background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'var(--shadow-sm)',
+              }}>
+                <Flame className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-tertiary)',
+                  fontWeight: 'var(--weight-medium)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}>
+                  Current Streak
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: 'var(--text-4xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-2xs)',
+            }}>
+              {progress?.summary?.currentStreak || 0}
+              <span style={{ fontSize: 'var(--text-xl)', color: 'var(--color-text-tertiary)', marginLeft: 'var(--space-2xs)' }}>days</span>
+            </div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+              Keep the momentum going! 🔥
+            </div>
+          </div>
+
+          <div className="surface-elevated animate-scale-in" style={{
+            padding: 'var(--space-lg)',
+            transition: 'all var(--transition-base)',
+            cursor: 'default',
+            animationDelay: '50ms',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: 'var(--radius-lg)',
+                background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'var(--shadow-sm)',
+              }}>
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-tertiary)',
+                  fontWeight: 'var(--weight-medium)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}>
+                  Total Points
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: 'var(--text-4xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-2xs)',
+            }}>
+              {progress?.summary?.totalPoints?.toLocaleString() || 0}
+            </div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+              Amazing work! ✨
+            </div>
+          </div>
+
+          <div className="surface-elevated animate-scale-in" style={{
+            padding: 'var(--space-lg)',
+            transition: 'all var(--transition-base)',
+            cursor: 'default',
+            animationDelay: '100ms',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: 'var(--radius-lg)',
+                background: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'var(--shadow-sm)',
+              }}>
+                <Trophy className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-tertiary)',
+                  fontWeight: 'var(--weight-medium)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}>
+                  Achievements
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: 'var(--text-4xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-2xs)',
+            }}>
+              {progress?.achievements?.length || 0}
+              <span style={{ fontSize: 'var(--text-xl)', color: 'var(--color-text-tertiary)' }}>/10</span>
+            </div>
+            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+              Badges earned 🏆
+            </div>
+          </div>
+        </section>
 
         {/* Subjects Grid */}
-        <section className="mb-8" aria-labelledby="subjects-heading">
-          <h2 id="subjects-heading" className="text-2xl font-bold text-gray-800 mb-4">Choose Your Subject</h2>
+        <section style={{ marginBottom: 'var(--space-2xl)' }}>
+          <h2 style={{
+            fontSize: 'var(--text-3xl)',
+            fontWeight: 'var(--weight-semibold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-lg)',
+          }}>
+            Choose Your Subject
+          </h2>
+
           {subjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
-              {subjects.map(subject => (
-                <div key={subject.id} role="listitem">
+            <div className="grid grid-auto-fit">
+              {subjects.map((subject, idx) => (
+                <div
+                  key={subject.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
                   <SubjectCard
                     subject={subject}
                     progress={progress?.progressBySubject?.[subject.slug]}
@@ -161,83 +288,185 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-12 shadow-md">
-              <EmptySubjects />
+            <div className="surface-subtle" style={{
+              padding: 'var(--space-2xl)',
+              textAlign: 'center',
+              color: 'var(--color-text-secondary)',
+            }}>
+              <p>No subjects available yet.</p>
             </div>
           )}
         </section>
 
         {/* Recommendations */}
-        <section className="mb-8" aria-labelledby="recommendations-heading">
-          <div className="flex items-center gap-3 mb-4">
-            <Lightbulb className="w-6 h-6 text-yellow-500" aria-hidden="true" />
-            <h2 id="recommendations-heading" className="text-2xl font-bold text-gray-800">Recommended for You</h2>
-          </div>
-          {recommendations.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {recommendations.length > 0 && (
+          <section style={{ marginBottom: 'var(--space-2xl)' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-sm)',
+              marginBottom: 'var(--space-lg)',
+            }}>
+              <Lightbulb style={{ width: '24px', height: '24px', color: 'var(--color-accent)' }} />
+              <h2 style={{
+                fontSize: 'var(--text-3xl)',
+                fontWeight: 'var(--weight-semibold)',
+                color: 'var(--color-text-primary)',
+              }}>
+                Recommended for You
+              </h2>
+            </div>
+
+            <div className="grid grid-auto-fit">
               {recommendations.slice(0, 6).map((rec, idx) => (
-                <RecommendationCard
+                <button
                   key={idx}
-                  recommendation={rec}
-                  onSelect={() => {
+                  onClick={() => {
                     if (rec.topic?.slug) {
                       router.push(`/learn?subject=${rec.subject?.slug || 'math'}&topic=${rec.topic.slug}`);
                     } else {
                       router.push(`/learn?subject=${rec.subject?.slug || 'math'}`);
                     }
                   }}
-                />
+                  className="surface-interactive animate-fade-in"
+                  style={{
+                    padding: 'var(--space-lg)',
+                    textAlign: 'left',
+                    border: '1px solid var(--color-border-subtle)',
+                    background: 'var(--color-bg-elevated)',
+                    animationDelay: `${idx * 50}ms`,
+                  }}
+                >
+                  <div style={{
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--color-accent)',
+                    fontWeight: 'var(--weight-medium)',
+                    marginBottom: 'var(--space-2xs)',
+                  }}>
+                    {rec.reason || 'Recommended'}
+                  </div>
+                  <div style={{
+                    fontSize: 'var(--text-lg)',
+                    fontWeight: 'var(--weight-semibold)',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 'var(--space-2xs)',
+                  }}>
+                    {rec.topic?.name || rec.subject?.name}
+                  </div>
+                  <div style={{
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--color-text-secondary)',
+                  }}>
+                    {rec.subject?.name} {rec.topic && `• ${rec.topic.description?.slice(0, 60)}...`}
+                  </div>
+                </button>
               ))}
             </div>
-          ) : (
-            <div className="bg-white rounded-xl p-8 shadow-md">
-              <EmptyRecommendations />
-            </div>
-          )}
-        </div>
+          </section>
+        )}
 
-        {/* Recent Activity */}
+        {/* Recent Activity - Progressive Disclosure */}
         {progress?.recentSessions && progress.recentSessions.length > 0 && (
-          <section className="bg-white rounded-2xl p-6 shadow-md" aria-labelledby="recent-sessions-heading">
-            <h2 id="recent-sessions-heading" className="text-2xl font-bold text-gray-800 mb-4">Recent Sessions</h2>
-            <div className="space-y-3">
-              {progress.recentSessions.slice(0, 5).map((session, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-800">
-                      {session.subject} - {session.topic}
+          <section style={{ marginBottom: 'var(--space-xl)' }}>
+            <button
+              onClick={() => setShowRecentActivity(!showRecentActivity)}
+              className="btn-ghost"
+              style={{
+                width: '100%',
+                justifyContent: 'space-between',
+                padding: 'var(--space-md)',
+                marginBottom: showRecentActivity ? 'var(--space-md)' : 0,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                <Clock style={{ width: '20px', height: '20px' }} />
+                <span style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-semibold)' }}>
+                  Recent Activity
+                </span>
+              </div>
+              <svg
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  transform: showRecentActivity ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform var(--transition-base)',
+                }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showRecentActivity && (
+              <div className="stack animate-fade-in" style={{ gap: 'var(--space-xs)' }}>
+                {progress.recentSessions.slice(0, 5).map((session, i) => (
+                  <div
+                    key={i}
+                    className="surface-subtle"
+                    style={{
+                      padding: 'var(--space-md)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <div>
+                      <div style={{
+                        fontSize: 'var(--text-base)',
+                        fontWeight: 'var(--weight-medium)',
+                        color: 'var(--color-text-primary)',
+                        marginBottom: 'var(--space-3xs)',
+                      }}>
+                        {session.subject} - {session.topic}
+                      </div>
+                      <div style={{
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--color-text-tertiary)',
+                      }}>
+                        {new Date(session.startedAt).toLocaleDateString()} • {session.durationMinutes} min
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(session.startedAt).toLocaleDateString()} • {session.durationMinutes} min
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontSize: 'var(--text-xl)',
+                        fontWeight: 'var(--weight-bold)',
+                        color: 'var(--color-accent)',
+                      }}>
+                        +{session.pointsEarned}
+                      </div>
+                      <div style={{
+                        fontSize: 'var(--text-xs)',
+                        color: 'var(--color-text-tertiary)',
+                      }}>
+                        points
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-gray-800">+{session.pointsEarned}</div>
-                    <div className="text-xs text-gray-500">points</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         {/* Quick Actions */}
-        <nav className="mt-8 flex gap-4" aria-label="Quick actions">
+        <section className="cluster" style={{ justifyContent: 'center', gap: 'var(--space-md)' }}>
           <button
             onClick={() => router.push('/progress')}
-            className="flex-1 bg-blue-500 text-white rounded-xl py-3 px-6 font-semibold hover:bg-blue-600 transition-colors"
-            aria-label="View your learning progress"
+            className="btn btn-secondary btn-lg"
           >
+            <TrendingUp className="w-5 h-5" />
             View Progress
           </button>
           <button
             onClick={() => router.push('/achievements')}
-            className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl py-3 px-6 font-semibold hover:from-yellow-600 hover:to-orange-600 transition-all"
-            aria-label="View your achievements and badges"
+            className="btn btn-primary btn-lg"
           >
+            <Trophy className="w-5 h-5" />
             Achievements
           </button>
-        </nav>
+        </section>
       </main>
     </div>
   );

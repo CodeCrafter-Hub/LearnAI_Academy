@@ -21,6 +21,13 @@ const registerSchema = z.object({
 
 export async function POST(request) {
   try {
+    // Rate limiting: 3 registration attempts per hour per IP
+    const { rateLimitMiddleware } = await import('@/middleware/rateLimit');
+    const rateLimitResponse = await rateLimitMiddleware(request, 3, 3600);
+    if (rateLimitResponse) {
+      return rateLimitResponse; // Return rate limit error
+    }
+
     const body = await request.json();
     const validatedData = registerSchema.parse(body);
 

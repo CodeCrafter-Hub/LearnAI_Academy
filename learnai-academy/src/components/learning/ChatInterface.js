@@ -130,62 +130,149 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: 'var(--space-lg)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-md)',
+      }}>
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className="animate-fade-in"
+            style={{
+              display: 'flex',
+              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              animationDelay: '50ms',
+            }}
           >
             <div
-              className={`max-w-[80%] rounded-2xl p-4 ${
-                msg.role === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-800 shadow-md'
-              }`}
+              style={{
+                maxWidth: '80%',
+                padding: 'var(--space-md)',
+                borderRadius: 'var(--radius-2xl)',
+                fontSize: 'var(--text-base)',
+                lineHeight: 'var(--leading-relaxed)',
+                ...(msg.role === 'user' ? {
+                  background: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+                  color: 'white',
+                  boxShadow: 'var(--shadow-md)',
+                } : {
+                  background: 'var(--color-bg-elevated)',
+                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--color-border-subtle)',
+                  boxShadow: 'var(--shadow-sm)',
+                }),
+              }}
             >
               {msg.content}
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white rounded-2xl p-4 shadow-md">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div className="surface-elevated" style={{
+              padding: 'var(--space-md)',
+              borderRadius: 'var(--radius-2xl)',
+              display: 'flex',
+              gap: 'var(--space-xs)',
+            }}>
+              <div className="animate-bounce" style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--color-text-tertiary)',
+              }} />
+              <div className="animate-bounce" style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--color-text-tertiary)',
+                animationDelay: '150ms',
+              }} />
+              <div className="animate-bounce" style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--color-text-tertiary)',
+                animationDelay: '300ms',
+              }} />
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="border-t bg-white p-4">
+      {/* Input Area */}
+      <div className="glass" style={{
+        borderTop: '1px solid var(--color-border-subtle)',
+        padding: 'var(--space-md)',
+      }}>
+        {/* Listening Indicator */}
         {isListening && (
-          <div className="mb-3 text-center">
-            <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-full">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-              <span className="font-medium">Listening...</span>
+          <div style={{
+            marginBottom: 'var(--space-sm)',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 'var(--space-xs)',
+              background: 'hsla(0, 80%, 95%, 1)',
+              color: 'hsl(0, 70%, 50%)',
+              padding: 'var(--space-xs) var(--space-md)',
+              borderRadius: 'var(--radius-full)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 'var(--weight-medium)',
+            }}>
+              <div className="animate-pulse" style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: 'var(--radius-full)',
+                background: 'hsl(0, 70%, 50%)',
+              }} />
+              <span>Listening...</span>
             </div>
           </div>
         )}
-        <div className="flex gap-2">
+
+        {/* Input Controls */}
+        <div style={{
+          display: 'flex',
+          gap: 'var(--space-xs)',
+        }}>
+          {/* Microphone Button */}
           <button
             onClick={toggleListening}
             disabled={isLoading}
-            className={`rounded-xl px-4 py-3 transition-colors ${
-              isListening
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-            }`}
+            className="btn"
+            style={{
+              padding: 'var(--space-sm) var(--space-md)',
+              borderRadius: 'var(--radius-xl)',
+              border: 'none',
+              background: isListening ? 'hsl(0, 70%, 55%)' : 'var(--color-bg-muted)',
+              color: isListening ? 'white' : 'var(--color-text-secondary)',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.5 : 1,
+              transition: 'all var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           </button>
 
+          {/* Text Input */}
           <input
             type="text"
             value={input}
@@ -193,22 +280,81 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
             placeholder="Type or speak your message..."
             disabled={isLoading}
-            className="flex-1 rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-blue-500"
+            style={{
+              flex: 1,
+              padding: 'var(--space-sm) var(--space-md)',
+              borderRadius: 'var(--radius-xl)',
+              border: '2px solid var(--color-border-subtle)',
+              background: 'var(--color-bg-base)',
+              fontSize: 'var(--text-base)',
+              color: 'var(--color-text-primary)',
+              outline: 'none',
+              transition: 'all var(--transition-fast)',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-accent)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px hsla(var(--hue-accent), 70%, 55%, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
 
+          {/* Voice Toggle Button */}
           <button
             onClick={() => setVoiceEnabled(!voiceEnabled)}
-            className="rounded-xl px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+            className="btn"
+            style={{
+              padding: 'var(--space-sm) var(--space-md)',
+              borderRadius: 'var(--radius-xl)',
+              border: 'none',
+              background: 'var(--color-bg-muted)',
+              color: 'var(--color-text-secondary)',
+              transition: 'all var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.background = 'var(--color-bg-elevated)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = 'var(--color-bg-muted)';
+            }}
           >
-            {voiceEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+            {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
 
+          {/* Send Button */}
           <button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-blue-500 text-white rounded-xl px-6 py-3 font-semibold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            style={{
+              padding: 'var(--space-sm) var(--space-lg)',
+              borderRadius: 'var(--radius-xl)',
+              border: 'none',
+              background: (isLoading || !input.trim())
+                ? 'var(--color-bg-muted)'
+                : 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+              color: 'white',
+              fontWeight: 'var(--weight-semibold)',
+              cursor: (isLoading || !input.trim()) ? 'not-allowed' : 'pointer',
+              opacity: (isLoading || !input.trim()) ? 0.5 : 1,
+              boxShadow: (isLoading || !input.trim()) ? 'none' : 'var(--shadow-md)',
+              transition: 'all var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading && input.trim()) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+            }}
           >
-            <Send className="w-6 h-6" />
+            <Send className="w-5 h-5" />
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ package-lock.json
 .env
 .env.local
 .env.production
+.env.development
 
 # Next.js
 .next/
@@ -16,10 +17,18 @@ out/
 
 # Testing
 coverage/
-test-output.txt
 
-# Logs
-*.log
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# OS
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,25 +1,15 @@
 'use client';
 
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+
 /**
- * TopicSelector Component
+ * SubjectSelector Component
  *
- * Glassy cards for topic selection with staggered animations.
+ * Glassy subject cards with staggered animations.
  */
-export default function TopicSelector({ subject, onSelect }) {
-  if (!subject || !subject.topics || subject.topics.length === 0) {
-    return (
-      <div style={{
-        textAlign: 'center',
-        padding: 'var(--space-2xl)',
-      }}>
-        <p style={{
-          fontSize: 'var(--text-lg)',
-          color: 'var(--color-text-tertiary)',
-        }}>
-          No topics available for this subject.
-        </p>
-      </div>
-    );
+export default function SubjectSelector({ subjects = [], onSelect }) {
+  if (subjects.length === 0) {
+    return <LoadingSpinner message="Loading subjects..." />;
   }
 
   return (
@@ -28,23 +18,16 @@ export default function TopicSelector({ subject, onSelect }) {
         fontSize: 'var(--text-3xl)',
         fontWeight: 'var(--weight-bold)',
         color: 'var(--color-text-primary)',
-        marginBottom: 'var(--space-xs)',
-      }}>
-        {subject.name}
-      </h1>
-      <p style={{
-        fontSize: 'var(--text-base)',
-        color: 'var(--color-text-secondary)',
         marginBottom: 'var(--space-lg)',
       }}>
-        Choose a topic to study
-      </p>
+        Choose a Subject
+      </h1>
 
       <div className="grid grid-auto-fit">
-        {subject.topics.map((topic, idx) => (
+        {subjects.map((subject, idx) => (
           <button
-            key={topic.id}
-            onClick={() => onSelect(topic)}
+            key={subject.id}
+            onClick={() => onSelect(subject)}
             className="surface-interactive animate-fade-in"
             style={{
               padding: 'var(--space-lg)',
@@ -55,19 +38,19 @@ export default function TopicSelector({ subject, onSelect }) {
             }}
           >
             <h3 style={{
-              fontSize: 'var(--text-lg)',
-              fontWeight: 'var(--weight-semibold)',
+              fontSize: 'var(--text-xl)',
+              fontWeight: 'var(--weight-bold)',
               color: 'var(--color-text-primary)',
               marginBottom: 'var(--space-xs)',
             }}>
-              {topic.name}
+              {subject.name}
             </h3>
             <p style={{
               fontSize: 'var(--text-sm)',
               color: 'var(--color-text-secondary)',
               lineHeight: 'var(--leading-relaxed)',
             }}>
-              {topic.description}
+              {subject.description}
             </p>
           </button>
         ))}

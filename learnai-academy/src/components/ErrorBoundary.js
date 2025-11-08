@@ -1,12 +1,11 @@
 'use client';
 
 import React from 'react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 /**
  * Error Boundary Component
- *
- * Catches JavaScript errors anywhere in the child component tree,
- * logs those errors, and displays a fallback UI.
+ * Catches React errors and displays a fallback UI
  */
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -20,89 +19,91 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log error details for debugging
+    // Log error to console (in production, send to error tracking service)
     console.error('Error Boundary caught an error:', error, errorInfo);
 
-    // Store error details in state
-    this.state = {
-      hasError: true,
+    this.setState({
       error,
       errorInfo,
-    };
+    });
 
-    // TODO: Send error to logging service (e.g., Sentry)
-    // logErrorToService(error, errorInfo);
+    // In production, send to error tracking service (e.g., Sentry)
+    if (process.env.NODE_ENV === 'production') {
+      // Example: Sentry.captureException(error, { extra: errorInfo });
+    }
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
+    // Optionally reload the page or navigate to a safe route
+    if (this.props.onReset) {
+      this.props.onReset();
+    }
   };
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
+      // Fallback UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-            <div className="text-center">
-              {/* Error Icon */}
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                <svg
-                  className="h-8 w-8 text-red-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
-              </div>
-
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Oops! Something went wrong
-              </h1>
-
-              <p className="text-gray-600 mb-6">
-                We encountered an unexpected error. Don't worry, we've logged the issue
-                and will look into it.
-              </p>
-
-              {/* Error Details (only in development) */}
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <details className="mb-6 text-left">
-                  <summary className="cursor-pointer text-sm font-medium text-gray-700 mb-2">
-                    Error Details (Development Only)
-                  </summary>
-                  <div className="bg-gray-100 rounded p-4 text-xs text-gray-800 overflow-auto max-h-48">
-                    <p className="font-bold mb-2">{this.state.error.toString()}</p>
-                    <pre className="whitespace-pre-wrap">
-                      {this.state.errorInfo?.componentStack}
-                    </pre>
-                  </div>
-                </details>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
-                  onClick={this.handleReset}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Try Again
-                </button>
-
-                <button
-                  onClick={() => (window.location.href = '/')}
-                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                >
-                  Go Home
-                </button>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full">
+            <div className="flex items-center justify-center mb-6">
+              <div className="bg-red-100 rounded-full p-4">
+                <AlertCircle className="w-12 h-12 text-red-600" />
               </div>
             </div>
+
+            <h1 className="text-3xl font-bold text-gray-800 text-center mb-3">
+              Oops! Something went wrong
+            </h1>
+
+            <p className="text-gray-600 text-center mb-6">
+              {this.props.fallbackMessage ||
+                "We're sorry, but something unexpected happened. Don't worry, our team has been notified!"}
+            </p>
+
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-red-800 mb-2">Error Details:</h3>
+                <p className="text-sm text-red-700 mb-2">{this.state.error.toString()}</p>
+                <details className="text-xs text-red-600">
+                  <summary className="cursor-pointer font-medium mb-2">
+                    Stack Trace
+                  </summary>
+                  <pre className="whitespace-pre-wrap overflow-auto max-h-48">
+                    {this.state.errorInfo?.componentStack}
+                  </pre>
+                </details>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={this.handleReset}
+                className="flex-1 bg-blue-500 text-white rounded-xl py-3 px-6 font-semibold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-5 h-5" />
+                Try Again
+              </button>
+              <button
+                onClick={() => (window.location.href = '/')}
+                className="flex-1 bg-gray-200 text-gray-800 rounded-xl py-3 px-6 font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Go Home
+              </button>
+            </div>
+
+            {this.props.showContactSupport && (
+              <p className="text-center text-sm text-gray-500 mt-4">
+                If this problem persists, please{' '}
+                <a
+                  href="/support"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  contact support
+                </a>
+              </p>
+            )}
           </div>
         </div>
       );

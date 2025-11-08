@@ -36,7 +36,7 @@ export function verifyToken(request) {
 
     return decoded;
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('Token verification error:', error.message);
     return null;
   }
 }

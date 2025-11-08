@@ -68,6 +68,8 @@ model Subject {
   progress StudentProgress[]
   sessions LearningSession[]
 
+  @@index([isActive, orderIndex])
+  @@index([minGrade, maxGrade])
   @@map("subjects")
 }
 
@@ -96,6 +98,8 @@ model Topic {
 
   @@unique([subjectId, slug])
   @@index([subjectId, gradeLevel])
+  @@index([gradeLevel, difficulty])
+  @@index([isActive, orderIndex])
   @@index([parentTopicId])
   @@index([difficulty])
   @@map("topics")
@@ -176,7 +180,10 @@ model LearningSession {
 
   @@index([studentId, startedAt])
   @@index([subjectId, sessionMode])
+  @@index([subjectId])
   @@index([topicId])
+  @@index([sessionMode])
+  @@index([createdAt])
   @@map("learning_sessions")
 }
 
@@ -242,6 +249,8 @@ model DailyActivity {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, activityDate])
+  @@index([studentId, activityDate])
+  @@index([activityDate])
   @@map("daily_activity")
 }
 
