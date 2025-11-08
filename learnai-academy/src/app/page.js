@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import {
   ArrowRight,
   Check,
@@ -10,11 +11,21 @@ import {
   Sparkles,
   BookOpen,
   Users,
-  Award
+  Award,
+  ChevronDown,
+  Zap,
+  Target,
+  BarChart3,
+  Play
 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
+  const [openFaq, setOpenFaq] = useState(null);
+
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
 
   return (
     <div style={{ background: 'var(--color-bg-base)' }}>
@@ -39,18 +50,17 @@ export default function Home() {
             fontWeight: 'var(--weight-bold)',
             color: 'var(--color-text-primary)',
           }}>
-            LearnAI Academy
+            LearnAI
           </div>
-          <div className="cluster" style={{ gap: 'var(--space-md)' }}>
-            <button
-              onClick={() => router.push('/login')}
-              className="btn btn-ghost"
-            >
-              Sign In
-            </button>
+          <div className="cluster" style={{ gap: 'var(--space-lg)', alignItems: 'center' }}>
+            <a href="#services" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>Services</a>
+            <a href="#how-it-works" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>How it works</a>
+            <a href="#testimonials" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>Testimonials</a>
+            <a href="#pricing" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>Pricing</a>
+            <a href="#faq" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>FAQ</a>
             <button
               onClick={() => router.push('/register')}
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
             >
               Get Started
             </button>
@@ -63,138 +73,227 @@ export default function Home() {
         paddingBlock: 'var(--space-3xl)',
         background: 'linear-gradient(180deg, var(--color-bg-subtle) 0%, var(--color-bg-base) 100%)',
       }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          {/* Badge */}
-          <div style={{ marginBottom: 'var(--space-lg)' }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 'var(--space-2xs)',
-              padding: 'var(--space-2xs) var(--space-md)',
-              background: 'var(--color-accent-subtle)',
-              color: 'var(--color-accent)',
-              borderRadius: 'var(--radius-full)',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 'var(--weight-medium)',
-            }}>
-              <Sparkles style={{ width: '16px', height: '16px' }} />
-              Powered by Advanced AI Technology
-            </span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 style={{
-            fontSize: 'var(--text-5xl)',
-            fontWeight: 'var(--weight-bold)',
-            color: 'var(--color-text-primary)',
-            marginBottom: 'var(--space-md)',
-            lineHeight: 'var(--leading-tight)',
-            maxWidth: '900px',
-            marginInline: 'auto',
-          }}>
-            Personalized AI Tutoring for Every Student
-          </h1>
-
-          {/* Subheadline */}
-          <p style={{
-            fontSize: 'var(--text-xl)',
-            color: 'var(--color-text-secondary)',
-            marginBottom: 'var(--space-xl)',
-            maxWidth: '700px',
-            marginInline: 'auto',
-            lineHeight: 'var(--leading-relaxed)',
-          }}>
-            Transform learning with intelligent tutors that adapt to each student's needs.
-            From K-12 to advanced subjects, we make education accessible and effective.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="cluster" style={{
-            justifyContent: 'center',
-            gap: 'var(--space-md)',
-            marginBottom: 'var(--space-2xl)',
-          }}>
-            <button
-              onClick={() => router.push('/register')}
-              className="btn btn-primary btn-lg"
-              style={{ gap: 'var(--space-2xs)' }}
-            >
-              Start Learning Free
-              <ArrowRight style={{ width: '20px', height: '20px' }} />
-            </button>
-            <button
-              onClick={() => router.push('/login')}
-              className="btn btn-secondary btn-lg"
-            >
-              Sign In
-            </button>
-          </div>
-
-          {/* Social Proof */}
+        <div className="container">
           <div style={{
-            display: 'flex',
+            display: 'grid',
+            gridTemplateColumns: '1.1fr 0.9fr',
+            gap: 'var(--space-2xl)',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 'var(--space-md)',
-            flexWrap: 'wrap',
-            fontSize: 'var(--text-sm)',
-            color: 'var(--color-text-tertiary)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2xs)' }}>
-              <Star style={{ width: '16px', height: '16px', fill: 'var(--color-warning)', color: 'var(--color-warning)' }} />
-              <Star style={{ width: '16px', height: '16px', fill: 'var(--color-warning)', color: 'var(--color-warning)' }} />
-              <Star style={{ width: '16px', height: '16px', fill: 'var(--color-warning)', color: 'var(--color-warning)' }} />
-              <Star style={{ width: '16px', height: '16px', fill: 'var(--color-warning)', color: 'var(--color-warning)' }} />
-              <Star style={{ width: '16px', height: '16px', fill: 'var(--color-warning)', color: 'var(--color-warning)' }} />
-              <span style={{ marginLeft: 'var(--space-2xs)', color: 'var(--color-text-secondary)' }}>
-                4.9/5 from 2,000+ families
-              </span>
+            {/* Left Column */}
+            <div>
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2xs)',
+                  padding: 'var(--space-2xs) var(--space-md)',
+                  background: 'var(--color-accent-subtle)',
+                  color: 'var(--color-accent)',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: 'var(--text-xs)',
+                  fontWeight: 'var(--weight-semibold)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}>
+                  100% active users
+                </span>
+              </div>
+
+              <h1 style={{
+                fontSize: 'var(--text-5xl)',
+                fontWeight: 'var(--weight-bold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-md)',
+                lineHeight: 'var(--leading-tight)',
+              }}>
+                AI-Powered Learning That Adapts to Every Student
+              </h1>
+
+              <p style={{
+                fontSize: 'var(--text-lg)',
+                color: 'var(--color-text-secondary)',
+                marginBottom: 'var(--space-xl)',
+                lineHeight: 'var(--leading-relaxed)',
+              }}>
+                Personalized tutoring that understands each student's unique learning style. See measurable improvement in comprehension and confidence.
+              </p>
+
+              <div className="cluster" style={{
+                gap: 'var(--space-md)',
+                marginBottom: 'var(--space-xl)',
+              }}>
+                <button
+                  onClick={() => router.push('/register')}
+                  className="btn btn-primary btn-lg"
+                >
+                  Start Free Trial
+                </button>
+                <button
+                  onClick={() => router.push('/login')}
+                  className="btn btn-secondary btn-lg"
+                >
+                  Watch Demo
+                </button>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-md)',
+                fontSize: 'var(--text-sm)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2xs)' }}>
+                  {[1,2,3,4,5].map(i => (
+                    <Star key={i} style={{ width: '14px', height: '14px', fill: 'var(--color-warning)', color: 'var(--color-warning)' }} />
+                  ))}
+                </div>
+                <span style={{ color: 'var(--color-text-secondary)' }}>
+                  Trusted by 2,000+ families
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column - Screenshot */}
+            <div style={{
+              background: 'var(--color-bg-muted)',
+              borderRadius: 'var(--radius-2xl)',
+              border: '1px solid var(--color-border-subtle)',
+              aspectRatio: '4/3',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, var(--color-accent-subtle) 0%, var(--color-primary-subtle) 100%)',
+              }}>
+                <Play style={{ width: '64px', height: '64px', color: 'var(--color-accent)' }} />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section style={{ paddingBlock: 'var(--space-2xl)' }}>
+      {/* Partners Section */}
+      <section style={{
+        paddingBlock: 'var(--space-xl)',
+        borderBottom: '1px solid var(--color-border-subtle)',
+      }}>
         <div className="container">
-          <div className="grid-enterprise-3" style={{ gap: 'var(--space-xl)' }}>
-            <FeatureItem
-              icon={BookOpen}
-              title="Adaptive Learning"
-              description="AI tutors adjust difficulty and teaching style based on student performance and learning patterns."
-            />
-            <FeatureItem
-              icon={TrendingUp}
-              title="Progress Tracking"
-              description="Comprehensive analytics and insights help parents and students monitor growth over time."
-            />
-            <FeatureItem
-              icon={Shield}
-              title="Safe & Secure"
-              description="Enterprise-grade security ensures student data is protected with industry-leading encryption."
-            />
-            <FeatureItem
-              icon={Users}
-              title="Parent Dashboard"
-              description="Real-time visibility into learning sessions, progress, and achievements for peace of mind."
-            />
-            <FeatureItem
-              icon={Award}
-              title="Proven Results"
-              description="Students show an average 35% improvement in comprehension within the first 3 months."
-            />
-            <FeatureItem
-              icon={Sparkles}
-              title="Engaging Experience"
-              description="Gamification elements keep students motivated with achievements, streaks, and rewards."
-            />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-xl)',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+          }}>
+            <span style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-tertiary)',
+              fontWeight: 'var(--weight-medium)',
+            }}>
+              Trusted by employees at:
+            </span>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
+              <div
+                key={i}
+                style={{
+                  width: '80px',
+                  height: '40px',
+                  background: 'var(--color-bg-muted)',
+                  borderRadius: 'var(--radius-md)',
+                }}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Subjects Section */}
-      <section style={{
-        paddingBlock: 'var(--space-2xl)',
+      {/* Benefits Section */}
+      <section id="services" style={{ paddingBlock: 'var(--space-3xl)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <h2 style={{
+            fontSize: 'var(--text-4xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-sm)',
+          }}>
+            Benefits
+          </h2>
+          <p style={{
+            fontSize: 'var(--text-lg)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: 'var(--space-2xl)',
+            maxWidth: '600px',
+            marginInline: 'auto',
+          }}>
+            Focus on how it helps users instead of what features it has
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 'var(--space-lg)',
+          }}>
+            {[
+              { icon: Target, title: 'Adaptive Learning', desc: 'AI tutors adjust to each student\'s pace and style' },
+              { icon: BarChart3, title: 'Track Progress', desc: 'Detailed analytics show growth over time' },
+              { icon: Shield, title: 'Safe & Secure', desc: 'Enterprise-grade data protection' },
+              { icon: Users, title: 'Parent Dashboard', desc: 'Real-time visibility into learning sessions' },
+              { icon: Zap, title: 'Instant Feedback', desc: 'Get help exactly when you need it' },
+              { icon: Award, title: 'Proven Results', desc: '35% average improvement in 3 months' },
+            ].map((item, i) => (
+              <div key={i} style={{
+                padding: 'var(--space-xl)',
+                background: 'var(--color-bg-subtle)',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--color-border-subtle)',
+                textAlign: 'center',
+              }}>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'var(--color-accent-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginInline: 'auto',
+                  marginBottom: 'var(--space-md)',
+                }}>
+                  <item.icon style={{ width: '28px', height: '28px', color: 'var(--color-accent)' }} />
+                </div>
+                <h3 style={{
+                  fontSize: 'var(--text-lg)',
+                  fontWeight: 'var(--weight-semibold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--space-xs)',
+                }}>
+                  {item.title}
+                </h3>
+                <p style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 'var(--leading-relaxed)',
+                }}>
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" style={{
+        paddingBlock: 'var(--space-3xl)',
         background: 'var(--color-bg-subtle)',
       }}>
         <div className="container" style={{ textAlign: 'center' }}>
@@ -204,66 +303,196 @@ export default function Home() {
             color: 'var(--color-text-primary)',
             marginBottom: 'var(--space-sm)',
           }}>
-            Comprehensive Curriculum Coverage
+            How it works?
           </h2>
           <p style={{
             fontSize: 'var(--text-lg)',
             color: 'var(--color-text-secondary)',
-            marginBottom: 'var(--space-xl)',
+            marginBottom: 'var(--space-2xl)',
             maxWidth: '600px',
-            marginInline: 'auto)',
+            marginInline: 'auto',
           }}>
-            From foundational skills to advanced concepts across all major subjects
+            Get started in 3 simple steps
           </p>
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: 'var(--space-sm)',
-            maxWidth: '800px',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 'var(--space-xl)',
+          }}>
+            {[
+              { num: '1', title: 'Create Account', desc: 'Sign up and set your grade level' },
+              { num: '2', title: 'Choose Subject', desc: 'Select what you want to learn' },
+              { num: '3', title: 'Start Learning', desc: 'Get personalized tutoring instantly' },
+            ].map((step, i) => (
+              <div key={i} style={{
+                padding: 'var(--space-xl)',
+                background: 'var(--color-bg-base)',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--color-border-subtle)',
+              }}>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--color-accent)',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 'var(--text-2xl)',
+                  fontWeight: 'var(--weight-bold)',
+                  marginInline: 'auto',
+                  marginBottom: 'var(--space-md)',
+                }}>
+                  {step.num}
+                </div>
+                <h3 style={{
+                  fontSize: 'var(--text-xl)',
+                  fontWeight: 'var(--weight-semibold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--space-xs)',
+                }}>
+                  {step.title}
+                </h3>
+                <p style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-secondary)',
+                }}>
+                  {step.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" style={{ paddingBlock: 'var(--space-3xl)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <h2 style={{
+            fontSize: 'var(--text-4xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-sm)',
+          }}>
+            Pricing - Why to buy/How it helps
+          </h2>
+          <p style={{
+            fontSize: 'var(--text-lg)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: 'var(--space-2xl)',
+          }}>
+            Simple, transparent pricing
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 'var(--space-lg)',
+            maxWidth: '1000px',
             marginInline: 'auto',
           }}>
             {[
-              { name: 'Mathematics', icon: '∑' },
-              { name: 'English', icon: 'Aa' },
-              { name: 'Reading', icon: '📕' },
-              { name: 'Science', icon: '⚗' },
-              { name: 'Writing', icon: '✎' },
-              { name: 'Coding', icon: '</>' },
-            ].map(subject => (
+              {
+                name: 'Starter',
+                price: '$100',
+                period: '/month',
+                features: ['Feature 1 goes here', 'Feature 2 goes here', 'Feature 3 goes here', 'Feature 4 goes here', 'Feature 5 goes here'],
+              },
+              {
+                name: 'Pro',
+                price: '$200',
+                period: '/month',
+                popular: true,
+                features: ['Everything in Starter', 'Feature 6 goes here', 'Feature 7 goes here', 'Feature 8 goes here', 'Feature 9 goes here', 'Feature 10 goes here'],
+              },
+              {
+                name: 'Advanced',
+                price: '$300',
+                period: '/month',
+                features: ['Everything in Pro', 'Feature 11 goes here', 'Feature 12 goes here', 'Feature 13 goes here'],
+              },
+            ].map((tier, i) => (
               <div
-                key={subject.name}
+                key={i}
                 style={{
-                  padding: 'var(--space-lg)',
-                  background: 'var(--color-bg-base)',
-                  border: '1px solid var(--color-border-subtle)',
-                  borderRadius: 'var(--radius-xl)',
-                  transition: 'all var(--transition-base)',
-                  cursor: 'default',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
+                  padding: 'var(--space-xl)',
+                  background: tier.popular ? 'var(--color-accent-subtle)' : 'var(--color-bg-subtle)',
+                  border: tier.popular ? '2px solid var(--color-accent)' : '1px solid var(--color-border-subtle)',
+                  borderRadius: 'var(--radius-2xl)',
+                  position: 'relative',
+                  textAlign: 'left',
                 }}
               >
-                <div style={{
-                  fontSize: 'var(--text-3xl)',
-                  marginBottom: 'var(--space-xs)',
-                  color: 'var(--color-text-primary)',
-                }}>
-                  {subject.icon}
+                {tier.popular && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'var(--space-md)',
+                    right: 'var(--space-md)',
+                    background: 'var(--color-accent)',
+                    color: 'white',
+                    padding: 'var(--space-2xs) var(--space-sm)',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 'var(--weight-bold)',
+                  }}>
+                    MOST POPULAR
+                  </div>
+                )}
+                <div style={{ marginBottom: 'var(--space-lg)' }}>
+                  <div style={{
+                    fontSize: 'var(--text-lg)',
+                    fontWeight: 'var(--weight-semibold)',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 'var(--space-xs)',
+                  }}>
+                    {tier.name}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-2xs)' }}>
+                    <span style={{
+                      fontSize: 'var(--text-4xl)',
+                      fontWeight: 'var(--weight-bold)',
+                      color: 'var(--color-text-primary)',
+                    }}>
+                      {tier.price}
+                    </span>
+                    <span style={{
+                      fontSize: 'var(--text-base)',
+                      color: 'var(--color-text-tertiary)',
+                    }}>
+                      {tier.period}
+                    </span>
+                  </div>
                 </div>
-                <div style={{
-                  fontSize: 'var(--text-base)',
-                  fontWeight: 'var(--weight-medium)',
-                  color: 'var(--color-text-secondary)',
+                <button
+                  onClick={() => router.push('/register')}
+                  className={tier.popular ? 'btn btn-primary' : 'btn btn-secondary'}
+                  style={{ width: '100%', justifyContent: 'center', marginBottom: 'var(--space-lg)' }}
+                >
+                  CTA
+                </button>
+                <ul style={{
+                  listStyle: 'none',
+                  padding: 0,
                 }}>
-                  {subject.name}
-                </div>
+                  {tier.features.map((feature, j) => (
+                    <li
+                      key={j}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 'var(--space-sm)',
+                        marginBottom: 'var(--space-sm)',
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--color-text-secondary)',
+                      }}
+                    >
+                      <Check style={{ width: '16px', height: '16px', color: 'var(--color-success)', flexShrink: 0 }} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
@@ -271,40 +500,8 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section style={{ paddingBlock: 'var(--space-2xl)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{
-            fontSize: 'var(--text-4xl)',
-            fontWeight: 'var(--weight-bold)',
-            color: 'var(--color-text-primary)',
-            marginBottom: 'var(--space-xl)',
-          }}>
-            Trusted by Families Worldwide
-          </h2>
-
-          <div className="grid-enterprise-3" style={{ gap: 'var(--space-lg)' }}>
-            <Testimonial
-              quote="My daughter went from struggling with algebra to getting A's. The personalized approach made all the difference."
-              author="Sarah Chen"
-              role="Parent of 8th grader"
-            />
-            <Testimonial
-              quote="As a teacher, I recommend LearnAI to all my students. The progress tracking helps me identify where they need extra support."
-              author="Michael Rodriguez"
-              role="High School Math Teacher"
-            />
-            <Testimonial
-              quote="The AI tutors are patient and explain things in different ways until my son understands. It's like having a private tutor 24/7."
-              author="Jennifer Williams"
-              role="Parent of 5th grader"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section style={{
-        paddingBlock: 'var(--space-2xl)',
+      <section id="testimonials" style={{
+        paddingBlock: 'var(--space-3xl)',
         background: 'var(--color-bg-subtle)',
       }}>
         <div className="container" style={{ textAlign: 'center' }}>
@@ -312,69 +509,196 @@ export default function Home() {
             fontSize: 'var(--text-4xl)',
             fontWeight: 'var(--weight-bold)',
             color: 'var(--color-text-primary)',
-            marginBottom: 'var(--space-sm)',
+            marginBottom: 'var(--space-2xl)',
           }}>
-            Simple, Transparent Pricing
+            Loved by people worldwide
           </h2>
-          <p style={{
-            fontSize: 'var(--text-lg)',
-            color: 'var(--color-text-secondary)',
-            marginBottom: 'var(--space-xl)',
-          }}>
-            Start free, upgrade anytime
-          </p>
 
-          <div className="grid-enterprise-3" style={{ gap: 'var(--space-lg)', maxWidth: '1000px', marginInline: 'auto' }}>
-            <PricingTier
-              name="Free"
-              price="$0"
-              description="Perfect for trying out LearnAI"
-              features={[
-                '3 sessions per week',
-                'Basic progress tracking',
-                'All core subjects',
-                'Email support',
-              ]}
-              cta="Start Free"
-              onClick={() => router.push('/register')}
-            />
-            <PricingTier
-              name="Pro"
-              price="$29"
-              period="/month"
-              description="For serious students"
-              features={[
-                'Unlimited sessions',
-                'Advanced analytics',
-                'Priority support',
-                'Parent dashboard',
-                'Custom learning paths',
-              ]}
-              cta="Get Started"
-              highlighted
-              onClick={() => router.push('/register')}
-            />
-            <PricingTier
-              name="Family"
-              price="$49"
-              period="/month"
-              description="Up to 4 students"
-              features={[
-                'Everything in Pro',
-                'Up to 4 student profiles',
-                'Family progress reports',
-                'Dedicated support',
-              ]}
-              cta="Get Started"
-              onClick={() => router.push('/register')}
-            />
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 'var(--space-lg)',
+          }}>
+            {[
+              {
+                quote: 'My daughter went from struggling with algebra to getting A\'s. The personalized approach made all the difference.',
+                author: 'Sarah Chen',
+                role: 'Parent of 8th grader',
+              },
+              {
+                quote: 'As a teacher, I recommend LearnAI to all my students. The progress tracking is invaluable.',
+                author: 'Michael Rodriguez',
+                role: 'High School Teacher',
+              },
+              {
+                quote: 'The AI tutors are patient and explain things in different ways until my son understands.',
+                author: 'Jennifer Williams',
+                role: 'Parent of 5th grader',
+              },
+            ].map((testimonial, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: 'var(--space-lg)',
+                  background: 'var(--color-bg-base)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: '1px solid var(--color-border-subtle)',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  gap: 'var(--space-2xs)',
+                  marginBottom: 'var(--space-md)',
+                }}>
+                  {[1, 2, 3, 4, 5].map(j => (
+                    <Star
+                      key={j}
+                      style={{
+                        width: '14px',
+                        height: '14px',
+                        fill: 'var(--color-warning)',
+                        color: 'var(--color-warning)',
+                      }}
+                    />
+                  ))}
+                </div>
+                <p style={{
+                  fontSize: 'var(--text-base)',
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: 'var(--space-md)',
+                  lineHeight: 'var(--leading-relaxed)',
+                  fontStyle: 'italic',
+                }}>
+                  "{testimonial.quote}"
+                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-sm)',
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'var(--color-bg-muted)',
+                  }} />
+                  <div>
+                    <div style={{
+                      fontSize: 'var(--text-sm)',
+                      fontWeight: 'var(--weight-semibold)',
+                      color: 'var(--color-text-primary)',
+                    }}>
+                      {testimonial.author}
+                    </div>
+                    <div style={{
+                      fontSize: 'var(--text-xs)',
+                      color: 'var(--color-text-tertiary)',
+                    }}>
+                      {testimonial.role}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* FAQ */}
+      <section id="faq" style={{ paddingBlock: 'var(--space-3xl)' }}>
+        <div className="container" style={{ maxWidth: '800px' }}>
+          <h2 style={{
+            fontSize: 'var(--text-4xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-sm)',
+            textAlign: 'center',
+          }}>
+            Frequently Asked Questions
+          </h2>
+          <p style={{
+            fontSize: 'var(--text-lg)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: 'var(--space-2xl)',
+            textAlign: 'center',
+          }}>
+            Address major questions to help people make the trial call
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            {[
+              { q: 'How does the AI personalize learning?', a: 'Our AI analyzes student performance in real-time, adapting difficulty levels and teaching approaches based on comprehension patterns.' },
+              { q: 'Is my child\'s data secure?', a: 'Yes. We use enterprise-grade encryption and never share student data with third parties.' },
+              { q: 'Can I cancel anytime?', a: 'Absolutely. No contracts or cancellation fees. Cancel with one click from your dashboard.' },
+              { q: 'What subjects are available?', a: 'We cover Math, English, Science, Reading, Writing, and Coding for grades K-12.' },
+            ].map((faq, i) => (
+              <div
+                key={i}
+                style={{
+                  border: '1px solid var(--color-border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  overflow: 'hidden',
+                }}
+              >
+                <button
+                  onClick={() => toggleFaq(i)}
+                  style={{
+                    width: '100%',
+                    padding: 'var(--space-lg)',
+                    background: 'var(--color-bg-base)',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'background var(--transition-fast)',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-subtle)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-bg-base)'}
+                >
+                  <span style={{
+                    fontSize: 'var(--text-base)',
+                    fontWeight: 'var(--weight-semibold)',
+                    color: 'var(--color-text-primary)',
+                    textAlign: 'left',
+                  }}>
+                    {faq.q}
+                  </span>
+                  <ChevronDown
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      color: 'var(--color-text-tertiary)',
+                      transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0)',
+                      transition: 'transform var(--transition-fast)',
+                    }}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div style={{
+                    padding: 'var(--space-lg)',
+                    paddingTop: 0,
+                    background: 'var(--color-bg-base)',
+                  }}>
+                    <p style={{
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--color-text-secondary)',
+                      lineHeight: 'var(--leading-relaxed)',
+                    }}>
+                      {faq.a}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
       <section style={{
-        paddingBlock: 'var(--space-2xl)',
+        paddingBlock: 'var(--space-3xl)',
         background: 'var(--color-text-primary)',
         color: 'white',
       }}>
@@ -401,7 +725,7 @@ export default function Home() {
             style={{
               background: 'white',
               color: 'var(--color-text-primary)',
-              padding: 'var(--space-md) var(--space-xl)',
+              padding: 'var(--space-md) var(--space-2xl)',
               borderRadius: 'var(--radius-lg)',
               fontSize: 'var(--text-lg)',
               fontWeight: 'var(--weight-semibold)',
@@ -430,65 +754,55 @@ export default function Home() {
       {/* Footer */}
       <footer style={{
         borderTop: '1px solid var(--color-border-subtle)',
-        padding: 'var(--space-xl) 0',
+        padding: 'var(--space-2xl) 0',
         background: 'var(--color-bg-base)',
       }}>
         <div className="container">
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
             gap: 'var(--space-xl)',
-            marginBottom: 'var(--space-xl)',
+            marginBottom: 'var(--space-2xl)',
           }}>
             <div>
               <div style={{
-                fontSize: 'var(--text-lg)',
+                fontSize: 'var(--text-xl)',
                 fontWeight: 'var(--weight-bold)',
                 marginBottom: 'var(--space-md)',
                 color: 'var(--color-text-primary)',
               }}>
-                LearnAI Academy
+                LearnAI
               </div>
               <p style={{
                 fontSize: 'var(--text-sm)',
                 color: 'var(--color-text-secondary)',
+                lineHeight: 'var(--leading-relaxed)',
+                marginBottom: 'var(--space-md)',
               }}>
                 Personalized AI tutoring for every student
               </p>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-tertiary)' }}>
+                Newsletter sign-up placeholder
+              </div>
             </div>
             <div>
               <div style={{
-                fontSize: 'var(--text-base)',
+                fontSize: 'var(--text-sm)',
                 fontWeight: 'var(--weight-semibold)',
                 marginBottom: 'var(--space-sm)',
                 color: 'var(--color-text-primary)',
               }}>
-                Product
+                Menu
               </div>
               <div className="stack" style={{ gap: 'var(--space-2xs)' }}>
-                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Features</a>
-                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Pricing</a>
-                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Subjects</a>
+                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Link 1</a>
+                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Link 2</a>
+                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Link 3</a>
               </div>
             </div>
             <div>
               <div style={{
-                fontSize: 'var(--text-base)',
-                fontWeight: 'var(--weight-semibold)',
-                marginBottom: 'var(--space-sm)',
-                color: 'var(--color-text-primary)',
-              }}>
-                Company
-              </div>
-              <div className="stack" style={{ gap: 'var(--space-2xs)' }}>
-                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>About</a>
-                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Blog</a>
-                <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Contact</a>
-              </div>
-            </div>
-            <div>
-              <div style={{
-                fontSize: 'var(--text-base)',
+                fontSize: 'var(--text-sm)',
                 fontWeight: 'var(--weight-semibold)',
                 marginBottom: 'var(--space-sm)',
                 color: 'var(--color-text-primary)',
@@ -503,196 +817,22 @@ export default function Home() {
             </div>
           </div>
           <div style={{
-            paddingTop: 'var(--space-md)',
+            paddingTop: 'var(--space-lg)',
             borderTop: '1px solid var(--color-border-subtle)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             fontSize: 'var(--text-sm)',
             color: 'var(--color-text-tertiary)',
-            textAlign: 'center',
           }}>
-            © 2024 LearnAI Academy. All rights reserved.
+            <div>© 2024 LearnAI Academy. All rights reserved.</div>
+            <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
+              <a href="#" style={{ color: 'var(--color-text-tertiary)' }}>Privacy Policy</a>
+              <a href="#" style={{ color: 'var(--color-text-tertiary)' }}>Terms</a>
+            </div>
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function FeatureItem({ icon: Icon, title, description }) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{
-        width: '64px',
-        height: '64px',
-        borderRadius: 'var(--radius-xl)',
-        background: 'var(--color-accent-subtle)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginInline: 'auto',
-        marginBottom: 'var(--space-md)',
-      }}>
-        <Icon style={{ width: '32px', height: '32px', color: 'var(--color-accent)' }} />
-      </div>
-      <h3 style={{
-        fontSize: 'var(--text-xl)',
-        fontWeight: 'var(--weight-semibold)',
-        color: 'var(--color-text-primary)',
-        marginBottom: 'var(--space-xs)',
-      }}>
-        {title}
-      </h3>
-      <p style={{
-        fontSize: 'var(--text-base)',
-        color: 'var(--color-text-secondary)',
-        lineHeight: 'var(--leading-relaxed)',
-      }}>
-        {description}
-      </p>
-    </div>
-  );
-}
-
-function Testimonial({ quote, author, role }) {
-  return (
-    <div style={{
-      padding: 'var(--space-lg)',
-      background: 'var(--color-bg-subtle)',
-      borderRadius: 'var(--radius-xl)',
-      border: '1px solid var(--color-border-subtle)',
-    }}>
-      <div style={{
-        display: 'flex',
-        gap: 'var(--space-2xs)',
-        marginBottom: 'var(--space-md)',
-        justifyContent: 'center',
-      }}>
-        {[1, 2, 3, 4, 5].map(i => (
-          <Star
-            key={i}
-            style={{
-              width: '16px',
-              height: '16px',
-              fill: 'var(--color-warning)',
-              color: 'var(--color-warning)',
-            }}
-          />
-        ))}
-      </div>
-      <p style={{
-        fontSize: 'var(--text-base)',
-        color: 'var(--color-text-secondary)',
-        marginBottom: 'var(--space-md)',
-        lineHeight: 'var(--leading-relaxed)',
-        fontStyle: 'italic',
-      }}>
-        "{quote}"
-      </p>
-      <div>
-        <div style={{
-          fontSize: 'var(--text-base)',
-          fontWeight: 'var(--weight-semibold)',
-          color: 'var(--color-text-primary)',
-        }}>
-          {author}
-        </div>
-        <div style={{
-          fontSize: 'var(--text-sm)',
-          color: 'var(--color-text-tertiary)',
-        }}>
-          {role}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PricingTier({ name, price, period, description, features, cta, highlighted, onClick }) {
-  return (
-    <div style={{
-      padding: 'var(--space-xl)',
-      background: highlighted ? 'var(--color-accent-subtle)' : 'var(--color-bg-base)',
-      border: highlighted ? '2px solid var(--color-accent)' : '1px solid var(--color-border-subtle)',
-      borderRadius: 'var(--radius-2xl)',
-      position: 'relative',
-    }}>
-      {highlighted && (
-        <div style={{
-          position: 'absolute',
-          top: 'var(--space-md)',
-          right: 'var(--space-md)',
-          background: 'var(--color-accent)',
-          color: 'white',
-          padding: 'var(--space-2xs) var(--space-sm)',
-          borderRadius: 'var(--radius-full)',
-          fontSize: 'var(--text-xs)',
-          fontWeight: 'var(--weight-semibold)',
-        }}>
-          POPULAR
-        </div>
-      )}
-      <div style={{ marginBottom: 'var(--space-md)' }}>
-        <div style={{
-          fontSize: 'var(--text-2xl)',
-          fontWeight: 'var(--weight-bold)',
-          color: 'var(--color-text-primary)',
-          marginBottom: 'var(--space-2xs)',
-        }}>
-          {name}
-        </div>
-        <div style={{
-          fontSize: 'var(--text-sm)',
-          color: 'var(--color-text-secondary)',
-          marginBottom: 'var(--space-md)',
-        }}>
-          {description}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-2xs)' }}>
-          <span style={{
-            fontSize: 'var(--text-4xl)',
-            fontWeight: 'var(--weight-bold)',
-            color: 'var(--color-text-primary)',
-          }}>
-            {price}
-          </span>
-          {period && (
-            <span style={{
-              fontSize: 'var(--text-base)',
-              color: 'var(--color-text-tertiary)',
-            }}>
-              {period}
-            </span>
-          )}
-        </div>
-      </div>
-      <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        marginBottom: 'var(--space-lg)',
-      }}>
-        {features.map((feature, i) => (
-          <li
-            key={i}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-sm)',
-              marginBottom: 'var(--space-sm)',
-              fontSize: 'var(--text-sm)',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            <Check style={{ width: '16px', height: '16px', color: 'var(--color-success)', flexShrink: 0 }} />
-            {feature}
-          </li>
-        ))}
-      </ul>
-      <button
-        onClick={onClick}
-        className={highlighted ? 'btn btn-primary' : 'btn btn-secondary'}
-        style={{ width: '100%', justifyContent: 'center' }}
-      >
-        {cta}
-      </button>
     </div>
   );
 }
