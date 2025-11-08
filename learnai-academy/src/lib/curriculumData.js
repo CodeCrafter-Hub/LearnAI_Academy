@@ -667,3 +667,455 @@ export function getSessionDuration(gradeLevel) {
   if (gradeLevel <= 8) return 35;
   return 45;
 }
+
+/**
+ * ENGLISH/WRITING CURRICULUM BY GRADE
+ */
+export const ENGLISH_CURRICULUM = {
+  EARLY_ELEMENTARY: {
+    grades: [0, 1, 2],
+    topics: [
+      {
+        id: 'writing-letters',
+        name: '✏️ Writing Letters',
+        description: 'Learn to write uppercase and lowercase letters!',
+        difficulty: 1,
+        activities: ['letter-tracing', 'letter-formation', 'handwriting-practice'],
+        skills: ['letter formation', 'pencil grip', 'spacing', 'line awareness'],
+        practice: ['name writing', 'simple words', 'letter sounds'],
+      },
+      {
+        id: 'simple-sentences',
+        name: '📝 Making Sentences',
+        description: 'Put words together to make sentences!',
+        difficulty: 2,
+        activities: ['sentence-building', 'word-order', 'capitals-periods'],
+        skills: ['capital letters', 'periods', 'word spacing', 'simple sentences'],
+        visuals: ['✏️', '📝', '💬', '✨', '🌈'],
+      },
+      {
+        id: 'creative-writing-basics',
+        name: '🎨 Creative Writing Fun',
+        description: 'Tell stories and share ideas!',
+        difficulty: 2,
+        activities: ['picture-prompts', 'sentence-starters', 'story-drawing'],
+        skills: ['ideas', 'imagination', 'simple stories', 'describing'],
+        prompts: ['favorite toy', 'my family', 'what I like'],
+      },
+      {
+        id: 'grammar-basics',
+        name: '📚 Grammar Basics',
+        description: 'Learn about naming words and action words!',
+        difficulty: 2,
+        activities: ['noun-identification', 'verb-actions', 'word-sorting'],
+        skills: ['nouns', 'verbs', 'simple grammar', 'parts of speech'],
+        fun: ['action games', 'naming games', 'picture sorting'],
+      },
+    ],
+    learningStyle: 'multisensory',
+    sessionDuration: 15,
+    emphasis: ['drawing', 'oral storytelling', 'letter practice', 'word building'],
+  },
+
+  UPPER_ELEMENTARY: {
+    grades: [3, 4, 5],
+    topics: [
+      {
+        id: 'paragraph-writing',
+        name: '📄 Paragraph Power',
+        description: 'Write organized paragraphs with topic sentences',
+        difficulty: 3,
+        activities: ['paragraph-structure', 'topic-sentences', 'supporting-details'],
+        skills: ['topic sentences', 'supporting details', 'concluding sentences', 'organization'],
+        practice: ['descriptive paragraphs', 'explanatory paragraphs', 'opinion paragraphs'],
+      },
+      {
+        id: 'narrative-writing',
+        name: '📖 Story Writing',
+        description: 'Create engaging stories with characters and plot',
+        difficulty: 4,
+        activities: ['story-planning', 'character-development', 'plot-structure'],
+        skills: ['story elements', 'dialogue', 'descriptive language', 'plot development'],
+        elements: ['beginning-middle-end', 'characters', 'setting', 'problem-solution'],
+      },
+      {
+        id: 'persuasive-writing',
+        name: '💬 Persuasive Writing',
+        description: 'Write to convince and persuade readers',
+        difficulty: 4,
+        activities: ['opinion-writing', 'reason-giving', 'persuasive-techniques'],
+        skills: ['claims', 'reasons', 'evidence', 'persuasive language'],
+        practice: ['opinion essays', 'letters', 'advertisements', 'speeches'],
+      },
+      {
+        id: 'grammar-mechanics',
+        name: '✍️ Grammar & Mechanics',
+        description: 'Master grammar rules and conventions',
+        difficulty: 3,
+        activities: ['grammar-practice', 'editing', 'proofreading'],
+        skills: ['punctuation', 'capitalization', 'parts of speech', 'sentence types'],
+        topics: ['commas', 'quotation marks', 'apostrophes', 'sentence variety'],
+      },
+      {
+        id: 'research-writing',
+        name: '🔍 Research & Reports',
+        description: 'Learn to research and write informational texts',
+        difficulty: 4,
+        activities: ['note-taking', 'research', 'organizing-information'],
+        skills: ['research', 'note-taking', 'citing sources', 'informational writing'],
+        process: ['choose topic', 'research', 'organize', 'write', 'revise'],
+      },
+    ],
+    learningStyle: 'process-oriented',
+    sessionDuration: 25,
+    emphasis: ['writing process', 'revision', 'peer feedback', 'publishing'],
+  },
+
+  MIDDLE_SCHOOL: {
+    grades: [6, 7, 8],
+    topics: [
+      {
+        id: 'essay-writing',
+        name: 'Essay Writing',
+        description: 'Write clear, organized multi-paragraph essays',
+        difficulty: 5,
+        activities: ['thesis-development', 'outlining', 'essay-structure'],
+        skills: ['thesis statements', 'essay organization', 'body paragraphs', 'conclusions'],
+        types: ['expository', 'persuasive', 'analytical', 'compare-contrast'],
+      },
+      {
+        id: 'argumentative-writing',
+        name: 'Argumentative Writing',
+        description: 'Develop and support claims with evidence',
+        difficulty: 6,
+        activities: ['claim-development', 'evidence-selection', 'counterarguments'],
+        skills: ['argumentation', 'evidence', 'reasoning', 'refutation'],
+        components: ['claim', 'reasons', 'evidence', 'counterarguments', 'conclusion'],
+      },
+      {
+        id: 'creative-writing-advanced',
+        name: 'Creative Writing',
+        description: 'Develop voice and style in creative pieces',
+        difficulty: 6,
+        activities: ['style-development', 'voice', 'literary-devices'],
+        skills: ['voice', 'style', 'figurative language', 'imagery', 'symbolism'],
+        genres: ['short stories', 'poetry', 'personal narratives', 'drama'],
+      },
+      {
+        id: 'research-papers',
+        name: 'Research Papers',
+        description: 'Conduct research and write formal papers',
+        difficulty: 6,
+        activities: ['research-methods', 'citation', 'formal-writing'],
+        skills: ['research', 'MLA/APA format', 'citations', 'works cited', 'synthesis'],
+        process: ['topic selection', 'research', 'thesis', 'outline', 'draft', 'cite'],
+      },
+      {
+        id: 'grammar-advanced',
+        name: 'Advanced Grammar',
+        description: 'Master complex grammar and usage',
+        difficulty: 5,
+        activities: ['complex-sentences', 'grammar-mastery', 'style-refinement'],
+        skills: ['complex sentences', 'clauses', 'phrases', 'parallelism', 'active voice'],
+        topics: ['subordination', 'coordination', 'modifiers', 'agreement'],
+      },
+    ],
+    learningStyle: 'analytical',
+    sessionDuration: 35,
+    emphasis: ['revision', 'peer review', 'formal writing', 'research skills'],
+  },
+
+  HIGH_SCHOOL: {
+    grades: [9, 10, 11, 12],
+    topics: [
+      {
+        id: 'analytical-writing',
+        name: 'Analytical Writing',
+        description: 'Analyze literature and write critical essays',
+        difficulty: 7,
+        activities: ['literary-analysis', 'close-reading', 'critical-essays'],
+        skills: ['analysis', 'interpretation', 'textual evidence', 'literary criticism'],
+        focus: ['theme analysis', 'character analysis', 'rhetorical analysis', 'comparative analysis'],
+      },
+      {
+        id: 'research-papers-advanced',
+        name: 'Advanced Research',
+        description: 'Conduct scholarly research and write academic papers',
+        difficulty: 8,
+        activities: ['scholarly-research', 'synthesis', 'academic-writing'],
+        skills: ['research methodology', 'source evaluation', 'synthesis', 'documentation'],
+        rigor: ['primary sources', 'peer-reviewed sources', 'research questions', 'thesis development'],
+      },
+      {
+        id: 'persuasive-rhetoric',
+        name: 'Persuasive Rhetoric',
+        description: 'Master rhetorical strategies and argumentation',
+        difficulty: 7,
+        activities: ['rhetorical-analysis', 'persuasive-strategies', 'argumentation'],
+        skills: ['ethos/pathos/logos', 'rhetorical devices', 'argumentation', 'persuasion'],
+        applications: ['speeches', 'editorials', 'position papers', 'debates'],
+      },
+      {
+        id: 'creative-writing-mastery',
+        name: 'Creative Writing Mastery',
+        description: 'Develop sophisticated creative writing skills',
+        difficulty: 8,
+        activities: ['advanced-craft', 'revision-workshops', 'publication'],
+        skills: ['craft', 'revision', 'voice development', 'genre conventions'],
+        genres: ['fiction', 'poetry', 'creative nonfiction', 'screenwriting'],
+      },
+      {
+        id: 'college-writing',
+        name: 'College Prep Writing',
+        description: 'Prepare for college-level writing demands',
+        difficulty: 8,
+        activities: ['timed-writing', 'college-essays', 'academic-discourse'],
+        skills: ['academic writing', 'timed essays', 'personal statements', 'writing portfolio'],
+        preparation: ['SAT/ACT essays', 'college applications', 'scholarship essays'],
+      },
+    ],
+    learningStyle: 'scholarly',
+    sessionDuration: 45,
+    emphasis: ['critical thinking', 'research', 'revision', 'academic discourse'],
+  },
+};
+
+/**
+ * CODING/PROGRAMMING CURRICULUM BY GRADE
+ */
+export const CODING_CURRICULUM = {
+  EARLY_ELEMENTARY: {
+    grades: [0, 1, 2],
+    topics: [
+      {
+        id: 'sequencing-basics',
+        name: '🎯 Order Matters!',
+        description: 'Learn to put steps in the right order',
+        difficulty: 1,
+        activities: ['sequence-games', 'step-by-step', 'pattern-following'],
+        skills: ['sequencing', 'following directions', 'order', 'patterns'],
+        visuals: ['🔢', '➡️', '✨', '🎨', '🎯'],
+        practice: ['daily routines', 'recipes', 'game rules'],
+      },
+      {
+        id: 'basic-directions',
+        name: '🧭 Giving Directions',
+        description: 'Tell friends how to move and do things!',
+        difficulty: 1,
+        activities: ['direction-games', 'grid-navigation', 'command-following'],
+        skills: ['directions', 'commands', 'navigation', 'spatial reasoning'],
+        fun: ['treasure hunts', 'robot games', 'maze solving'],
+      },
+      {
+        id: 'loops-intro',
+        name: '🔄 Doing Things Again',
+        description: 'Learn to repeat actions with loops!',
+        difficulty: 2,
+        activities: ['repeat-patterns', 'loop-games', 'circle-time'],
+        skills: ['repetition', 'patterns', 'loops', 'counting'],
+        examples: ['songs', 'dances', 'counting', 'patterns'],
+      },
+      {
+        id: 'visual-coding',
+        name: '🎨 Block Coding Fun',
+        description: 'Make code with colorful blocks!',
+        difficulty: 2,
+        activities: ['block-coding', 'scratch-jr', 'visual-programming'],
+        skills: ['block coding', 'drag-and-drop', 'cause-effect', 'problem-solving'],
+        platforms: ['ScratchJr', 'Code.org', 'Blockly'],
+      },
+    ],
+    learningStyle: 'play-based',
+    sessionDuration: 15,
+    emphasis: ['hands-on', 'games', 'unplugged activities', 'visual coding'],
+  },
+
+  UPPER_ELEMENTARY: {
+    grades: [3, 4, 5],
+    topics: [
+      {
+        id: 'scratch-basics',
+        name: '🎮 Scratch Programming',
+        description: 'Create games and animations with Scratch',
+        difficulty: 3,
+        activities: ['scratch-projects', 'animation', 'game-creation'],
+        skills: ['Scratch', 'sprites', 'motion', 'looks', 'sound', 'events'],
+        projects: ['animated stories', 'simple games', 'interactive cards'],
+      },
+      {
+        id: 'loops-conditions',
+        name: '🔄 Loops & Decisions',
+        description: 'Make your code smarter with loops and if-statements',
+        difficulty: 3,
+        activities: ['loop-practice', 'conditional-logic', 'problem-solving'],
+        skills: ['for loops', 'while loops', 'if-else', 'conditions', 'logic'],
+        concepts: ['repetition', 'decision-making', 'flow control'],
+      },
+      {
+        id: 'variables-data',
+        name: '📦 Variables & Data',
+        description: 'Store and use information in your programs',
+        difficulty: 4,
+        activities: ['variable-practice', 'score-keeping', 'data-tracking'],
+        skills: ['variables', 'data types', 'assignment', 'updating values'],
+        uses: ['scores', 'counters', 'timers', 'user input'],
+      },
+      {
+        id: 'game-development',
+        name: '🎮 Game Development',
+        description: 'Design and build your own games',
+        difficulty: 4,
+        activities: ['game-design', 'sprite-creation', 'game-mechanics'],
+        skills: ['game design', 'mechanics', 'levels', 'user interaction'],
+        elements: ['characters', 'obstacles', 'scoring', 'winning/losing'],
+      },
+      {
+        id: 'debugging',
+        name: '🐛 Finding & Fixing Bugs',
+        description: 'Learn to find and fix problems in code',
+        difficulty: 3,
+        activities: ['bug-hunting', 'problem-solving', 'testing'],
+        skills: ['debugging', 'testing', 'problem-solving', 'persistence'],
+        strategies: ['read carefully', 'test often', 'ask for help', 'break it down'],
+      },
+    ],
+    learningStyle: 'project-based',
+    sessionDuration: 30,
+    emphasis: ['creativity', 'projects', 'problem-solving', 'sharing'],
+  },
+
+  MIDDLE_SCHOOL: {
+    grades: [6, 7, 8],
+    topics: [
+      {
+        id: 'python-basics',
+        name: 'Python Fundamentals',
+        description: 'Learn Python programming from scratch',
+        difficulty: 5,
+        activities: ['python-exercises', 'small-programs', 'interactive-programs'],
+        skills: ['Python syntax', 'variables', 'data types', 'operators', 'functions'],
+        concepts: ['print', 'input', 'math', 'strings', 'lists'],
+      },
+      {
+        id: 'functions-parameters',
+        name: 'Functions & Parameters',
+        description: 'Write reusable code with functions',
+        difficulty: 5,
+        activities: ['function-writing', 'parameter-passing', 'return-values'],
+        skills: ['functions', 'parameters', 'return values', 'scope', 'modularity'],
+        practice: ['helper functions', 'calculations', 'text processing'],
+      },
+      {
+        id: 'lists-arrays',
+        name: 'Lists & Data Structures',
+        description: 'Work with collections of data',
+        difficulty: 6,
+        activities: ['list-manipulation', 'data-processing', 'algorithms'],
+        skills: ['lists', 'indexing', 'iteration', 'list methods', 'algorithms'],
+        operations: ['append', 'remove', 'sort', 'search', 'filter'],
+      },
+      {
+        id: 'web-development-intro',
+        name: 'Web Development Basics',
+        description: 'Create web pages with HTML and CSS',
+        difficulty: 5,
+        activities: ['html-practice', 'css-styling', 'webpage-creation'],
+        skills: ['HTML', 'CSS', 'web structure', 'styling', 'layout'],
+        projects: ['personal page', 'hobby site', 'fan page'],
+      },
+      {
+        id: 'app-development',
+        name: 'App Development',
+        description: 'Build mobile apps with visual tools',
+        difficulty: 6,
+        activities: ['app-design', 'interface-building', 'app-logic'],
+        skills: ['UI design', 'app logic', 'user interaction', 'testing'],
+        platforms: ['MIT App Inventor', 'Thunkable'],
+      },
+    ],
+    learningStyle: 'problem-solving',
+    sessionDuration: 40,
+    emphasis: ['text-based coding', 'projects', 'debugging', 'collaboration'],
+  },
+
+  HIGH_SCHOOL: {
+    grades: [9, 10, 11, 12],
+    topics: [
+      {
+        id: 'advanced-python',
+        name: 'Advanced Python',
+        description: 'Master Python programming',
+        difficulty: 7,
+        activities: ['complex-programs', 'data-analysis', 'automation'],
+        skills: ['OOP', 'classes', 'libraries', 'file I/O', 'error handling'],
+        topics: ['object-oriented', 'modules', 'exceptions', 'APIs'],
+      },
+      {
+        id: 'algorithms-ds',
+        name: 'Algorithms & Data Structures',
+        description: 'Study fundamental CS concepts',
+        difficulty: 8,
+        activities: ['algorithm-design', 'complexity-analysis', 'problem-solving'],
+        skills: ['algorithms', 'data structures', 'Big O', 'optimization'],
+        structures: ['stacks', 'queues', 'trees', 'graphs', 'hash tables'],
+      },
+      {
+        id: 'web-development-advanced',
+        name: 'Full-Stack Web Development',
+        description: 'Build complete web applications',
+        difficulty: 8,
+        activities: ['frontend-dev', 'backend-dev', 'database-design'],
+        skills: ['HTML/CSS/JS', 'React', 'Node.js', 'databases', 'deployment'],
+        stack: ['frontend', 'backend', 'database', 'deployment'],
+      },
+      {
+        id: 'mobile-development',
+        name: 'Mobile App Development',
+        description: 'Create professional mobile applications',
+        difficulty: 8,
+        activities: ['app-development', 'ui-ux-design', 'publishing'],
+        skills: ['Swift/Kotlin', 'UI/UX', 'APIs', 'testing', 'deployment'],
+        platforms: ['iOS', 'Android', 'cross-platform'],
+      },
+      {
+        id: 'cs-principles',
+        name: 'Computer Science Principles',
+        description: 'Comprehensive CS concepts (AP prep)',
+        difficulty: 9,
+        activities: ['ap-prep', 'projects', 'creative-development'],
+        skills: ['CS theory', 'algorithms', 'internet', 'data', 'impact'],
+        preparation: ['AP CSP exam', 'portfolio', 'programming fundamentals'],
+      },
+    ],
+    learningStyle: 'professional',
+    sessionDuration: 50,
+    emphasis: ['real-world projects', 'best practices', 'collaboration', 'portfolio building'],
+  },
+};
+
+/**
+ * Update getCurriculumTopics to include all subjects
+ */
+export function getCurriculumTopicsUpdated(gradeLevel, subject) {
+  const curriculumMap = {
+    math: MATH_CURRICULUM,
+    reading: READING_CURRICULUM,
+    science: SCIENCE_CURRICULUM,
+    english: ENGLISH_CURRICULUM,
+    writing: ENGLISH_CURRICULUM,
+    coding: CODING_CURRICULUM,
+    programming: CODING_CURRICULUM,
+  };
+
+  const curriculum = curriculumMap[subject.toLowerCase()];
+  if (!curriculum) return null;
+
+  // Determine grade band
+  let gradeBand;
+  if (gradeLevel <= 2) gradeBand = curriculum.EARLY_ELEMENTARY;
+  else if (gradeLevel <= 5) gradeBand = curriculum.UPPER_ELEMENTARY;
+  else if (gradeLevel <= 8) gradeBand = curriculum.MIDDLE_SCHOOL;
+  else gradeBand = curriculum.HIGH_SCHOOL;
+
+  return gradeBand;
+}
