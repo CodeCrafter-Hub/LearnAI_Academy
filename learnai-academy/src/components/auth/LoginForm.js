@@ -94,7 +94,7 @@ export default function LoginForm() {
       <main style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        minHeight: 'calc(100vh - 80px)',
+        minHeight: 'calc(100vh - 80px - 60px)',
       }}>
         {/* Left Column - Form */}
         <div style={{
@@ -492,6 +492,43 @@ export default function LoginForm() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer style={{
+        borderTop: '1px solid var(--color-border-subtle)',
+        background: 'var(--color-bg-base)',
+        padding: 'var(--space-lg) 0',
+      }}>
+        <div className="container" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 var(--space-xl)',
+          fontSize: 'var(--text-sm)',
+          color: 'var(--color-text-tertiary)',
+        }}>
+          <div>
+            © 2024 LearnAI Academy. All rights reserved.
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--space-lg)' }}>
+            <a href="#" style={{ color: 'var(--color-text-tertiary)', textDecoration: 'none', transition: 'color var(--transition-fast)' }}
+               onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-accent)'}
+               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-tertiary)'}>
+              Terms
+            </a>
+            <a href="#" style={{ color: 'var(--color-text-tertiary)', textDecoration: 'none', transition: 'color var(--transition-fast)' }}
+               onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-accent)'}
+               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-tertiary)'}>
+              Privacy
+            </a>
+            <a href="#" style={{ color: 'var(--color-text-tertiary)', textDecoration: 'none', transition: 'color var(--transition-fast)' }}
+               onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-accent)'}
+               onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-tertiary)'}>
+              Help
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
