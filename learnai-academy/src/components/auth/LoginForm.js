@@ -121,7 +121,7 @@ export default function LoginForm() {
             Sign up
           </a>
         </p>
-      </div>
+      </main>
     </div>
   );
 }
