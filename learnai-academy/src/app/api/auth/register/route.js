@@ -6,7 +6,12 @@ import { z } from 'zod';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string()
+    .min(12, 'Password must be at least 12 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().optional(),
   role: z.enum(['STUDENT', 'PARENT']).default('PARENT'),
@@ -63,15 +68,27 @@ export async function POST(request) {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    return NextResponse.json({
+    // Create response with user data
+    const response = NextResponse.json({
       success: true,
-      token,
+      token, // Still return token for backward compatibility during migration
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
       },
     });
+
+    // Set httpOnly cookie (secure method)
+    response.cookies.set('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Registration error:', error);
     

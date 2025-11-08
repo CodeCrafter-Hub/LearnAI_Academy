@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { getClientIdentifier, rateLimit, addRateLimitHeaders } from '@/middleware/rateLimit';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -11,6 +12,30 @@ const loginSchema = z.object({
 
 export async function POST(request) {
   try {
+    // Apply rate limiting (5 requests per minute for auth endpoints)
+    const identifier = getClientIdentifier(request);
+    const rateLimitResult = await rateLimit(request, identifier, 'auth');
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Too many login attempts. Please try again later.',
+          retryAfter: Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.resetAt.toString(),
+            'Retry-After': Math.ceil(
+              (rateLimitResult.resetAt - Date.now()) / 1000
+            ).toString(),
+          },
+        }
+      );
+    }
+
     // Check if JWT_SECRET is set
     if (!process.env.JWT_SECRET) {
       console.error('JWT_SECRET is not set in environment variables');
@@ -81,9 +106,10 @@ export async function POST(request) {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    return NextResponse.json({
+    // Create response with user data
+    const response = NextResponse.json({
       success: true,
-      token,
+      token, // Still return token for backward compatibility during migration
       user: {
         id: user.id,
         email: user.email,
@@ -96,6 +122,22 @@ export async function POST(request) {
           gradeLevel: s.gradeLevel,
         })),
       },
+    });
+
+    // Set httpOnly cookie (secure method)
+    response.cookies.set('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    // Add rate limit headers
+    return addRateLimitHeaders(response, {
+      'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+      'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+      'X-RateLimit-Reset': rateLimitResult.resetAt.toString(),
     });
   } catch (error) {
     console.error('Login error:', error);
