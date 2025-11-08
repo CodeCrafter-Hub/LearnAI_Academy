@@ -20,12 +20,12 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const subjects = [
-    { id: 'math', name: 'Math', emoji: '🔢' },
-    { id: 'english', name: 'English', emoji: '📚' },
-    { id: 'science', name: 'Science', emoji: '🔬' },
-    { id: 'reading', name: 'Reading', emoji: '📖' },
-    { id: 'writing', name: 'Writing', emoji: '✍️' },
-    { id: 'coding', name: 'Coding', emoji: '💻' },
+    { id: 'math', name: 'Math', icon: '∑' },
+    { id: 'english', name: 'English', icon: 'Aa' },
+    { id: 'science', name: 'Science', icon: '⚗' },
+    { id: 'reading', name: 'Reading', icon: '📕' },
+    { id: 'writing', name: 'Writing', icon: '✎' },
+    { id: 'coding', name: 'Coding', icon: '</>' },
   ];
 
   const toggleSubject = (subjectId) => {
@@ -179,14 +179,42 @@ export default function OnboardingPage() {
                 <button
                   key={subject.id}
                   onClick={() => toggleSubject(subject.id)}
-                  className={`p-6 rounded-xl border-2 transition-all ${
-                    formData.favoriteSubjects.includes(subject.id)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  style={{
+                    padding: 'var(--space-lg)',
+                    borderRadius: 'var(--radius-xl)',
+                    border: formData.favoriteSubjects.includes(subject.id)
+                      ? '2px solid var(--color-accent)'
+                      : '2px solid var(--color-border-subtle)',
+                    background: formData.favoriteSubjects.includes(subject.id)
+                      ? 'var(--color-accent-subtle)'
+                      : 'var(--color-bg-base)',
+                    transition: 'all var(--transition-base)',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!formData.favoriteSubjects.includes(subject.id)) {
+                      e.currentTarget.style.borderColor = 'var(--color-border-muted)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!formData.favoriteSubjects.includes(subject.id)) {
+                      e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+                    }
+                  }}
                 >
-                  <div className="text-4xl mb-2">{subject.emoji}</div>
-                  <div className="font-medium text-gray-800">{subject.name}</div>
+                  <div style={{
+                    fontSize: 'var(--text-4xl)',
+                    marginBottom: 'var(--space-xs)',
+                    color: 'var(--color-text-primary)',
+                  }}>
+                    {subject.icon}
+                  </div>
+                  <div style={{
+                    fontWeight: 'var(--weight-medium)',
+                    color: 'var(--color-text-primary)',
+                  }}>
+                    {subject.name}
+                  </div>
                 </button>
               ))}
             </div>
@@ -196,20 +224,82 @@ export default function OnboardingPage() {
         {/* Step 3: Ready to Learn */}
         {step === 3 && (
           <div className="text-center space-y-6">
-            <div className="text-6xl mb-4">🎉</div>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--color-success-subtle)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginInline: 'auto',
+              marginBottom: 'var(--space-md)',
+            }}>
+              <svg
+                style={{ width: '48px', height: '48px', color: 'var(--color-success)' }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               You're all set!
             </h1>
             <p className="text-gray-600 mb-8">
               Your personalized learning journey is ready to begin.
             </p>
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
-              <h3 className="font-bold text-lg mb-2">What's Next?</h3>
-              <ul className="text-left space-y-2 text-sm opacity-90">
-                <li>✓ Explore subjects and topics</li>
-                <li>✓ Start your first learning session</li>
-                <li>✓ Earn achievements as you learn</li>
-                <li>✓ Track your progress</li>
+            <div style={{
+              background: 'var(--color-accent-subtle)',
+              border: '1px solid var(--color-border-subtle)',
+              borderRadius: 'var(--radius-xl)',
+              padding: 'var(--space-lg)',
+            }}>
+              <h3 style={{
+                fontWeight: 'var(--weight-bold)',
+                fontSize: 'var(--text-lg)',
+                marginBottom: 'var(--space-sm)',
+                color: 'var(--color-text-primary)',
+              }}>
+                What's Next?
+              </h3>
+              <ul style={{
+                textAlign: 'left',
+                listStyle: 'none',
+                padding: 0,
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-text-secondary)',
+              }}>
+                <li style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+                  <svg style={{ width: '16px', height: '16px', color: 'var(--color-success)', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Explore subjects and topics
+                </li>
+                <li style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+                  <svg style={{ width: '16px', height: '16px', color: 'var(--color-success)', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Start your first learning session
+                </li>
+                <li style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+                  <svg style={{ width: '16px', height: '16px', color: 'var(--color-success)', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Earn achievements as you learn
+                </li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+                  <svg style={{ width: '16px', height: '16px', color: 'var(--color-success)', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Track your progress
+                </li>
               </ul>
             </div>
           </div>

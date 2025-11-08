@@ -155,7 +155,7 @@ function LearnPageContent() {
                 fontSize: 'var(--text-sm)',
                 color: 'var(--color-text-secondary)',
               }}>
-                {selectedMode === 'PRACTICE' ? '🎯 Practice Mode' : '💡 Help Mode'}
+                {selectedMode === 'PRACTICE' ? 'Practice Mode' : 'Help Mode'}
               </p>
             </div>
             <button

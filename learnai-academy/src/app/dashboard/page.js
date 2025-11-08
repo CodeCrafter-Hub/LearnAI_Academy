@@ -166,7 +166,7 @@ export default function DashboardPage() {
               <span style={{ fontSize: 'var(--text-xl)', color: 'var(--color-text-tertiary)', marginLeft: 'var(--space-2xs)' }}>days</span>
             </div>
             <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-              Keep the momentum going! 🔥
+              Keep the momentum going!
             </div>
           </div>
 
@@ -210,7 +210,7 @@ export default function DashboardPage() {
               {progress?.summary?.totalPoints?.toLocaleString() || 0}
             </div>
             <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-              Amazing work! ✨
+              Amazing work!
             </div>
           </div>
 
@@ -255,7 +255,7 @@ export default function DashboardPage() {
               <span style={{ fontSize: 'var(--text-xl)', color: 'var(--color-text-tertiary)' }}>/10</span>
             </div>
             <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-              Badges earned 🏆
+              Badges earned
             </div>
           </div>
         </section>
