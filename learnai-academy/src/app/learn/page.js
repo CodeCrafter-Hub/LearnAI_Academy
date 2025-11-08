@@ -109,23 +109,28 @@ function LearnPageContent() {
     return (
       <div className="flex flex-col h-screen bg-gray-50">
         {/* Session Header */}
-        <div className={`${selectedSubject.color} text-white p-4 shadow-md`}>
+        <header className={`${selectedSubject.color} text-white p-4 shadow-md`} role="banner">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold">{selectedTopic.name}</h2>
               <p className="text-sm opacity-90">
-                {selectedMode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'} • {selectedDifficulty}
+                <span aria-label={`${selectedMode === 'PRACTICE' ? 'Practice mode' : 'Help mode'}`}>
+                  {selectedMode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'}
+                </span>
+                {' • '}
+                {selectedDifficulty}
               </p>
             </div>
             <button
               onClick={endSession}
               className="bg-white/20 hover:bg-white/30 rounded-lg px-4 py-2 font-medium transition-colors flex items-center gap-2"
+              aria-label="End current learning session"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
               End Session
             </button>
           </div>
-        </div>
+        </header>
 
         {/* Chat Interface */}
         <div className="flex-1 overflow-hidden">
@@ -139,7 +144,7 @@ function LearnPageContent() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <Header />
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-8" role="main">
         {/* Back Button */}
         <button
           onClick={() => {
@@ -157,15 +162,16 @@ function LearnPageContent() {
             }
           }}
           className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6"
+          aria-label={step === 'subject' ? 'Back to Dashboard' : 'Go back to previous step'}
         >
-          <Home className="w-5 h-5" />
+          <Home className="w-5 h-5" aria-hidden="true" />
           {step === 'subject' ? 'Back to Dashboard' : 'Back'}
         </button>
 
         {/* Subject Selection */}
         {step === 'subject' && (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          <section aria-labelledby="subject-selection-heading">
+            <h1 id="subject-selection-heading" className="text-3xl font-bold text-gray-800 mb-6">
               Choose a Subject
             </h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
