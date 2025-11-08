@@ -33,7 +33,6 @@ jobs:
       - name: Run linter
         working-directory: ./learnai-academy
         run: npm run lint
-        continue-on-error: true
 
       - name: Run tests with coverage
         working-directory: ./learnai-academy
@@ -106,7 +105,7 @@ jobs:
       - name: Run npm audit
         working-directory: ./learnai-academy
         run: npm audit --audit-level=moderate
-        continue-on-error: true
+        continue-on-error: true  # Keep this one as true - vulnerabilities shouldn't block builds
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -144,4 +143,3 @@ jobs:
       - name: Check TypeScript types
         working-directory: ./learnai-academy
         run: npx tsc --noEmit
-        continue-on-error: true

@@ -62,15 +62,53 @@ class GroqClient {
     };
   }
 
+  /**
+   * Retry with exponential backoff
+   * @param {Function} fn - Function to retry
+   * @param {number} maxRetries - Maximum number of retries (default: 3)
+   * @param {number} baseDelay - Base delay in ms (default: 1000)
+   */
+  async _retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+    let lastError;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error;
+
+        // Don't retry on certain errors (validation, auth, etc.)
+        if (error.status === 400 || error.status === 401 || error.status === 403) {
+          throw error;
+        }
+
+        // If this was the last attempt, throw the error
+        if (attempt === maxRetries) {
+          break;
+        }
+
+        // Calculate exponential backoff delay: baseDelay * 2^attempt
+        const delay = baseDelay * Math.pow(2, attempt);
+        console.warn(`Groq API attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    throw lastError;
+  }
+
   async chat(messages, options = {}) {
     const {
       model = this.models.smart,
       temperature = 0.7,
       maxTokens = 1500,
       stream = false,
+      retries = 3, // Allow configurable retries
     } = options;
 
-    try {
+    return this._retryWithBackoff(async () => {
       const client = this.getClient();
       const startTime = Date.now();
 
@@ -94,10 +132,7 @@ class GroqClient {
         model,
         responseTime,
       };
-    } catch (error) {
-      console.error('Groq API Error:', error);
-      throw new Error(`AI service error: ${error.message}`);
-    }
+    }, retries);
   }
 
   async streamChat(messages, options = {}) {
