@@ -1,0 +1,147 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, claude/**]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: learnai-academy/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./learnai-academy
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ./learnai-academy
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Run tests with coverage
+        working-directory: ./learnai-academy
+        run: npm run test:ci
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test-secret-key-minimum-32-characters-long-for-testing
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: matrix.node-version == '20.x'
+        with:
+          files: ./learnai-academy/coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  build:
+    name: Build Application
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: learnai-academy/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./learnai-academy
+        run: npm ci
+
+      - name: Generate Prisma Client
+        working-directory: ./learnai-academy
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/learnai_test
+
+      - name: Build application
+        working-directory: ./learnai-academy
+        run: npm run build
+        env:
+          NODE_ENV: production
+          JWT_SECRET: build-time-secret-key-minimum-32-characters
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/learnai_test
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
+      - name: Check build artifacts
+        working-directory: ./learnai-academy
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build failed: .next directory not found"
+            exit 1
+          fi
+          echo "Build successful!"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run npm audit
+        working-directory: ./learnai-academy
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './learnai-academy'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: learnai-academy/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./learnai-academy
+        run: npm ci
+
+      - name: Check TypeScript types
+        working-directory: ./learnai-academy
+        run: npx tsc --noEmit
+        continue-on-error: true
