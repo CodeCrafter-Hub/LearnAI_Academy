@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 export default function ChatInterface({ sessionId, onSessionEnd }) {
+  const { addToast } = useToast();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,11 +42,8 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
 
   const loadMessages = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/sessions/${sessionId}/messages`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -53,6 +52,7 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
       }
     } catch (error) {
       console.error('Error loading messages:', error);
+      addToast('Failed to load messages. Please refresh.', 'error');
     }
   };
 
@@ -70,13 +70,12 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/sessions/${sessionId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ content: input }),
       });
 
@@ -108,7 +107,7 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert('Voice input is not supported in your browser.');
+      addToast('Voice input is not supported in your browser.', 'warning');
       return;
     }
 

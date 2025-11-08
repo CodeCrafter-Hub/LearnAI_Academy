@@ -5,12 +5,16 @@ import { useRouter, useParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import QuestionCard from '@/components/assessment/QuestionCard';
 import Loading from '@/components/ui/Loading';
-import { Clock, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Clock, CheckCircle, ArrowRight, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/Toast';
 
 export default function TakeAssessmentPage() {
   const router = useRouter();
   const params = useParams();
   const assessmentId = params.id;
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addToast } = useToast();
 
   const [assessment, setAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -18,10 +22,17 @@ export default function TakeAssessmentPage() {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   useEffect(() => {
-    loadAssessment();
-  }, [assessmentId]);
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else {
+        loadAssessment();
+      }
+    }
+  }, [authLoading, isAuthenticated, assessmentId]);
 
   useEffect(() => {
     if (assessment?.timeLimitMinutes && timeRemaining !== null) {
@@ -41,9 +52,8 @@ export default function TakeAssessmentPage() {
 
   const loadAssessment = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/assessments/${assessmentId}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -52,13 +62,13 @@ export default function TakeAssessmentPage() {
 
       const data = await response.json();
       setAssessment(data.assessment);
-      
+
       if (data.assessment.timeLimitMinutes) {
         setTimeRemaining(data.assessment.timeLimitMinutes * 60);
       }
     } catch (error) {
       console.error('Error loading assessment:', error);
-      alert('Failed to load assessment');
+      addToast('Failed to load assessment. Returning to assessments.', 'error');
       router.push('/assessments');
     } finally {
       setIsLoading(false);
@@ -84,16 +94,16 @@ export default function TakeAssessmentPage() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!confirm('Are you sure you want to submit your assessment? You cannot change your answers after submitting.')) {
-      return;
-    }
+  const handleSubmitClick = () => {
+    setShowSubmitModal(true);
+  };
 
+  const handleSubmit = async () => {
+    setShowSubmitModal(false);
     setIsSubmitting(true);
+
     try {
-      const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      const studentId = userData?.students?.[0]?.id;
+      const studentId = user?.students?.[0]?.id;
 
       if (!studentId) {
         throw new Error('Student ID not found');
@@ -108,9 +118,9 @@ export default function TakeAssessmentPage() {
       const response = await fetch(`/api/assessments/${assessmentId}/grade`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           studentId: studentId,
           answers: answersArray,
@@ -123,10 +133,11 @@ export default function TakeAssessmentPage() {
       }
 
       const data = await response.json();
+      addToast('Assessment submitted successfully!', 'success');
       router.push(`/assessments/${assessmentId}/results?score=${data.result.score}&total=${data.result.totalQuestions}`);
     } catch (error) {
       console.error('Error submitting assessment:', error);
-      alert(`Failed to submit assessment: ${error.message}`);
+      addToast(`Failed to submit assessment: ${error.message}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -221,7 +232,7 @@ export default function TakeAssessmentPage() {
               </button>
             ) : (
               <button
-                onClick={handleSubmit}
+                onClick={handleSubmitClick}
                 disabled={isSubmitting}
                 className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
               >
@@ -232,6 +243,45 @@ export default function TakeAssessmentPage() {
           </div>
         </div>
       </div>
+
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Submit Assessment?
+                </h3>
+                <p className="text-gray-600">
+                  Are you sure you want to submit your assessment? You cannot change your answers after submitting.
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  You have answered <span className="font-semibold">{answeredCount}</span> out of <span className="font-semibold">{questions.length}</span> questions.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowSubmitModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
