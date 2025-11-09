@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
 import Header from '@/components/layout/Header';
+import AdaptiveSidebar from '@/components/layout/AdaptiveSidebar';
 import ChatInterface from '@/components/learning/ChatInterface';
 import AdaptiveClassroom from '@/components/learning/AdaptiveClassroom';
 import BreakReminder from '@/components/study/BreakReminder';
@@ -34,6 +35,7 @@ function LearnPageContent() {
   const [requestedGrade, setRequestedGrade] = useState(null);
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [focusModeEnabled, setFocusModeEnabled] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!authLoading) {
@@ -237,11 +239,25 @@ function LearnPageContent() {
   }
 
   // Selection Flow View
-  return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-      <Header />
+  const gradeLevel = user?.students?.[0]?.gradeLevel || 5;
+  const isSelectionPhase = step !== 'session';
 
-      <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)', display: 'flex' }}>
+      {/* Adaptive Sidebar - Only show during selection phase */}
+      {isSelectionPhase && (
+        <AdaptiveSidebar
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          gradeLevel={gradeLevel}
+          showDuringLearning={false}
+        />
+      )}
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Header />
+
+        <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)', flex: 1 }}>
         {/* Breadcrumb Navigation */}
         <nav style={{ marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button
@@ -386,7 +402,8 @@ function LearnPageContent() {
             <LoadingSpinner message="Starting your session..." />
           </div>
         )}
-      </main>
+        </main>
+      </div>
 
       {/* Password Prompt Modal */}
       {showPasswordPrompt && requestedGrade !== null && (
