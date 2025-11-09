@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
+// Force dynamic rendering - uses database and cookies
+export const dynamic = 'force-dynamic';
+
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string()
