@@ -72,12 +72,21 @@ export async function GET(request) {
       );
     }
 
-    // Get recommendations
-    const recommendations = await recommendationEngine.getRecommendations(studentId, {
-      subjectId: subjectId || null,
-      limit,
-      includePrerequisites,
-    });
+    // Get recommendations - handle gracefully if engine fails
+    let recommendations;
+    try {
+      recommendations = await recommendationEngine.getRecommendations(studentId, {
+        subjectId: subjectId || null,
+        limit,
+        includePrerequisites,
+      });
+    } catch (recError) {
+      console.warn('Recommendation engine failed, returning empty recommendations:', recError);
+      recommendations = {
+        recommendations: [],
+        learningPath: [],
+      };
+    }
 
     return NextResponse.json({
       success: true,
