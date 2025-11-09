@@ -21,9 +21,9 @@ async function main() {
       update: {},
       create: {
         email: 'admin@test.com',
-        passwordHash,
+        password_hash: passwordHash,
         role: 'ADMIN',
-        subscriptionTier: 'PREMIUM',
+        is_admin: true,
       },
     });
 
@@ -35,9 +35,8 @@ async function main() {
       update: {},
       create: {
         email: 'parent@test.com',
-        passwordHash,
+        password_hash: passwordHash,
         role: 'PARENT',
-        subscriptionTier: 'FAMILY',
       },
     });
 
@@ -69,9 +68,8 @@ async function main() {
         update: {},
         create: {
           email: `grade${grade.level}@test.com`,
-          passwordHash,
+          password_hash: passwordHash,
           role: 'STUDENT',
-          subscriptionTier: 'FREE',
         },
       });
 
@@ -111,9 +109,8 @@ async function main() {
       update: {},
       create: {
         email: 'test@learnai.com',
-        passwordHash,
+        password_hash: passwordHash,
         role: 'STUDENT',
-        subscriptionTier: 'PREMIUM',
       },
     });
 
