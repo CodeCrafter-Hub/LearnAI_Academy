@@ -13,7 +13,10 @@ import './globals.css';
 
 export const metadata = {
   title: "LearnAI Academy",
-  description: "AI-powered K-12 tutoring platform with personalized learning experiences."
+  description: "AI-powered K-12 tutoring platform with personalized learning experiences.",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({ children }) {
