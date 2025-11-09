@@ -9,8 +9,24 @@ import { ArrowRight, GraduationCap, Sparkles } from 'lucide-react';
 export default function OnboardingPage() {
   const router = useRouter();
   const { addToast } = useToast();
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, isLoading: authLoading } = useAuth();
   const [step, setStep] = useState(1);
+
+  // Redirect admins and users who already have student profiles
+  useEffect(() => {
+    if (!authLoading && user) {
+      // Admins don't need onboarding
+      if (user.role === 'ADMIN' || user.is_admin) {
+        router.push('/dashboard');
+        return;
+      }
+      // If user already has a student profile, skip onboarding
+      if (user.students && user.students.length > 0) {
+        router.push('/dashboard');
+        return;
+      }
+    }
+  }, [user, authLoading, router]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
