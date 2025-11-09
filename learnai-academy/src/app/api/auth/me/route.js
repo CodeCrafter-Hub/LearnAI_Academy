@@ -17,7 +17,7 @@ export async function GET(request) {
 
     if (!tokenData) {
       return NextResponse.json(
-        { error: 'Not authenticated' },
+        { error: 'Not authenticated', message: 'No authentication token provided' },
         { status: 401 }
       );
     }
