@@ -69,12 +69,13 @@ export default function DashboardPage() {
       }
 
       // Load progress
+      let progressData = null;
       try {
         const progressRes = await fetch(`/api/students/${studentId}/progress`, {
           credentials: 'include',
         });
         if (progressRes.ok) {
-          const progressData = await progressRes.json();
+          progressData = await progressRes.json();
           setProgress(progressData);
         }
       } catch (progressError) {
@@ -83,7 +84,7 @@ export default function DashboardPage() {
       }
 
       // Prepare chart data from recent sessions
-      if (progressData.recentSessions && progressData.recentSessions.length > 0) {
+      if (progressData && progressData.recentSessions && progressData.recentSessions.length > 0) {
         const chartPoints = progressData.recentSessions
           .slice(-7)
           .map((session, index) => ({
@@ -94,7 +95,7 @@ export default function DashboardPage() {
       }
 
       // Check for streak milestones
-      const currentStreak = progressData.summary?.currentStreak || 0;
+      const currentStreak = progressData?.summary?.currentStreak || 0;
       if (currentStreak > 0 && currentStreak % 7 === 0) {
         notifyStreak(currentStreak);
       }
