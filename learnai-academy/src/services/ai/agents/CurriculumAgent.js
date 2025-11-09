@@ -74,16 +74,34 @@ Create a comprehensive lesson plan with:
 
 Format the response as structured JSON with clear sections.`;
 
-    const response = await groqClient.chat([
-      { role: 'system', content: prompt },
-      { role: 'user', content: `Generate a complete lesson plan for ${topic}.` },
-    ], {
-      model: groqClient.models.smart,
-      temperature: 0.3, // Lower temperature for more structured output
-      maxTokens: 3000,
-    });
+        const response = await groqClient.chat([
+          { role: 'system', content: prompt },
+          { role: 'user', content: `Generate a complete lesson plan for ${topic}.` },
+        ], {
+          model: groqClient.models.smart,
+          temperature: 0.3, // Lower temperature for more structured output
+          maxTokens: 3000,
+        });
 
-    return this.parseLessonPlan(response.content);
+        const result = this.parseLessonPlan(response.content);
+        
+        // Cache the result if topicId is provided
+        if (useCache && topicId) {
+          await curriculumCache.cacheContent(topicId, gradeLevel, 'lessonPlan', result, options);
+        }
+        
+        return result;
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxRetries - 1) {
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        }
+      }
+    }
+    
+    // If all retries failed, throw the last error
+    throw lastError || new Error('Failed to generate lesson plan after retries');
   }
 
   /**
@@ -131,16 +149,34 @@ Format as JSON array with these fields:
 - difficulty: "${difficulty}"
 - gradeLevel: ${gradeLevel}`;
 
-    const response = await groqClient.chat([
-      { role: 'system', content: prompt },
-      { role: 'user', content: `Generate ${count} practice problems.` },
-    ], {
-      model: groqClient.models.smart,
-      temperature: 0.4,
-      maxTokens: 4000,
-    });
+        const response = await groqClient.chat([
+          { role: 'system', content: prompt },
+          { role: 'user', content: `Generate ${count} practice problems.` },
+        ], {
+          model: groqClient.models.smart,
+          temperature: 0.4,
+          maxTokens: 4000,
+        });
 
-    return this.parseProblems(response.content);
+        const result = this.parseProblems(response.content);
+        
+        // Cache the result if topicId is provided
+        if (useCache && topicId) {
+          await curriculumCache.cacheContent(topicId, gradeLevel, 'practiceProblems', result, { difficulty, count });
+        }
+        
+        return result;
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxRetries - 1) {
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        }
+      }
+    }
+    
+    // If all retries failed, throw the last error
+    throw lastError || new Error('Failed to generate practice problems after retries');
   }
 
   /**

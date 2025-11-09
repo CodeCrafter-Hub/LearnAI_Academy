@@ -3,7 +3,15 @@ import { withAuthAndErrorHandler } from '@/middleware/errorHandler';
 import GamificationManager from '@/lib/gamification';
 import prisma from '@/lib/prisma';
 
-const gamificationManager = new GamificationManager();
+// Lazy initialization to avoid localStorage on server
+function getGamificationManager() {
+  if (typeof window === 'undefined') {
+    return {
+      getLeaderboard: () => [],
+    };
+  }
+  return new GamificationManager();
+}
 
 /**
  * GET /api/gamification/leaderboard

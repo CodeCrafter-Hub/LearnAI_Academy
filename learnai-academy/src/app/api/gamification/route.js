@@ -2,8 +2,20 @@ import { NextResponse } from 'next/server';
 import { withAuthAndErrorHandler } from '@/middleware/errorHandler';
 import GamificationManager from '@/lib/gamification';
 
-// Initialize gamification manager
-const gamificationManager = new GamificationManager();
+// Lazy initialization to avoid localStorage on server
+function getGamificationManager() {
+  if (typeof window === 'undefined') {
+    // Server-side: return a mock or use database-based service
+    return {
+      initializePlayer: () => ({}),
+      getPlayerProfile: () => ({ points: 0, level: 1, badges: [] }),
+      getBadgeShowcase: () => [],
+      createDailyChallenge: () => ({}),
+    };
+  }
+  // Client-side: use localStorage-based manager
+  return new GamificationManager();
+}
 
 /**
  * GET /api/gamification
@@ -11,6 +23,7 @@ const gamificationManager = new GamificationManager();
  */
 export const GET = withAuthAndErrorHandler(async (request, { user }) => {
   const studentId = user.userId;
+  const gamificationManager = getGamificationManager();
 
   // Initialize player if doesn't exist
   const player = gamificationManager.initializePlayer(studentId, {

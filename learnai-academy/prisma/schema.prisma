@@ -45,6 +45,8 @@ model Student {
   dailyActivity     DailyActivity[]
   assessmentResults AssessmentResult[]
   lessons           Lesson[]
+  conceptReviews    ConceptReview[]
+  formativeAttempts FormativeAttempt[]
 
   @@index([userId])
   @@index([parentId])

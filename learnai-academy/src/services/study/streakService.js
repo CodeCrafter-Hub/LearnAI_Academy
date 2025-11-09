@@ -210,7 +210,7 @@ class StreakService {
 
       // Send parent notification (async, don't wait)
       try {
-        const { parentNotificationService } = await import('../../notifications/parentNotificationService.js');
+        const { parentNotificationService } = await import('../notifications/parentNotificationService.js');
         parentNotificationService.sendStreakMilestoneNotification(studentId, milestone).catch(err => {
           logError('Error sending streak milestone notification', err);
         });

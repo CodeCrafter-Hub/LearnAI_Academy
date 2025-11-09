@@ -156,8 +156,8 @@ export default function ClassroomEvaluationResults({ evaluation, onApplyRecommen
       <div className="surface-elevated p-6 rounded-xl shadow-md">
         <h3 className="text-xl font-bold text-gray-800 mb-4">Detailed Evaluations</h3>
         <div className="space-y-3">
-          {Object.entries(evaluations).map(([key, eval]) => {
-            const badge = getScoreBadge(eval.score || 0);
+          {Object.entries(evaluations).map(([key, evaluation]) => {
+            const badge = getScoreBadge(evaluation.score || 0);
             const isExpanded = expandedSection === key;
 
             return (
@@ -174,14 +174,14 @@ export default function ClassroomEvaluationResults({ evaluation, onApplyRecommen
                       <h4 className="font-semibold text-gray-800 capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </h4>
-                      {eval.framework && (
-                        <p className="text-xs text-gray-500">{eval.framework}</p>
+                      {evaluation.framework && (
+                        <p className="text-xs text-gray-500">{evaluation.framework}</p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className={`text-lg font-bold ${getScoreColor(eval.score || 0)}`}>
-                      {Math.round((eval.score || 0) * 100)}%
+                    <span className={`text-lg font-bold ${getScoreColor(evaluation.score || 0)}`}>
+                      {Math.round((evaluation.score || 0) * 100)}%
                     </span>
                     <svg
                       className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -197,35 +197,35 @@ export default function ClassroomEvaluationResults({ evaluation, onApplyRecommen
                 {isExpanded && (
                   <div className="p-4 bg-gray-50 border-t border-gray-200">
                     <div className="space-y-4">
-                      {eval.recommendations && eval.recommendations.length > 0 && (
+                      {evaluation.recommendations && evaluation.recommendations.length > 0 && (
                         <div>
                           <h5 className="font-semibold text-gray-700 mb-2">Recommendations:</h5>
                           <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-                            {eval.recommendations.map((rec, index) => (
+                            {evaluation.recommendations.map((rec, index) => (
                               <li key={index}>{rec}</li>
                             ))}
                           </ul>
                         </div>
                       )}
 
-                      {eval.issues && eval.issues.length > 0 && (
+                      {evaluation.issues && evaluation.issues.length > 0 && (
                         <div>
                           <h5 className="font-semibold text-red-700 mb-2 flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4" />
                             Issues:
                           </h5>
                           <ul className="list-disc list-inside space-y-1 text-sm text-red-600">
-                            {eval.issues.map((issue, index) => (
+                            {evaluation.issues.map((issue, index) => (
                               <li key={index}>{issue}</li>
                             ))}
                           </ul>
                         </div>
                       )}
 
-                      {eval.passed !== undefined && (
+                      {evaluation.passed !== undefined && (
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-700">Status:</span>
-                          {eval.passed ? (
+                          {evaluation.passed ? (
                             <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm font-medium">
                               Passed
                             </span>

@@ -7,9 +7,6 @@ const nextConfig = {
   images: {
     domains: ["localhost"],
   },
-  experimental: {
-    serverActions: true,
-  },
   // Security headers and Service Worker configuration
   async headers() {
     return [

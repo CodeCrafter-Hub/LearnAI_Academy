@@ -24,17 +24,17 @@ class SpacedRepetitionService {
    */
   calculateNextReview(reviewHistory, quality) {
     // Quality scale: 0 (complete blackout) to 5 (perfect recall)
-    const quality = Math.max(0, Math.min(5, quality));
+    const qualityValue = Math.max(0, Math.min(5, quality));
 
     let easeFactor = reviewHistory.easeFactor || 2.5;
     let interval = reviewHistory.interval || 1;
     let repetitions = reviewHistory.repetitions || 0;
 
     // Update ease factor based on quality
-    easeFactor = this.updateEaseFactor(easeFactor, quality);
+    easeFactor = this.updateEaseFactor(easeFactor, qualityValue);
 
     // Calculate new interval
-    if (quality < 3) {
+    if (qualityValue < 3) {
       // If quality is low, restart
       interval = 1;
       repetitions = 0;

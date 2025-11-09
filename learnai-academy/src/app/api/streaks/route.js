@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { withAuthAndErrorHandler } from '@/middleware/errorHandler';
-import { StreakManager } from '@/lib/studyStreaks';
+import { StreakTracker } from '@/lib/studyStreaks';
+import { streakService } from '@/services/study/streakService';
 
-// Initialize streak manager
-const streakManager = new StreakManager();
+// Use the service instead of direct instantiation (avoids localStorage on server)
 
 /**
  * GET /api/streaks
@@ -12,14 +12,10 @@ const streakManager = new StreakManager();
 export const GET = withAuthAndErrorHandler(async (request, { user }) => {
   const studentId = user.userId;
 
-  // Get streak data
-  const streakData = streakManager.getStreak(studentId);
-
-  // Get streak history
-  const history = streakManager.getStreakHistory(studentId, 30); // Last 30 days
-
-  // Get milestones
-  const milestones = streakManager.getStreakMilestones(studentId);
+  // Get streak data using the service (uses database, not localStorage)
+  const streakData = await streakService.getCurrentStreak(studentId);
+  const history = await streakService.getStreakHistory(studentId, 30);
+  const milestones = await streakService.getStreakMilestones(studentId);
 
   return NextResponse.json({
     current: streakData,
@@ -37,8 +33,8 @@ export const POST = withAuthAndErrorHandler(async (request, { user }) => {
   const { activityType, duration, subject } = body;
   const studentId = user.userId;
 
-  // Record activity
-  const result = streakManager.recordActivity(studentId, {
+  // Record activity using the service
+  const result = await streakService.recordActivity(studentId, {
     type: activityType || 'study',
     duration: duration || 0,
     subject: subject || 'general',

@@ -107,19 +107,27 @@ class PresentationGeneratorService {
 LESSON: ${lessonPlan.name}
 OBJECTIVES: ${JSON.stringify(objectives)}
 
+IMPORTANT DESIGN RULES:
+- Follow the 6x6 rule: Maximum 6 words per line, 6 lines per slide
+- One idea per slide - focus on single concept
+- Minimal text - let visuals tell the story
+- High contrast - text must be readable
+- Age-appropriate fonts - larger for younger students
+
 Create ${totalSlides} slides that cover:
-1. Title slide with lesson name
-2. Learning objectives
-3. Key concepts (from lesson structure)
-4. Examples and illustrations
-5. Practice problems or activities
-6. Summary and review
+1. Title slide with engaging hook (story, question, or visual)
+2. Learning objectives (clear and simple)
+3. Key concepts (one concept per slide)
+4. Examples and illustrations (visual-heavy)
+5. Practice problems or activities (interactive)
+6. Summary and review (key takeaways)
 
 For each slide, provide:
-- title: string
-- content: string (main text)
-- visualDescription: string (what visual should be shown)
-- notes: string (speaker notes)
+- title: string (short, clear)
+- content: string (main text - MAX 6 lines, 6 words per line)
+- visualDescription: string (detailed description of visual)
+- notes: string (speaker notes for teacher)
+- keyPoint: boolean (is this a key point to highlight?)
 
 Format as JSON array.`;
 

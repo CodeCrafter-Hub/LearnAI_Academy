@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+import { NextResponse } from 'next/server';
 
 /**
  * OpenAPI/Swagger Documentation

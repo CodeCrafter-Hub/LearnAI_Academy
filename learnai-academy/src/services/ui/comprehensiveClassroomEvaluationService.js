@@ -1208,7 +1208,7 @@ Format as JSON.`;
     
     // Find lowest scoring areas
     const scores = Object.entries(evaluations)
-      .map(([key, eval]) => ({ key, score: eval.score || 0 }))
+      .map(([key, evaluation]) => ({ key, score: evaluation.score || 0 }))
       .sort((a, b) => a.score - b.score);
     
     // Top 3 priorities

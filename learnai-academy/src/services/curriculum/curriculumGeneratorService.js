@@ -289,7 +289,7 @@ class CurriculumGeneratorService {
   }
 
   /**
-   * Create formal lesson structure
+   * Create formal lesson structure with I do, We do, You do methodology
    * @param {Object} lessonPlanData - Generated lesson plan data
    * @param {number} durationMinutes - Total duration
    * @returns {Object} Structured lesson format
@@ -302,32 +302,67 @@ class CurriculumGeneratorService {
     const assessmentMinutes = Math.max(3, Math.round(durationMinutes * 0.1));
     const closureMinutes = Math.max(2, durationMinutes - warmUpMinutes - instructionMinutes - practiceMinutes - assessmentMinutes);
 
+    // Split instruction into I do, We do, You do (gradual release of responsibility)
+    const iDoMinutes = Math.round(instructionMinutes * 0.4); // 40% - Teacher demonstrates
+    const weDoMinutes = Math.round(instructionMinutes * 0.35); // 35% - Guided practice
+    const youDoMinutes = Math.round(instructionMinutes * 0.25); // 25% - Independent practice
+
     return {
       warmUp: {
         duration: warmUpMinutes,
         activity: lessonPlanData.warmUp || 'Review previous concepts and engage students',
         content: lessonPlanData.warmUpContent || null,
+        hook: lessonPlanData.hook || null, // Engaging opening (story, question, visual)
       },
       instruction: {
         duration: instructionMinutes,
         presentation: lessonPlanData.instruction || 'Main concept explanation',
         content: lessonPlanData.keyConcepts || lessonPlanData.instructionContent || null,
         teachingAids: lessonPlanData.materials || [],
+        prerequisites: lessonPlanData.prerequisites || [], // For pre-training
+        // I do, We do, You do methodology
+        iDo: {
+          duration: iDoMinutes,
+          description: 'Teacher demonstrates - Watch and learn',
+          video: lessonPlanData.demonstrationVideo || null,
+          thinkAloud: lessonPlanData.thinkAloud || 'Step-by-step explanation',
+          examples: lessonPlanData.demonstrationExamples || [],
+          keyPoints: lessonPlanData.keyPoints || [],
+        },
+        weDo: {
+          duration: weDoMinutes,
+          description: 'Guided practice - Let\'s work together',
+          activities: lessonPlanData.guidedPractice || [],
+          scaffolding: lessonPlanData.scaffolding || 'Hints and support provided',
+          feedback: 'Immediate correction and encouragement',
+        },
+        youDo: {
+          duration: youDoMinutes,
+          description: 'Independent practice - Try it yourself',
+          activities: lessonPlanData.independentPractice || [],
+          support: 'Minimal hints available',
+          checkForUnderstanding: lessonPlanData.checkForUnderstanding || null,
+        },
       },
       practice: {
         duration: practiceMinutes,
         activities: lessonPlanData.practice || lessonPlanData.activities || [],
         problems: lessonPlanData.practiceProblems || [],
+        variety: lessonPlanData.activityVariety || 'mixed', // mixed, games, problems, projects
+        engagementTechnique: lessonPlanData.engagementTechnique || null, // think-pair-share, gallery-walk, jigsaw, role-play, problem-based
+        engagementContent: lessonPlanData.engagementContent || null, // Content for engagement technique
       },
       assessment: {
         duration: assessmentMinutes,
         quiz: lessonPlanData.assessment || lessonPlanData.quiz || null,
         questions: lessonPlanData.assessmentQuestions || [],
+        formative: true, // Formative assessment
       },
       closure: {
         duration: closureMinutes,
         activity: lessonPlanData.closure || 'Review key concepts and preview next lesson',
         summary: lessonPlanData.summary || null,
+        celebration: lessonPlanData.celebration || null, // Recognize achievement
       },
     };
   }

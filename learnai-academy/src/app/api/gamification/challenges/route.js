@@ -2,7 +2,16 @@ import { NextResponse } from 'next/server';
 import { withAuthAndErrorHandler } from '@/middleware/errorHandler';
 import GamificationManager from '@/lib/gamification';
 
-const gamificationManager = new GamificationManager();
+// Lazy initialization to avoid localStorage on server
+function getGamificationManager() {
+  if (typeof window === 'undefined') {
+    return {
+      initializePlayer: () => ({}),
+      createDailyChallenge: () => ({}),
+    };
+  }
+  return new GamificationManager();
+}
 
 /**
  * GET /api/gamification/challenges
@@ -10,6 +19,7 @@ const gamificationManager = new GamificationManager();
  */
 export const GET = withAuthAndErrorHandler(async (request, { user }) => {
   const studentId = user.userId;
+  const gamificationManager = getGamificationManager();
 
   // Initialize player if needed
   gamificationManager.initializePlayer(studentId, {
