@@ -16,6 +16,7 @@ import ModeSelector from '@/components/learning/ModeSelector';
 import DifficultySelector from '@/components/learning/DifficultySelector';
 import EnhancedProgressIndicator from '@/components/learning/EnhancedProgressIndicator';
 import PageTransition from '@/components/learning/PageTransition';
+import EnhancedSessionHeader from '@/components/learning/EnhancedSessionHeader';
 import GradePasswordPrompt from '@/components/learning/GradePasswordPrompt';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { ArrowLeft, X, TrendingUp } from 'lucide-react';
@@ -180,51 +181,17 @@ function LearnPageContent() {
             />
           )}
 
-          {/* Session Header - Glassy */}
-          <div className="glass" style={{
-            padding: 'var(--space-md)',
-            borderBottom: '1px solid var(--color-border-subtle)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 'var(--z-sticky)',
-          }}>
-            <div className="container" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
-              <div>
-                <h2 style={{
-                  fontSize: 'var(--text-xl)',
-                  fontWeight: 'var(--weight-semibold)',
-                  color: 'var(--color-text-primary)',
-                  marginBottom: 'var(--space-3xs)',
-                }}>
-                  {selectedTopic.name}
-                </h2>
-                <p style={{
-                  fontSize: 'var(--text-sm)',
-                  color: 'var(--color-text-secondary)',
-                }}>
-                  {selectedMode === 'PRACTICE' ? 'Practice Mode' : 'Help Mode'}
-                </p>
-              </div>
-              <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
-                <FocusModeToggle 
-                  enabled={focusModeEnabled} 
-                  onToggle={() => setFocusModeEnabled(!focusModeEnabled)} 
-                />
-                <button
-                  onClick={endSession}
-                  className="btn btn-secondary"
-                  style={{ gap: 'var(--space-2xs)' }}
-                >
-                  <X className="w-4 h-4" />
-                  End Session
-                </button>
-              </div>
-            </div>
-          </div>
+          {/* Enhanced Session Header */}
+          <EnhancedSessionHeader
+            topicName={selectedTopic.name}
+            mode={selectedMode}
+            subjectName={selectedSubject?.name}
+            gradeLevel={user?.students?.[0]?.gradeLevel || 5}
+            onEndSession={endSession}
+            onToggleFocus={() => setFocusModeEnabled(!focusModeEnabled)}
+            focusModeEnabled={focusModeEnabled}
+            sessionStartTime={sessionStartTime}
+          />
 
           {/* Adaptive Classroom */}
           <div style={{ flex: 1, overflow: 'hidden' }}>
