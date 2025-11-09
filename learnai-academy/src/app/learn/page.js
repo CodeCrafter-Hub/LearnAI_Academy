@@ -390,7 +390,7 @@ function LearnPageContent() {
             <p className="text-gray-600">Starting your session...</p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

@@ -154,7 +154,7 @@ export default function DashboardPage() {
             icon={Trophy}
             color="bg-gradient-to-br from-blue-500 to-cyan-500"
           />
-        </div>
+        </section>
 
         {/* Subjects Grid */}
         <section className="mb-8 animate-fadeIn" aria-labelledby="subjects-heading">
@@ -216,7 +216,7 @@ export default function DashboardPage() {
               <EmptyRecommendations />
             </div>
           )}
-        </div>
+        </section>
 
         {/* Recent Activity */}
         {progress?.recentSessions && progress.recentSessions.length > 0 && (
@@ -250,7 +250,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Quick Actions */}
