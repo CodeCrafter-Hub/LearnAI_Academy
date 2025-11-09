@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "generate:jwt-secret": "node scripts/generate-jwt-secret.js",
     "test:accounts": "node prisma/createTestAccounts.js",
     "dev": "next dev",
     "build": "prisma generate && next build",
