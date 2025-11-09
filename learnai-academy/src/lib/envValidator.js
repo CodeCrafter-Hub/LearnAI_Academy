@@ -37,16 +37,20 @@ const envSchema = z.object({
       message: 'REDIS_URL must be a valid Redis connection string',
     }),
 
-  // External APIs (Optional in development)
+  // AI Provider API Keys (At least one required in production)
   GROQ_API_KEY: z.string().optional().describe('Groq AI API key'),
+  OPENAI_API_KEY: z.string().optional().describe('OpenAI API key'),
+  GEMINI_API_KEY: z.string().optional().describe('Google Gemini API key'),
+  KIMI_API_KEY: z.string().optional().describe('Kimi (Moonshot AI) API key'),
 
   // Application Settings
   PORT: z.string().default('3000').transform(Number).pipe(z.number().int().positive()),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
 
-  // Security (Production only)
+  // Security (Production only - at least one AI provider required)
   ...(process.env.NODE_ENV === 'production' && {
-    GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required in production'),
+    // At least one AI provider must be configured
+    // Validation happens in checkOptionalEnv()
   }),
 });
 
@@ -90,9 +94,27 @@ export function validateEnv() {
  */
 export function checkOptionalEnv() {
   const warnings = [];
+  const errors = [];
 
-  // Check for production-recommended variables
+  // Check for AI providers (at least one required in production)
+  const aiProviders = {
+    'GROQ_API_KEY': 'Groq',
+    'OPENAI_API_KEY': 'OpenAI',
+    'GEMINI_API_KEY': 'Google Gemini',
+    'KIMI_API_KEY': 'Kimi (Moonshot AI)',
+  };
+
+  const availableProviders = Object.entries(aiProviders)
+    .filter(([key]) => process.env[key])
+    .map(([_, name]) => name);
+
   if (process.env.NODE_ENV === 'production') {
+    if (availableProviders.length === 0) {
+      errors.push('At least one AI provider API key is required in production. Set one of: GROQ_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, or KIMI_API_KEY');
+    } else {
+      console.log(`✅ AI Providers configured: ${availableProviders.join(', ')}`);
+    }
+
     if (!process.env.SENTRY_DSN) {
       warnings.push('SENTRY_DSN is not set (recommended for error tracking in production)');
     }
@@ -100,6 +122,22 @@ export function checkOptionalEnv() {
     if (!process.env.RATE_LIMIT_MAX_REQUESTS) {
       warnings.push('RATE_LIMIT_MAX_REQUESTS is not set (using default rate limits)');
     }
+  } else {
+    // Development: warn if no providers configured
+    if (availableProviders.length === 0) {
+      warnings.push('No AI provider API keys configured. Set at least one: GROQ_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, or KIMI_API_KEY');
+    } else {
+      console.log(`✅ AI Providers configured: ${availableProviders.join(', ')}`);
+    }
+  }
+
+  // Throw errors if any
+  if (errors.length > 0) {
+    console.error('❌ Environment configuration errors:');
+    errors.forEach((error) => {
+      console.error(`  - ${error}`);
+    });
+    throw new Error('Environment configuration errors detected');
   }
 
   // Display warnings
@@ -122,7 +160,11 @@ export function getEnvConfig() {
     redisUrl: process.env.REDIS_URL,
     jwtSecret: process.env.JWT_SECRET,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    // AI Provider API Keys
     groqApiKey: process.env.GROQ_API_KEY,
+    openaiApiKey: process.env.OPENAI_API_KEY,
+    geminiApiKey: process.env.GEMINI_API_KEY,
+    kimiApiKey: process.env.KIMI_API_KEY,
     port: parseInt(process.env.PORT || '3000', 10),
     logLevel: process.env.LOG_LEVEL || 'info',
     isProduction: process.env.NODE_ENV === 'production',
@@ -144,7 +186,11 @@ export function displayEnvConfig() {
   console.log(`  Database: ${config.databaseUrl ? '✅ Configured' : '❌ Not configured'}`);
   console.log(`  Redis: ${config.redisUrl ? '✅ Configured' : '❌ Not configured'}`);
   console.log(`  JWT Secret: ${config.jwtSecret ? `✅ Set (${config.jwtSecret.length} chars)` : '❌ Not set'}`);
-  console.log(`  Groq API: ${config.groqApiKey ? '✅ Configured' : '⚠️  Not configured'}`);
+  console.log(`  AI Providers:`);
+  console.log(`    Groq: ${config.groqApiKey ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`    OpenAI: ${config.openaiApiKey ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`    Gemini: ${config.geminiApiKey ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`    Kimi: ${config.kimiApiKey ? '✅ Configured' : '❌ Not configured'}`);
   console.log('');
 }
 
