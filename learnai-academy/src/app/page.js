@@ -7,27 +7,103 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--color-bg-base)',
+    }}>
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold text-gray-900 mb-6">
-            Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">LearnAI Academy</span>
+      <div className="container" style={{
+        padding: 'clamp(3rem, 8vw, 5rem) var(--space-md)',
+      }}>
+        <div className="animate-fade-in" style={{
+          textAlign: 'center',
+          marginBottom: 'clamp(3rem, 6vw, 4rem)',
+        }}>
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-lg)',
+            lineHeight: 'var(--leading-tight)',
+          }}>
+            Welcome to{' '}
+            <span style={{
+              background: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              LearnAI Academy
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p style={{
+            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: 'var(--space-xl)',
+            maxWidth: '42rem',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            lineHeight: 'var(--leading-relaxed)',
+          }}>
             Personalized AI tutoring for K-12 students. Learn at your own pace with intelligent tutors that adapt to your needs.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div style={{
+            display: 'flex',
+            gap: 'var(--space-md)',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+          }}>
             <button
               onClick={() => router.push('/register')}
-              className="bg-blue-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+              className="animate-scale-in"
+              style={{
+                background: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+                color: 'white',
+                padding: 'var(--space-md) var(--space-xl)',
+                borderRadius: 'var(--radius-xl)',
+                fontWeight: 'var(--weight-semibold)',
+                fontSize: 'var(--text-lg)',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-xs)',
+                boxShadow: 'var(--shadow-lg)',
+                transition: 'all var(--transition-base)',
+                animationDelay: '100ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+              }}
             >
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
               onClick={() => router.push('/login')}
-              className="bg-white text-gray-800 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-colors border-2 border-gray-200"
+              className="surface-elevated animate-scale-in"
+              style={{
+                padding: 'var(--space-md) var(--space-xl)',
+                borderRadius: 'var(--radius-xl)',
+                fontWeight: 'var(--weight-semibold)',
+                fontSize: 'var(--text-lg)',
+                cursor: 'pointer',
+                transition: 'all var(--transition-base)',
+                animationDelay: '150ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+              }}
             >
               Sign In
             </button>
@@ -35,73 +111,128 @@ export default function Home() {
         </div>
 
         {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          <FeatureCard
-            icon={Brain}
-            title="AI-Powered Tutoring"
-            description="Get personalized help from specialized AI tutors for every subject"
-            color="bg-blue-500"
-          />
-          <FeatureCard
-            icon={Zap}
-            title="Instant Feedback"
-            description="Learn faster with immediate responses and guidance"
-            color="bg-purple-500"
-          />
-          <FeatureCard
-            icon={Trophy}
-            title="Gamified Learning"
-            description="Earn achievements, build streaks, and track progress"
-            color="bg-yellow-500"
-          />
-          <FeatureCard
-            icon={Users}
-            title="Parent Dashboard"
-            description="Monitor progress and stay involved in your child's learning"
-            color="bg-green-500"
-          />
+        <div className="grid grid-auto-fit" style={{
+          marginBottom: 'clamp(3rem, 6vw, 5rem)',
+        }}>
+          {[
+            { icon: Brain, title: 'AI-Powered Tutoring', description: 'Get personalized help from specialized AI tutors for every subject', gradient: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)' },
+            { icon: Zap, title: 'Instant Feedback', description: 'Learn faster with immediate responses and guidance', gradient: 'linear-gradient(135deg, hsl(260, 70%, 60%) 0%, hsl(280, 65%, 55%) 100%)' },
+            { icon: Trophy, title: 'Gamified Learning', description: 'Earn achievements, build streaks, and track progress', gradient: 'linear-gradient(135deg, hsl(45, 90%, 60%) 0%, hsl(30, 85%, 55%) 100%)' },
+            { icon: Users, title: 'Parent Dashboard', description: 'Monitor progress and stay involved in your child\'s learning', gradient: 'linear-gradient(135deg, hsl(145, 65%, 50%) 0%, hsl(175, 65%, 45%) 100%)' },
+          ].map((feature, idx) => (
+            <FeatureCard key={feature.title} {...feature} index={idx} />
+          ))}
         </div>
 
         {/* Subjects */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="animate-fade-in" style={{
+          textAlign: 'center',
+          marginBottom: 'var(--space-xl)',
+          animationDelay: '400ms',
+        }}>
+          <h2 style={{
+            fontSize: 'var(--text-4xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-md)',
+          }}>
             All Subjects Covered
           </h2>
-          <p className="text-xl text-gray-600">
+          <p style={{
+            fontSize: 'var(--text-xl)',
+            color: 'var(--color-text-secondary)',
+          }}>
             From kindergarten to high school, we've got you covered
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-20">
-          {['Math', 'English', 'Reading', 'Science', 'Writing', 'Coding'].map(subject => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" style={{
+          marginBottom: 'clamp(3rem, 6vw, 5rem)',
+        }}>
+          {[
+            { name: 'Math', emoji: '🔢' },
+            { name: 'English', emoji: '📚' },
+            { name: 'Reading', emoji: '📖' },
+            { name: 'Science', emoji: '🔬' },
+            { name: 'Writing', emoji: '✍️' },
+            { name: 'Coding', emoji: '💻' },
+          ].map((subject, idx) => (
             <div
-              key={subject}
-              className="bg-white rounded-xl p-6 text-center shadow-md hover:shadow-xl transition-all"
+              key={subject.name}
+              className="surface-elevated animate-scale-in"
+              style={{
+                padding: 'var(--space-lg)',
+                textAlign: 'center',
+                transition: 'all var(--transition-base)',
+                animationDelay: `${450 + idx * 30}ms`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+              }}
             >
-              <div className="text-3xl mb-2">
-                {subject === 'Math' && '🔢'}
-                {subject === 'English' && '📚'}
-                {subject === 'Reading' && '📖'}
-                {subject === 'Science' && '🔬'}
-                {subject === 'Writing' && '✍️'}
-                {subject === 'Coding' && '💻'}
+              <div style={{
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
+                marginBottom: 'var(--space-xs)',
+              }}>
+                {subject.emoji}
               </div>
-              <div className="font-semibold text-gray-800">{subject}</div>
+              <div style={{
+                fontWeight: 'var(--weight-semibold)',
+                color: 'var(--color-text-primary)',
+              }}>{subject.name}</div>
             </div>
           ))}
         </div>
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">
+        <div className="surface-elevated animate-fade-in" style={{
+          background: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+          borderRadius: 'var(--radius-3xl)',
+          padding: 'clamp(2rem, 4vw, 3rem)',
+          textAlign: 'center',
+          animationDelay: '650ms',
+        }}>
+          <h2 style={{
+            fontSize: 'var(--text-4xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'white',
+            marginBottom: 'var(--space-md)',
+          }}>
             Ready to Transform Learning?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p style={{
+            fontSize: 'var(--text-xl)',
+            color: 'rgba(255, 255, 255, 0.9)',
+            marginBottom: 'var(--space-xl)',
+          }}>
             Join thousands of students learning smarter with AI
           </p>
           <button
             onClick={() => router.push('/register')}
-            className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors"
+            style={{
+              background: 'white',
+              color: 'hsl(220, 80%, 60%)',
+              padding: 'var(--space-md) var(--space-xl)',
+              borderRadius: 'var(--radius-xl)',
+              fontWeight: 'var(--weight-semibold)',
+              fontSize: 'var(--text-lg)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all var(--transition-base)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = 'white';
+            }}
           >
             Start Learning Today
           </button>
@@ -111,14 +242,45 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon: Icon, title, description, color }) {
+function FeatureCard({ icon: Icon, title, description, gradient, index }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all">
-      <div className={`${color} rounded-xl p-3 inline-block mb-4`}>
-        <Icon className="w-8 h-8 text-white" />
+    <div
+      className="surface-elevated animate-scale-in"
+      style={{
+        padding: 'var(--space-lg)',
+        transition: 'all var(--transition-base)',
+        animationDelay: `${200 + index * 50}ms`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+      }}
+    >
+      <div style={{
+        background: gradient,
+        borderRadius: 'var(--radius-xl)',
+        padding: 'var(--space-sm)',
+        display: 'inline-flex',
+        marginBottom: 'var(--space-md)',
+        boxShadow: 'var(--shadow-sm)',
+      }}>
+        <Icon className="w-8 h-8" style={{ color: 'white' }} />
       </div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <h3 style={{
+        fontSize: 'var(--text-xl)',
+        fontWeight: 'var(--weight-bold)',
+        color: 'var(--color-text-primary)',
+        marginBottom: 'var(--space-xs)',
+      }}>{title}</h3>
+      <p style={{
+        fontSize: 'var(--text-base)',
+        color: 'var(--color-text-secondary)',
+        lineHeight: 'var(--leading-relaxed)',
+      }}>{description}</p>
     </div>
   );
 }

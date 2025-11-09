@@ -40,10 +40,23 @@ export default function ProgressPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading your progress...</p>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="skeleton" style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: 'var(--radius-full)',
+            margin: '0 auto var(--space-md)',
+          }} />
+          <p style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: 'var(--text-base)',
+          }}>Loading your progress...</p>
         </div>
       </div>
     );
@@ -55,19 +68,60 @@ export default function ProgressPage() {
   const currentStreak = progress?.summary?.currentStreak || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--color-bg-base)',
+    }}>
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="container" style={{
+        padding: 'var(--space-lg) var(--space-md)',
+      }}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="animate-fade-in" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 'var(--space-2xl)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-md)',
+        }}>
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">Your Progress</h1>
-            <p className="text-gray-600">Track your learning journey</p>
+            <h1 style={{
+              fontSize: 'var(--text-4xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--space-xs)',
+            }}>Your Learning Journey</h1>
+            <p style={{
+              fontSize: 'var(--text-lg)',
+              color: 'var(--color-text-secondary)',
+            }}>Track your growth and mastery</p>
           </div>
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 text-blue-500 hover:text-blue-600 font-medium"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-xs)',
+              padding: 'var(--space-sm) var(--space-md)',
+              background: 'none',
+              border: '1px solid var(--color-border-subtle)',
+              borderRadius: 'var(--radius-lg)',
+              color: 'var(--color-accent)',
+              fontWeight: 'var(--weight-medium)',
+              fontSize: 'var(--text-base)',
+              cursor: 'pointer',
+              transition: 'all var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--color-bg-muted)';
+              e.currentTarget.style.borderColor = 'var(--color-accent)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'none';
+              e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+            }}
           >
             <Home className="w-5 h-5" />
             Dashboard
@@ -75,85 +129,205 @@ export default function ProgressPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <ProgressCard
-            title="Total Points"
-            value={totalPoints}
-            icon={Star}
-            color="bg-gradient-to-br from-yellow-400 to-orange-500"
-          />
-          <ProgressCard
-            title="Sessions"
-            value={totalSessions}
-            icon={BookMarked}
-            color="bg-gradient-to-br from-blue-500 to-purple-600"
-          />
-          <ProgressCard
-            title="Learning Time"
-            value={`${Math.round(totalMinutes / 60)}h`}
-            subtitle={`${totalMinutes} minutes`}
-            icon={Clock}
-            color="bg-gradient-to-br from-green-500 to-teal-500"
-          />
-          <ProgressCard
-            title="Current Streak"
-            value={`${currentStreak} days`}
-            icon={TrendingUp}
-            color="bg-gradient-to-br from-pink-500 to-rose-500"
-          />
+        <div className="grid grid-auto-fit" style={{
+          marginBottom: 'var(--space-2xl)',
+        }}>
+          {[
+            { title: 'Total Points', value: totalPoints.toLocaleString(), icon: Star, gradient: 'linear-gradient(135deg, hsl(45, 90%, 60%) 0%, hsl(30, 85%, 55%) 100%)' },
+            { title: 'Sessions', value: totalSessions, icon: BookMarked, gradient: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)' },
+            { title: 'Learning Time', value: `${Math.round(totalMinutes / 60)}h`, subtitle: `${totalMinutes} minutes`, icon: Clock, gradient: 'linear-gradient(135deg, hsl(145, 65%, 50%) 0%, hsl(175, 65%, 45%) 100%)' },
+            { title: 'Current Streak', value: `${currentStreak} days`, icon: TrendingUp, gradient: 'linear-gradient(135deg, hsl(340, 75%, 60%) 0%, hsl(350, 70%, 55%) 100%)' },
+          ].map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.title}
+                className="surface-elevated animate-scale-in"
+                style={{
+                  padding: 'var(--space-lg)',
+                  transition: 'all var(--transition-base)',
+                  animationDelay: `${idx * 50}ms`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                }}
+              >
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: stat.gradient,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--space-md)',
+                  boxShadow: 'var(--shadow-sm)',
+                }}>
+                  <Icon className="w-6 h-6" style={{ color: 'white' }} />
+                </div>
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  fontWeight: 'var(--weight-medium)',
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: 'var(--space-2xs)',
+                }}>
+                  {stat.title}
+                </div>
+                <div style={{
+                  fontSize: 'var(--text-3xl)',
+                  fontWeight: 'var(--weight-bold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: stat.subtitle ? 'var(--space-2xs)' : 0,
+                }}>
+                  {stat.value}
+                </div>
+                {stat.subtitle && (
+                  <div style={{
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--color-text-tertiary)',
+                  }}>
+                    {stat.subtitle}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Activity Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow-md mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Learning Activity</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSelectedPeriod('7d')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedPeriod === '7d'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                7 Days
-              </button>
-              <button
-                onClick={() => setSelectedPeriod('30d')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedPeriod === '30d'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                30 Days
-              </button>
+        <div className="surface-elevated animate-fade-in" style={{
+          padding: 'var(--space-lg)',
+          marginBottom: 'var(--space-2xl)',
+          animationDelay: '200ms',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 'var(--space-lg)',
+            flexWrap: 'wrap',
+            gap: 'var(--space-md)',
+          }}>
+            <h2 style={{
+              fontSize: 'var(--text-2xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+            }}>Learning Activity</h2>
+            <div style={{
+              display: 'flex',
+              gap: 'var(--space-xs)',
+            }}>
+              {['7d', '30d'].map(period => (
+                <button
+                  key={period}
+                  onClick={() => setSelectedPeriod(period)}
+                  style={{
+                    padding: 'var(--space-xs) var(--space-md)',
+                    borderRadius: 'var(--radius-lg)',
+                    border: 'none',
+                    background: selectedPeriod === period ? 'var(--color-accent)' : 'var(--color-bg-muted)',
+                    color: selectedPeriod === period ? 'white' : 'var(--color-text-secondary)',
+                    fontWeight: 'var(--weight-medium)',
+                    fontSize: 'var(--text-sm)',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedPeriod !== period) {
+                      e.currentTarget.style.background = 'var(--color-bg-elevated)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedPeriod !== period) {
+                      e.currentTarget.style.background = 'var(--color-bg-muted)';
+                    }
+                  }}
+                >
+                  {period === '7d' ? '7 Days' : '30 Days'}
+                </button>
+              ))}
             </div>
           </div>
           <ProgressChart data={progress?.activityChart || []} type="line" />
         </div>
 
         {/* Subject Progress */}
-        <div className="bg-white rounded-2xl p-6 shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Subject Progress</h2>
+        <div className="surface-elevated animate-fade-in" style={{
+          padding: 'var(--space-lg)',
+          marginBottom: 'var(--space-2xl)',
+          animationDelay: '250ms',
+        }}>
+          <h2 style={{
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-lg)',
+          }}>Subject Progress</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(progress?.progressBySubject || {}).map(([slug, data]) => (
-              <div key={slug} className="border-2 border-gray-100 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">{data.subject}</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Average Mastery:</span>
-                    <span className="font-bold text-gray-800">
+            {Object.entries(progress?.progressBySubject || {}).map(([slug, data], idx) => (
+              <div
+                key={slug}
+                className="animate-scale-in"
+                style={{
+                  border: '1px solid var(--color-border-subtle)',
+                  borderRadius: 'var(--radius-xl)',
+                  padding: 'var(--space-lg)',
+                  background: 'var(--color-bg-base)',
+                  animationDelay: `${idx * 50}ms`,
+                }}
+              >
+                <h3 style={{
+                  fontSize: 'var(--text-xl)',
+                  fontWeight: 'var(--weight-bold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--space-md)',
+                }}>{data.subject}</h3>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--space-md)',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: 'var(--text-sm)',
+                  }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Average Mastery:</span>
+                    <span style={{
+                      fontWeight: 'var(--weight-bold)',
+                      color: 'var(--color-text-primary)',
+                    }}>
                       {Math.round(data.averageMastery * 100)}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div style={{
+                    width: '100%',
+                    height: '12px',
+                    background: 'var(--color-bg-muted)',
+                    borderRadius: 'var(--radius-full)',
+                    overflow: 'hidden',
+                  }}>
                     <div
-                      className="bg-blue-500 h-3 rounded-full transition-all"
-                      style={{ width: `${data.averageMastery * 100}%` }}
+                      style={{
+                        height: '100%',
+                        background: 'var(--color-accent)',
+                        borderRadius: 'var(--radius-full)',
+                        width: `${data.averageMastery * 100}%`,
+                        transition: 'width 500ms ease-out',
+                      }}
                     />
                   </div>
-                  <div className="flex justify-between text-sm text-gray-500">
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--color-text-tertiary)',
+                  }}>
                     <span>{data.totalSessions} sessions</span>
                     <span>{data.topics.length} topics</span>
                   </div>
@@ -164,69 +338,167 @@ export default function ProgressPage() {
         </div>
 
         {/* Topic Mastery */}
-        <div className="bg-white rounded-2xl p-6 shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Topic Mastery</h2>
-          <div className="space-y-3">
+        <div className="surface-elevated animate-fade-in" style={{
+          padding: 'var(--space-lg)',
+          marginBottom: 'var(--space-2xl)',
+          animationDelay: '300ms',
+        }}>
+          <h2 style={{
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-lg)',
+          }}>Topic Mastery</h2>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-sm)',
+          }}>
             {Object.entries(progress?.progressBySubject || {}).map(([slug, subjectData]) =>
-              subjectData.topics.map((topic, idx) => (
-                <div key={`${slug}-${idx}`} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <span className="font-medium text-gray-800">{topic.topicName}</span>
-                      <span className="text-sm text-gray-500 ml-2">({subjectData.subject})</span>
+              subjectData.topics.map((topic, idx) => {
+                const masteryColor = topic.masteryLevel >= 0.8
+                  ? 'hsl(145, 65%, 50%)'
+                  : topic.masteryLevel >= 0.5
+                  ? 'hsl(45, 90%, 55%)'
+                  : 'hsl(0, 70%, 55%)';
+
+                return (
+                  <div
+                    key={`${slug}-${idx}`}
+                    className="animate-fade-in"
+                    style={{
+                      padding: 'var(--space-md)',
+                      background: 'var(--color-bg-muted)',
+                      borderRadius: 'var(--radius-lg)',
+                      animationDelay: `${idx * 20}ms`,
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 'var(--space-xs)',
+                    }}>
+                      <div>
+                        <span style={{
+                          fontWeight: 'var(--weight-medium)',
+                          color: 'var(--color-text-primary)',
+                        }}>{topic.topicName}</span>
+                        <span style={{
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--color-text-tertiary)',
+                          marginLeft: 'var(--space-xs)',
+                        }}>({subjectData.subject})</span>
+                      </div>
+                      <span style={{
+                        fontWeight: 'var(--weight-bold)',
+                        color: 'var(--color-text-primary)',
+                      }}>
+                        {Math.round(topic.masteryLevel * 100)}%
+                      </span>
                     </div>
-                    <span className="font-bold text-gray-800">
-                      {Math.round(topic.masteryLevel * 100)}%
-                    </span>
+                    <div style={{
+                      width: '100%',
+                      height: '8px',
+                      background: 'var(--color-bg-elevated)',
+                      borderRadius: 'var(--radius-full)',
+                      overflow: 'hidden',
+                    }}>
+                      <div
+                        style={{
+                          height: '100%',
+                          background: masteryColor,
+                          borderRadius: 'var(--radius-full)',
+                          width: `${topic.masteryLevel * 100}%`,
+                          transition: 'width 500ms ease-out',
+                        }}
+                      />
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: 'var(--text-xs)',
+                      color: 'var(--color-text-tertiary)',
+                      marginTop: 'var(--space-xs)',
+                    }}>
+                      <span>{topic.sessionsCount} sessions</span>
+                      <span>{topic.totalTimeMinutes} min</span>
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${
-                        topic.masteryLevel >= 0.8
-                          ? 'bg-green-500'
-                          : topic.masteryLevel >= 0.5
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
-                      }`}
-                      style={{ width: `${topic.masteryLevel * 100}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>{topic.sessionsCount} sessions</span>
-                    <span>{topic.totalTimeMinutes} min</span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
 
         {/* Recent Sessions */}
-        <div className="bg-white rounded-2xl p-6 shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Recent Sessions</h2>
+        <div className="surface-elevated animate-fade-in" style={{
+          padding: 'var(--space-lg)',
+          animationDelay: '350ms',
+        }}>
+          <h2 style={{
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-lg)',
+          }}>Recent Sessions</h2>
           {progress?.recentSessions && progress.recentSessions.length > 0 ? (
-            <div className="space-y-3">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-sm)',
+            }}>
               {progress.recentSessions.map((session, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-800">
+                <div
+                  key={i}
+                  className="animate-fade-in"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: 'var(--space-md)',
+                    background: 'var(--color-bg-muted)',
+                    borderRadius: 'var(--radius-lg)',
+                    gap: 'var(--space-md)',
+                    animationDelay: `${i * 30}ms`,
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontWeight: 'var(--weight-medium)',
+                      color: 'var(--color-text-primary)',
+                      marginBottom: 'var(--space-2xs)',
+                    }}>
                       {session.subject} - {session.topic}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div style={{
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--color-text-secondary)',
+                    }}>
                       {new Date(session.startedAt).toLocaleString()} •{' '}
                       {session.mode === 'PRACTICE' ? '🎯 Practice' : '💡 Help'} •{' '}
                       {session.difficulty}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-gray-800">+{session.pointsEarned}</div>
-                    <div className="text-xs text-gray-500">{session.durationMinutes} min</div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{
+                      fontWeight: 'var(--weight-bold)',
+                      color: 'var(--color-accent)',
+                    }}>+{session.pointsEarned}</div>
+                    <div style={{
+                      fontSize: 'var(--text-xs)',
+                      color: 'var(--color-text-tertiary)',
+                    }}>{session.durationMinutes} min</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-8">
+            <p style={{
+              textAlign: 'center',
+              color: 'var(--color-text-secondary)',
+              padding: 'var(--space-2xl) 0',
+            }}>
               No sessions yet. Start learning to see your history!
             </p>
           )}
