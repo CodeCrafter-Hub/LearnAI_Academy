@@ -342,6 +342,7 @@ function LearnPageContent() {
           <div className="animate-fade-in">
             <TopicSelector
               subject={selectedSubject}
+              gradeLevel={gradeLevel}
               onSelect={(topic) => {
                 setSelectedTopic(topic);
                 setStep('mode');
@@ -355,6 +356,7 @@ function LearnPageContent() {
           <div className="animate-fade-in">
             <ModeSelector
               topicName={selectedTopic.name}
+              gradeLevel={gradeLevel}
               onSelect={(mode) => {
                 setSelectedMode(mode);
                 setStep('difficulty');
@@ -369,6 +371,7 @@ function LearnPageContent() {
             <DifficultySelector
               topicName={selectedTopic.name}
               mode={selectedMode}
+              gradeLevel={gradeLevel}
               onSelect={startSession}
               isLoading={isLoading}
             />
