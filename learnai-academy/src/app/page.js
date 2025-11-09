@@ -1,8 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import ThemeToggle to prevent SSR issues
+const ThemeToggle = dynamic(() => import('@/components/ui/ThemeToggle'), {
+  ssr: false,
+});
 import {
   ArrowRight,
   Check,
@@ -23,10 +28,31 @@ import {
 export default function Home() {
   const router = useRouter();
   const [openFaq, setOpenFaq] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration errors
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
+
+  // Show loading state during hydration
+  if (!mounted) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'var(--color-bg-base)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: 'var(--color-bg-base)' }}>
