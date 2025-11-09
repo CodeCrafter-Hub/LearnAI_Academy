@@ -26,16 +26,6 @@ export default function DashboardPage() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [chartData, setChartData] = useState([]);
 
-  useEffect(() => {
-    if (!authLoading) {
-      if (!isAuthenticated) {
-        router.push('/login');
-      } else {
-        loadData();
-      }
-    }
-  }, [authLoading, isAuthenticated]);
-
   const loadData = async () => {
     try {
       // Admins don't need student profiles - show admin dashboard
