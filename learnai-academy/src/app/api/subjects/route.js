@@ -42,17 +42,24 @@ export async function GET(request) {
       where.maxGrade = { gte: grade };
     }
 
-    // Fetch subjects with topics
-    const subjects = await prisma.subject.findMany({
-      where,
-      include: {
-        topics: {
-          where: { isActive: true },
-          orderBy: { orderIndex: 'asc' },
+    // Fetch subjects with topics - handle missing models gracefully
+    let subjects = [];
+    try {
+      subjects = await prisma.subject.findMany({
+        where,
+        include: {
+          topics: {
+            where: { isActive: true },
+            orderBy: { orderIndex: 'asc' },
+          },
         },
-      },
-      orderBy: { orderIndex: 'asc' },
-    });
+        orderBy: { orderIndex: 'asc' },
+      });
+    } catch (dbError) {
+      // Subject model might not exist - return empty array
+      console.warn('Subject model not found, returning empty array:', dbError);
+      return NextResponse.json([]);
+    }
 
     // Cache for 24 hours (gracefully handle Redis failures)
     try {

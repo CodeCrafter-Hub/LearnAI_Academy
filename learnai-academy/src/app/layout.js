@@ -6,7 +6,7 @@ import { GradeLevelUIProvider } from '@/components/learning/GradeLevelUIProvider
 import { I18nProvider } from '@/components/providers/I18nProvider';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import ServiceWorkerRegister from '@/components/offline/ServiceWorkerRegister';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/ErrorBoundary.js';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
