@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Mail, Lock, User, GraduationCap, CheckCircle, Zap, Shield } from 'lucide-react';
+import { Mail, Lock, User, GraduationCap, CheckCircle, Zap, Shield, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,36 +13,105 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     firstName: '',
     lastName: '',
     role: 'PARENT',
     gradeLevel: 5,
   });
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Password validation helper
+  const validatePassword = (password) => {
+    const requirements = {
+      minLength: password.length >= 12,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[^A-Za-z0-9]/.test(password),
+    };
+    return requirements;
+  };
+
+  // Get password strength
+  const getPasswordStrength = (password) => {
+    const reqs = validatePassword(password);
+    const metCount = Object.values(reqs).filter(Boolean).length;
+    if (metCount < 2) return { strength: 'weak', color: 'red' };
+    if (metCount < 4) return { strength: 'medium', color: 'orange' };
+    if (metCount < 5) return { strength: 'good', color: 'blue' };
+    return { strength: 'strong', color: 'green' };
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setErrors({});
     setIsLoading(true);
 
     // Validation
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      addToast('Password must be at least 6 characters', 'error');
+    const newErrors = {};
+
+    // Email validation
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
+    }
+
+    // First name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    // Password validation (match backend requirements)
+    const passwordReqs = validatePassword(formData.password);
+    if (!passwordReqs.minLength) {
+      newErrors.password = 'Password must be at least 12 characters';
+    } else if (!passwordReqs.hasUpperCase) {
+      newErrors.password = 'Password must contain at least one uppercase letter';
+    } else if (!passwordReqs.hasLowerCase) {
+      newErrors.password = 'Password must contain at least one lowercase letter';
+    } else if (!passwordReqs.hasNumber) {
+      newErrors.password = 'Password must contain at least one number';
+    } else if (!passwordReqs.hasSpecial) {
+      newErrors.password = 'Password must contain at least one special character';
+    }
+
+    // Password confirmation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    // Grade level validation for students
+    if (formData.role === 'STUDENT' && formData.gradeLevel === undefined) {
+      newErrors.gradeLevel = 'Grade level is required for students';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setError(Object.values(newErrors)[0]);
+      addToast(Object.values(newErrors)[0], 'error');
       setIsLoading(false);
       return;
     }
 
     try {
-      const data = await register(
-        formData.email,
-        formData.password,
-        formData.firstName,
-        formData.lastName,
-        formData.role,
-        formData.gradeLevel
-      );
+      // Fix: Use object parameter instead of separate parameters
+      const data = await register({
+        email: formData.email.trim(),
+        password: formData.password,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        role: formData.role,
+        gradeLevel: formData.role === 'STUDENT' ? formData.gradeLevel : undefined,
+      });
 
       addToast('Account created successfully!', 'success');
 
@@ -53,8 +122,23 @@ export default function RegisterPage() {
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err.message);
-      addToast(err.message || 'Registration failed. Please try again.', 'error');
+      // Handle detailed error messages from backend
+      let errorMessage = err.message || 'Registration failed. Please try again.';
+      
+      // Check if error has details (from Zod validation)
+      if (err.details && Array.isArray(err.details)) {
+        const fieldErrors = {};
+        err.details.forEach((detail) => {
+          if (detail.path && detail.path.length > 0) {
+            fieldErrors[detail.path[0]] = detail.message;
+          }
+        });
+        setErrors(fieldErrors);
+        errorMessage = err.details[0]?.message || errorMessage;
+      }
+      
+      setError(errorMessage);
+      addToast(errorMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -204,7 +288,7 @@ export default function RegisterPage() {
                       fontSize: 'var(--text-base)',
                       color: 'var(--color-text-primary)',
                       background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-subtle)',
+                      border: `1px solid ${errors.firstName ? 'var(--color-error)' : 'var(--color-border-subtle)'}`,
                       borderRadius: 'var(--radius-lg)',
                       transition: 'all var(--transition-fast)',
                     }}
@@ -314,7 +398,7 @@ export default function RegisterPage() {
                       fontSize: 'var(--text-base)',
                       color: 'var(--color-text-primary)',
                       background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-subtle)',
+                      border: `1px solid ${errors.email ? 'var(--color-error)' : 'var(--color-border-subtle)'}`,
                       borderRadius: 'var(--radius-lg)',
                       transition: 'all var(--transition-fast)',
                     }}
@@ -323,11 +407,21 @@ export default function RegisterPage() {
                       e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-subtle)';
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+                      e.currentTarget.style.borderColor = errors.email ? 'var(--color-error)' : 'var(--color-border-subtle)';
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
+                {errors.email && (
+                  <p style={{
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--color-error)',
+                    marginTop: 'var(--space-xs)',
+                    margin: 0,
+                  }}>
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               {/* Password */}

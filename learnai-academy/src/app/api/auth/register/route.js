@@ -134,6 +134,8 @@ export async function POST(request) {
         },
       });
     }
+    // Note: For PARENT role, the User record itself is sufficient
+    // Parent-student relationships are established through Student.parentId
 
     // Generate JWT token
     const token = jwt.sign(
@@ -168,7 +170,11 @@ export async function POST(request) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { 
+          error: 'Validation error', 
+          details: error.errors,
+          message: error.errors[0]?.message || 'Validation failed'
+        },
         { status: 400 }
       );
     }
