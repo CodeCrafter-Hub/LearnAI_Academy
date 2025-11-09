@@ -73,32 +73,42 @@ async function main() {
         },
       });
 
-      // Create student profile
-      const student = await prisma.student.upsert({
-        where: { 
-          userId: studentUser.id 
-        },
-        update: {
-          gradeLevel: grade.level,
-          firstName: `Grade${grade.level}`,
-          lastName: 'TestStudent',
-          parentId: parentUser.id, // Link to parent account
-        },
-        create: {
-          userId: studentUser.id,
-          firstName: `Grade${grade.level}`,
-          lastName: 'TestStudent',
-          gradeLevel: grade.level,
-          parentId: parentUser.id,
-          birthDate: new Date(2010 - grade.level, 0, 1), // Approximate birth date
-        },
-      });
+      // Create student profile (if Student model exists)
+      try {
+        const student = await prisma.student.upsert({
+          where: { 
+            userId: studentUser.id 
+          },
+          update: {
+            gradeLevel: grade.level,
+            firstName: `Grade${grade.level}`,
+            lastName: 'TestStudent',
+            parentId: parentUser.id, // Link to parent account
+          },
+          create: {
+            userId: studentUser.id,
+            firstName: `Grade${grade.level}`,
+            lastName: 'TestStudent',
+            gradeLevel: grade.level,
+            parentId: parentUser.id,
+            birthDate: new Date(2010 - grade.level, 0, 1), // Approximate birth date
+          },
+        });
 
-      studentAccounts.push({
-        email: studentUser.email,
-        grade: grade.name,
-        studentId: student.id,
-      });
+        studentAccounts.push({
+          email: studentUser.email,
+          grade: grade.name,
+          studentId: student.id,
+        });
+      } catch (error) {
+        // Student model doesn't exist - just create User account
+        console.log(`⚠️  Student model not found, created User account only: ${studentUser.email}`);
+        studentAccounts.push({
+          email: studentUser.email,
+          grade: grade.name,
+          studentId: null,
+        });
+      }
 
       console.log(`✅ Created ${grade.name} account: ${studentUser.email}`);
     }
@@ -114,17 +124,24 @@ async function main() {
       },
     });
 
-    const testStudent = await prisma.student.upsert({
-      where: { userId: testUser.id },
-      update: {},
-      create: {
-        userId: testUser.id,
-        firstName: 'Test',
-        lastName: 'Student',
-        gradeLevel: 5, // Default to 5th grade
-        parentId: parentUser.id,
-      },
-    });
+    // Create student profile (if Student model exists)
+    try {
+      const testStudent = await prisma.student.upsert({
+        where: { userId: testUser.id },
+        update: {},
+        create: {
+          userId: testUser.id,
+          firstName: 'Test',
+          lastName: 'Student',
+          gradeLevel: 5, // Default to 5th grade
+          parentId: parentUser.id,
+        },
+      });
+      console.log('✅ Created student profile for test account');
+    } catch (error) {
+      // Student model doesn't exist - just User account
+      console.log('⚠️  Student model not found, created User account only');
+    }
 
     console.log('✅ Created comprehensive test account:', testUser.email);
 
