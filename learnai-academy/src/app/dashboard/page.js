@@ -118,6 +118,20 @@ export default function DashboardPage() {
     router.push(`/learn?subject=${subject.slug}`);
   };
 
+  // Load data when authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      loadData();
+    }
+  }, [authLoading, isAuthenticated, user]);
+
+  // Redirect to onboarding if no student profile (but not admin)
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && !student && !(user?.role === 'ADMIN' || user?.is_admin) && !isLoading) {
+      router.push('/onboarding');
+    }
+  }, [authLoading, isAuthenticated, student, user, isLoading, router]);
+
   // Show loading state
   if (authLoading || isLoading) {
     return (
