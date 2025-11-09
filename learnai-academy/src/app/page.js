@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 
 // Dynamically import ThemeToggle to prevent SSR issues
-const ThemeToggle = dynamic(() => import('@/components/ui/ThemeToggle'), {
+const ThemeToggle = dynamicImport(() => import('@/components/ui/ThemeToggle'), {
   ssr: false,
   loading: () => <div style={{ width: '40px', height: '40px' }} />,
 });
