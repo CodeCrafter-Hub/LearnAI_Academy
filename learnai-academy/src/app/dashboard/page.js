@@ -37,9 +37,15 @@ export default function DashboardPage() {
 
       // Get student ID (first student for now)
       const studentId = user?.students?.[0]?.id;
-      if (!studentId) {
-        router.push('/onboarding');
+      if (!studentId && !(user?.role === 'ADMIN' || user?.is_admin)) {
+        // Don't redirect here - let component handle it via useEffect
+        setIsLoading(false);
         return;
+      }
+      
+      if (!studentId) {
+        setIsLoading(false);
+        return; // Admin or no student profile
       }
 
       setStudent(user.students[0]);
