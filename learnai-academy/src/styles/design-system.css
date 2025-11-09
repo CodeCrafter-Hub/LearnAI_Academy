@@ -127,8 +127,49 @@
 }
 
 /* === Dark Mode === */
+/* Explicit dark theme (user preference) */
+[data-theme="dark"] {
+  --color-bg-base: hsl(var(--hue-primary), 10%, 8%);
+  --color-bg-subtle: hsl(var(--hue-primary), 8%, 12%);
+  --color-bg-muted: hsl(var(--hue-primary), 6%, 16%);
+  --color-bg-elevated: hsla(var(--hue-primary), 8%, 14%, 0.9);
+
+  --color-text-primary: hsl(var(--hue-primary), 15%, 95%);
+  --color-text-secondary: hsl(var(--hue-primary), 10%, 70%);
+  --color-text-tertiary: hsl(var(--hue-primary), 8%, 50%);
+
+  --color-border-subtle: hsla(var(--hue-primary), 10%, 100%, 0.08);
+  --color-border-muted: hsla(var(--hue-primary), 10%, 100%, 0.14);
+  --color-border-emphasis: hsla(var(--hue-primary), 10%, 100%, 0.24);
+
+  --color-accent: hsl(var(--hue-accent), 65%, 60%);
+  --color-accent-subtle: hsl(var(--hue-accent), 40%, 15%);
+  --color-accent-muted: hsl(var(--hue-accent), 50%, 20%);
+  --color-accent-hover: hsl(var(--hue-accent), 70%, 65%);
+
+  --color-primary: hsl(var(--hue-primary), 70%, 60%);
+  --color-primary-subtle: hsl(var(--hue-primary), 40%, 15%);
+  --color-primary-hover: hsl(var(--hue-primary), 75%, 65%);
+
+  --color-success: hsl(var(--hue-success), 50%, 50%);
+  --color-success-subtle: hsl(var(--hue-success), 30%, 15%);
+
+  --color-warning: hsl(var(--hue-warning), 80%, 55%);
+  --color-warning-subtle: hsl(var(--hue-warning), 50%, 15%);
+
+  --color-error: hsl(var(--hue-error), 65%, 60%);
+  --color-error-subtle: hsl(var(--hue-error), 40%, 15%);
+
+  --shadow-xs: 0 1px 2px hsla(0, 0%, 0%, 0.3);
+  --shadow-sm: 0 1px 3px hsla(0, 0%, 0%, 0.4);
+  --shadow-md: 0 2px 8px hsla(0, 0%, 0%, 0.5);
+  --shadow-lg: 0 4px 16px hsla(0, 0%, 0%, 0.6);
+  --shadow-xl: 0 8px 24px hsla(0, 0%, 0%, 0.7);
+}
+
+/* System preference dark mode (fallback) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --color-bg-base: hsl(var(--hue-primary), 10%, 8%);
     --color-bg-subtle: hsl(var(--hue-primary), 8%, 12%);
     --color-bg-muted: hsl(var(--hue-primary), 6%, 16%);
@@ -150,6 +191,15 @@
     --color-primary: hsl(var(--hue-primary), 70%, 60%);
     --color-primary-subtle: hsl(var(--hue-primary), 40%, 15%);
     --color-primary-hover: hsl(var(--hue-primary), 75%, 65%);
+
+    --color-success: hsl(var(--hue-success), 50%, 50%);
+    --color-success-subtle: hsl(var(--hue-success), 30%, 15%);
+
+    --color-warning: hsl(var(--hue-warning), 80%, 55%);
+    --color-warning-subtle: hsl(var(--hue-warning), 50%, 15%);
+
+    --color-error: hsl(var(--hue-error), 65%, 60%);
+    --color-error-subtle: hsl(var(--hue-error), 40%, 15%);
 
     --shadow-xs: 0 1px 2px hsla(0, 0%, 0%, 0.3);
     --shadow-sm: 0 1px 3px hsla(0, 0%, 0%, 0.4);
@@ -201,6 +251,7 @@ body {
   background-color: var(--color-bg-base);
   min-height: 100vh;
   overflow-x: hidden;
+  transition: color var(--transition-base), background-color var(--transition-base);
 }
 
 /* ========================================

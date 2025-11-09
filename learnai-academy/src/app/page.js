@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import {
   ArrowRight,
   Check,
@@ -58,6 +59,7 @@ export default function Home() {
             <a href="#testimonials" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>Testimonials</a>
             <a href="#pricing" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>Pricing</a>
             <a href="#faq" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>FAQ</a>
+            <ThemeToggle />
             <button
               onClick={() => router.push('/register')}
               className="btn btn-primary btn-sm"

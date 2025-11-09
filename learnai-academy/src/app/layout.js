@@ -1,5 +1,6 @@
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider } from '@/hooks/useAuth';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
 
@@ -12,13 +13,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <ErrorBoundary showContactSupport={true}>
-          <AuthProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </AuthProvider>
-        </ErrorBoundary>
+        <ThemeProvider>
+          <ErrorBoundary showContactSupport={true}>
+            <AuthProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </AuthProvider>
+          </ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   );
