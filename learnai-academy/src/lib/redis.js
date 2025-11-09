@@ -31,11 +31,21 @@ function getRedisClient() {
         showFriendlyErrorStack: false,
       });
 
-      // Handle connection errors gracefully
+      // Handle connection errors gracefully - prevent unhandled error events
       client.on('error', (error) => {
-        // Only log in development, don't crash the app
+        // Suppress connection errors - app works without Redis
+        // Only log in development
         if (process.env.NODE_ENV === 'development') {
           console.warn('Redis connection error (app continues without cache):', error.message);
+        }
+        // Don't throw or crash - just log and continue
+      });
+
+      // Handle connection close gracefully
+      client.on('close', () => {
+        // Connection closed - app continues without cache
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Redis connection closed (app continues without cache)');
         }
       });
 
