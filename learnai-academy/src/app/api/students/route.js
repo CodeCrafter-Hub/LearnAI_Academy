@@ -35,6 +35,10 @@ export async function GET(request) {
     if (user.role === 'ADMIN' || user.is_admin) {
       // Admin can see all students
       try {
+        // Check if Student model exists by checking Prisma client
+        if (!prisma.student) {
+          return NextResponse.json({ students: [] });
+        }
         students = await prisma.student.findMany({
           include: {
             user: {
@@ -48,13 +52,17 @@ export async function GET(request) {
           take: 100, // Limit for now
         });
       } catch (error) {
-        // Student model might not exist
-        console.warn('Student model not found:', error.message);
+        // Student model might not exist or database error
+        console.warn('Error fetching students:', error.message);
+        // Return empty array instead of error to prevent page crash
         return NextResponse.json({ students: [] });
       }
     } else if (user.role === 'PARENT') {
       // Parent sees their children
       try {
+        if (!prisma.student) {
+          return NextResponse.json({ students: [] });
+        }
         students = await prisma.student.findMany({
           where: {
             parentId: user.id,
@@ -70,12 +78,15 @@ export async function GET(request) {
           },
         });
       } catch (error) {
-        console.warn('Student model not found:', error.message);
+        console.warn('Error fetching students:', error.message);
         return NextResponse.json({ students: [] });
       }
     } else if (user.role === 'STUDENT') {
       // Student sees their own profile
       try {
+        if (!prisma.student) {
+          return NextResponse.json({ students: [] });
+        }
         const student = await prisma.student.findFirst({
           where: {
             userId: user.id,
@@ -92,7 +103,7 @@ export async function GET(request) {
         });
         students = student ? [student] : [];
       } catch (error) {
-        console.warn('Student model not found:', error.message);
+        console.warn('Error fetching student:', error.message);
         return NextResponse.json({ students: [] });
       }
     }
@@ -123,6 +134,17 @@ export async function POST(request) {
 
     // Check if Student model exists
     try {
+      // Check if Student model is available
+      if (!prisma.student) {
+        return NextResponse.json(
+          { 
+            error: 'Student profiles are not available. Please contact support.',
+            details: 'The Student model is not configured in the database.'
+          },
+          { status: 503 }
+        );
+      }
+
       // Check if user already has a student profile
       const existingStudent = await prisma.student.findFirst({
         where: {

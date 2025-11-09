@@ -55,18 +55,32 @@ export default function DashboardPage() {
       setStudent(user.students[0]);
 
       // Load subjects - using httpOnly cookies (credentials: 'include')
-      const subjectsRes = await fetch(`/api/subjects?gradeLevel=${user.students[0].gradeLevel}`, {
-        credentials: 'include',
-      });
-      const subjectsData = await subjectsRes.json();
-      setSubjects(subjectsData);
+      try {
+        const subjectsRes = await fetch(`/api/subjects?gradeLevel=${user.students[0].gradeLevel}`, {
+          credentials: 'include',
+        });
+        if (subjectsRes.ok) {
+          const subjectsData = await subjectsRes.json();
+          setSubjects(subjectsData || []);
+        }
+      } catch (subjectsError) {
+        console.warn('Error loading subjects:', subjectsError);
+        setSubjects([]);
+      }
 
       // Load progress
-      const progressRes = await fetch(`/api/students/${studentId}/progress`, {
-        credentials: 'include',
-      });
-      const progressData = await progressRes.json();
-      setProgress(progressData);
+      try {
+        const progressRes = await fetch(`/api/students/${studentId}/progress`, {
+          credentials: 'include',
+        });
+        if (progressRes.ok) {
+          const progressData = await progressRes.json();
+          setProgress(progressData);
+        }
+      } catch (progressError) {
+        console.warn('Error loading progress:', progressError);
+        setProgress(null);
+      }
 
       // Prepare chart data from recent sessions
       if (progressData.recentSessions && progressData.recentSessions.length > 0) {
@@ -98,7 +112,12 @@ export default function DashboardPage() {
         // Continue even if recommendations fail
       }
     } catch (error) {
-      // Error loading data
+      // Error loading data - log but don't crash
+      console.error('Error loading dashboard data:', error);
+      // Show empty state instead of crashing
+      setSubjects([]);
+      setProgress(null);
+      setRecommendations([]);
     } finally {
       setIsLoading(false);
     }
