@@ -305,6 +305,7 @@ export async function POST(request) {
     );
 
     // Create response with user data
+    // CRITICAL: Include is_admin flag for proper admin detection
     const response = NextResponse.json({
       success: true,
       token, // Still return token for backward compatibility during migration
@@ -312,6 +313,7 @@ export async function POST(request) {
         id: user.id,
         email: user.email,
         role: user.role,
+        is_admin: user.is_admin || user.role === 'ADMIN' || false, // Explicit admin flag
         subscriptionTier: user.subscriptionTier || null, // Safe handling if field doesn't exist
         students: user.students && Array.isArray(user.students) ? user.students.map(s => ({
           id: s.id,
@@ -323,12 +325,17 @@ export async function POST(request) {
     });
 
     // Set httpOnly cookie (secure method)
+    // CRITICAL: Use secure: true in production (Vercel uses HTTPS)
+    // Use sameSite: 'lax' for better compatibility
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
     response.cookies.set('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction, // HTTPS only in production/Vercel
+      sameSite: 'lax', // CSRF protection while allowing navigation
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
+      // Explicitly set domain to allow cookie to work across subdomains if needed
+      // Don't set domain for same-origin requests (Vercel default)
     });
 
     // Add rate limit headers

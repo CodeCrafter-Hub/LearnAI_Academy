@@ -28,8 +28,20 @@ export default function LoginForm() {
 
       addToast('Welcome back!', 'success');
 
-      // Check if student profile exists
-      if (!data.user.students || data.user.students.length === 0) {
+      // Wait a moment for cookie to be set before redirecting
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Redirect based on user role and student profile
+      const user = data.user;
+      
+      // Admin users always go to dashboard
+      if (user.role === 'ADMIN' || user.is_admin) {
+        router.push('/dashboard');
+        return;
+      }
+
+      // Regular users: check if student profile exists
+      if (!user.students || user.students.length === 0) {
         router.push('/onboarding');
       } else {
         router.push('/dashboard');

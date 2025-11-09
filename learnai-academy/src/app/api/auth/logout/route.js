@@ -12,7 +12,15 @@ export async function POST(request) {
     });
 
     // Clear the authentication cookie
-    response.cookies.delete('auth_token');
+    // CRITICAL: Must use same secure/sameSite settings as login
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+    response.cookies.set('auth_token', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 0, // Expire immediately
+      path: '/',
+    });
 
     return response;
   } catch (error) {

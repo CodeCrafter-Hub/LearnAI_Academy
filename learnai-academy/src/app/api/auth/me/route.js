@@ -72,6 +72,11 @@ export async function GET(request) {
     // Remove sensitive data - database uses password_hash field
     const { password_hash, passwordHash, ...userData } = user;
 
+    // CRITICAL: Ensure is_admin flag is explicitly set for frontend
+    if (!userData.hasOwnProperty('is_admin')) {
+      userData.is_admin = userData.role === 'ADMIN' || false;
+    }
+
     logAuth('me_endpoint', user.id, true, { role: user.role });
 
     return NextResponse.json({
