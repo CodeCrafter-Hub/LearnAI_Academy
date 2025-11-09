@@ -15,6 +15,7 @@ import TopicSelector from '@/components/learning/TopicSelector';
 import ModeSelector from '@/components/learning/ModeSelector';
 import DifficultySelector from '@/components/learning/DifficultySelector';
 import EnhancedProgressIndicator from '@/components/learning/EnhancedProgressIndicator';
+import PageTransition from '@/components/learning/PageTransition';
 import GradePasswordPrompt from '@/components/learning/GradePasswordPrompt';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { ArrowLeft, X, TrendingUp } from 'lucide-react';
@@ -255,18 +256,35 @@ function LearnPageContent() {
         />
       )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <Header />
 
-        <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)', flex: 1 }}>
+        <main className="container" style={{ 
+          paddingBlock: gradeLevel <= 2 ? 'var(--space-2xl)' : 'var(--space-xl)', 
+          flex: 1,
+          maxWidth: gradeLevel <= 2 ? '1200px' : '1400px',
+          marginInline: 'auto',
+          width: '100%',
+        }}>
         {/* Breadcrumb Navigation */}
-        <nav style={{ marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <nav style={{ 
+          marginBottom: gradeLevel <= 2 ? 'var(--space-xl)' : 'var(--space-lg)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 'var(--space-sm)',
+        }}>
           <button
             onClick={handleBack}
             className="btn btn-ghost"
-            style={{ padding: 'var(--space-xs) var(--space-sm)' }}
+            style={{ 
+              padding: gradeLevel <= 2 ? 'var(--space-sm) var(--space-md)' : 'var(--space-xs) var(--space-sm)',
+              fontSize: gradeLevel <= 2 ? 'var(--text-base)' : 'var(--text-sm)',
+              minHeight: gradeLevel <= 2 ? '48px' : '40px',
+            }}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft size={gradeLevel <= 2 ? 20 : 16} />
             {step === 'subject' ? 'Dashboard' : 'Back'}
           </button>
 
@@ -325,7 +343,7 @@ function LearnPageContent() {
 
         {/* Subject Selection */}
         {step === 'subject' && (
-          <div className="animate-fade-in">
+          <PageTransition step={step} direction="forward">
             <SubjectSelector
               subjects={subjects}
               gradeLevel={gradeLevel}
@@ -334,12 +352,12 @@ function LearnPageContent() {
                 setStep('topic');
               }}
             />
-          </div>
+          </PageTransition>
         )}
 
         {/* Topic Selection */}
         {step === 'topic' && selectedSubject && (
-          <div className="animate-fade-in">
+          <PageTransition step={step} direction="forward">
             <TopicSelector
               subject={selectedSubject}
               gradeLevel={gradeLevel}
@@ -348,12 +366,12 @@ function LearnPageContent() {
                 setStep('mode');
               }}
             />
-          </div>
+          </PageTransition>
         )}
 
         {/* Mode Selection */}
         {step === 'mode' && selectedTopic && (
-          <div className="animate-fade-in">
+          <PageTransition step={step} direction="forward">
             <ModeSelector
               topicName={selectedTopic.name}
               gradeLevel={gradeLevel}
@@ -362,12 +380,12 @@ function LearnPageContent() {
                 setStep('difficulty');
               }}
             />
-          </div>
+          </PageTransition>
         )}
 
         {/* Difficulty Selection */}
         {step === 'difficulty' && selectedMode && (
-          <div className="animate-fade-in">
+          <PageTransition step={step} direction="forward">
             <DifficultySelector
               topicName={selectedTopic.name}
               mode={selectedMode}
@@ -375,7 +393,7 @@ function LearnPageContent() {
               onSelect={startSession}
               isLoading={isLoading}
             />
-          </div>
+          </PageTransition>
         )}
 
         {/* Loading State */}
