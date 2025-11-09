@@ -103,13 +103,21 @@ export default function Home() {
               </div>
 
               <h1 style={{
-                fontSize: 'var(--text-5xl)',
+                fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
                 fontWeight: 'var(--weight-bold)',
                 color: 'var(--color-text-primary)',
                 marginBottom: 'var(--space-md)',
                 lineHeight: 'var(--leading-tight)',
               }}>
-                AI-Powered Learning That Adapts to Every Student
+                AI-Powered Learning That{' '}
+                <span style={{
+                  background: 'linear-gradient(135deg, hsl(220, 80%, 60%) 0%, hsl(260, 70%, 60%) 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>
+                  Adapts to Every Student
+                </span>
               </h1>
 
               <p style={{
