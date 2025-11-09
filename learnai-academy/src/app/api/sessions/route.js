@@ -3,6 +3,9 @@ import prisma from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { z } from 'zod';
 
+// Force dynamic rendering - uses authentication
+export const dynamic = 'force-dynamic';
+
 const createSessionSchema = z.object({
   studentId: z.string().uuid(),
   subjectId: z.string().uuid(),

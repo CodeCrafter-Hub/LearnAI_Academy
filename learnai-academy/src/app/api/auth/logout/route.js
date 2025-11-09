@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - uses cookies
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
   try {
     // Create success response

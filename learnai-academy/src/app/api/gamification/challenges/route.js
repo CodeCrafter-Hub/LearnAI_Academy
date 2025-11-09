@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { withAuthAndErrorHandler } from '@/middleware/errorHandler';
 import GamificationManager from '@/lib/gamification';
 
+// Force dynamic rendering - uses authentication
+export const dynamic = 'force-dynamic';
+
 // Lazy initialization to avoid localStorage on server
 function getGamificationManager() {
   if (typeof window === 'undefined') {

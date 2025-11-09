@@ -10,6 +10,11 @@ import { cookies } from 'next/headers';
  */
 export function verifyToken(request) {
   try {
+    // Skip during build time
+    if (process.env.NEXT_PHASE === 'phase-production-build' || !request) {
+      return null;
+    }
+
     let token = null;
 
     // First, try to get token from httpOnly cookie (secure method)

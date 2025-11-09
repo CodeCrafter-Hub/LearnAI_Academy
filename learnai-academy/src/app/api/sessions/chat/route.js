@@ -4,6 +4,9 @@ import { verifyToken } from '@/lib/auth';
 import agentOrchestrator from '@/services/ai/agentOrchestrator';
 import { z } from 'zod';
 
+// Force dynamic rendering - uses authentication
+export const dynamic = 'force-dynamic';
+
 const chatSchema = z.object({
   sessionId: z.string().uuid(),
   message: z.string().min(1).max(4000),

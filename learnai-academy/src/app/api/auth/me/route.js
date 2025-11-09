@@ -10,6 +10,9 @@ import { logAuth, logError } from '@/lib/logger';
  * Replaces the need to store user data in localStorage.
  */
 
+// Force dynamic rendering - uses cookies() for authentication
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     // Verify authentication via httpOnly cookie

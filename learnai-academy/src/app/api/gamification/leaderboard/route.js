@@ -3,6 +3,9 @@ import { withAuthAndErrorHandler } from '@/middleware/errorHandler';
 import GamificationManager from '@/lib/gamification';
 import prisma from '@/lib/prisma';
 
+// Force dynamic rendering - this route uses authentication
+export const dynamic = 'force-dynamic';
+
 // Lazy initialization to avoid localStorage on server
 function getGamificationManager() {
   if (typeof window === 'undefined') {
