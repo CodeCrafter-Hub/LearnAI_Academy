@@ -9,6 +9,9 @@ import { checkAccountLockout, recordFailedAttempt, clearFailedAttempts } from '@
 import { auditAuth, getRequestMetadata } from '@/lib/auditLogger';
 import { errorResponse, successResponse, validationErrorResponse, rateLimitErrorResponse } from '@/lib/errorHandler';
 
+// Force dynamic rendering - uses database, cookies, and authentication
+export const dynamic = 'force-dynamic';
+
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
