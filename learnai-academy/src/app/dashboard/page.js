@@ -38,6 +38,13 @@ export default function DashboardPage() {
 
   const loadData = async () => {
     try {
+      // Admins don't need student profiles - show admin dashboard
+      if (user?.role === 'ADMIN' || user?.is_admin) {
+        // Admin dashboard - show system overview instead of student-specific data
+        setIsLoading(false);
+        return;
+      }
+
       // Get student ID (first student for now)
       const studentId = user?.students?.[0]?.id;
       if (!studentId) {
