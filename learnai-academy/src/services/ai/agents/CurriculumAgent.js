@@ -1,5 +1,6 @@
 import { BaseAgent } from './BaseAgent.js';
 import { groqClient } from '../groqClient.js';
+import { aiProvider } from '../aiProviderConfig.js';
 import prisma from '../../../lib/prisma.js';
 import { standardsService } from '../../curriculum/standardsService.js';
 import { contentValidator } from '../../curriculum/contentValidator.js';
