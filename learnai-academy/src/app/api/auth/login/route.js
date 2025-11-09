@@ -194,19 +194,20 @@ export async function POST(request) {
     );
 
     // Create response with user data
-    const response = successResponse({
+    const response = NextResponse.json({
+      success: true,
       token, // Still return token for backward compatibility during migration
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
         subscriptionTier: user.subscriptionTier || null, // Safe handling if field doesn't exist
-        students: user.students.map(s => ({
+        students: user.students && Array.isArray(user.students) ? user.students.map(s => ({
           id: s.id,
           firstName: s.firstName,
           lastName: s.lastName,
           gradeLevel: s.gradeLevel,
-        })),
+        })) : [],
       },
     });
 

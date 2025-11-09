@@ -70,13 +70,38 @@ export function AuthProvider({ children }) {
 
     // Safe JSON parsing
     const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Invalid response format');
-    }
     const text = await response.text();
+    
+    if (!response.ok) {
+      // Handle error responses
+      let errorData;
+      if (contentType && contentType.includes('application/json') && text) {
+        try {
+          errorData = JSON.parse(text);
+        } catch (e) {
+          // Not JSON, use text as error message
+          throw new Error(text || 'Login failed');
+        }
+      } else {
+        throw new Error(text || 'Login failed');
+      }
+      
+      const error = new Error(errorData.message || errorData.error || 'Login failed');
+      if (errorData.details) {
+        error.details = errorData.details;
+      }
+      throw error;
+    }
+
+    // Parse successful response
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Invalid response format from server');
+    }
+    
     if (!text) {
       throw new Error('Empty response from server');
     }
+    
     let data;
     try {
       data = JSON.parse(text);
@@ -84,20 +109,14 @@ export function AuthProvider({ children }) {
       throw new Error('Invalid JSON response from server');
     }
 
-    if (!response.ok) {
-      // Preserve detailed error information
-      const error = new Error(data.message || data.error || 'Login failed');
-      if (data.details) {
-        error.details = data.details;
-      }
-      throw error;
-    }
+    // Handle successResponse wrapper (data.data) or direct response (data)
+    const responseData = data.data || data;
 
     // Set user data from response
-    setUser(data.user);
+    setUser(responseData.user);
     setIsAuthenticated(true);
 
-    return data;
+    return responseData;
   };
 
   const register = async (userData) => {
@@ -110,13 +129,38 @@ export function AuthProvider({ children }) {
 
     // Safe JSON parsing
     const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Invalid response format');
-    }
     const text = await response.text();
+    
+    if (!response.ok) {
+      // Handle error responses
+      let errorData;
+      if (contentType && contentType.includes('application/json') && text) {
+        try {
+          errorData = JSON.parse(text);
+        } catch (e) {
+          // Not JSON, use text as error message
+          throw new Error(text || 'Registration failed');
+        }
+      } else {
+        throw new Error(text || 'Registration failed');
+      }
+      
+      const error = new Error(errorData.message || errorData.error || 'Registration failed');
+      if (errorData.details) {
+        error.details = errorData.details;
+      }
+      throw error;
+    }
+
+    // Parse successful response
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Invalid response format from server');
+    }
+    
     if (!text) {
       throw new Error('Empty response from server');
     }
+    
     let data;
     try {
       data = JSON.parse(text);
@@ -124,20 +168,14 @@ export function AuthProvider({ children }) {
       throw new Error('Invalid JSON response from server');
     }
 
-    if (!response.ok) {
-      // Preserve detailed error information
-      const error = new Error(data.message || data.error || 'Registration failed');
-      if (data.details) {
-        error.details = data.details;
-      }
-      throw error;
-    }
+    // Handle successResponse wrapper (data.data) or direct response (data)
+    const responseData = data.data || data;
 
     // Set user data from response
-    setUser(data.user);
+    setUser(responseData.user);
     setIsAuthenticated(true);
 
-    return data;
+    return responseData;
   };
 
   const logout = async () => {
