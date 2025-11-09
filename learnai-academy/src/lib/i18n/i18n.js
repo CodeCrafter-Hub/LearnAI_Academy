@@ -64,7 +64,11 @@ export function setLanguage(locale) {
     currentLanguage = locale;
     // Store in localStorage for persistence
     if (typeof window !== 'undefined') {
-      localStorage.setItem('preferredLanguage', locale);
+      try {
+        localStorage.setItem('preferredLanguage', locale);
+      } catch (error) {
+        console.warn('Failed to save language preference:', error);
+      }
     }
   }
 }
@@ -117,8 +121,11 @@ export function hasTranslation(key, locale = currentLanguage) {
   return true;
 }
 
-// Initialize with default language
+// Initialize with default language (only on client side, and don't block)
 if (typeof window !== 'undefined') {
-  initI18n();
+  // Don't await - let it initialize in background
+  initI18n().catch((error) => {
+    console.warn('Failed to initialize i18n on module load:', error);
+  });
 }
 
