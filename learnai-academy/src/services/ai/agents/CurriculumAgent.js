@@ -75,13 +75,14 @@ Create a comprehensive lesson plan with:
 
 Format the response as structured JSON with clear sections.`;
 
-        const response = await groqClient.chat([
+        // Use unified AI provider with automatic fallback
+        const response = await aiProvider.chat([
           { role: 'system', content: prompt },
           { role: 'user', content: `Generate a complete lesson plan for ${topic}.` },
         ], {
-          model: groqClient.models.smart,
           temperature: 0.3, // Lower temperature for more structured output
           maxTokens: 3000,
+          preferredProvider: 'groq', // Prefer Groq, but fallback if needed
         });
 
         const result = this.parseLessonPlan(response.content);
@@ -150,13 +151,14 @@ Format as JSON array with these fields:
 - difficulty: "${difficulty}"
 - gradeLevel: ${gradeLevel}`;
 
-        const response = await groqClient.chat([
+        // Use unified AI provider with automatic fallback
+        const response = await aiProvider.chat([
           { role: 'system', content: prompt },
           { role: 'user', content: `Generate ${count} practice problems.` },
         ], {
-          model: groqClient.models.smart,
           temperature: 0.4,
           maxTokens: 4000,
+          preferredProvider: 'groq', // Prefer Groq, but fallback if needed
         });
 
         const result = this.parseProblems(response.content);
