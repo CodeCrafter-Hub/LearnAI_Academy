@@ -1,3 +1,5 @@
+'use client';
+
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -10,19 +12,7 @@ import ErrorBoundary from '@/components/ErrorBoundary.js';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
-
-export const metadata = {
-  title: "LearnAI Academy",
-  description: "AI-powered K-12 tutoring platform with personalized learning experiences.",
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
-  },
-};
+import Head from 'next/head';
 
 export default function RootLayout({ children }) {
   return (

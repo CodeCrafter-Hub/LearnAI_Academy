@@ -7,7 +7,9 @@ import dynamic from 'next/dynamic';
 // Dynamically import ThemeToggle to prevent SSR issues
 const ThemeToggle = dynamic(() => import('@/components/ui/ThemeToggle'), {
   ssr: false,
+  loading: () => <div style={{ width: '40px', height: '40px' }} />,
 });
+
 import {
   ArrowRight,
   Check,
@@ -24,6 +26,9 @@ import {
   BarChart3,
   Play
 } from 'lucide-react';
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
 
 export default function Home() {
   const router = useRouter();
