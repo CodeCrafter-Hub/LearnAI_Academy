@@ -220,13 +220,14 @@ For each question, provide:
 5. Points (out of 100 total)
 6. Standards addressed`;
 
-    const response = await groqClient.chat([
+    // Use unified AI provider with automatic fallback
+    const response = await aiProvider.chat([
       { role: 'system', content: prompt },
       { role: 'user', content: `Generate the assessment.` },
     ], {
-      model: groqClient.models.smart,
       temperature: 0.3,
       maxTokens: 4000,
+      preferredProvider: 'groq', // Prefer Groq, but fallback if needed
     });
 
     return this.parseAssessment(response.content);
