@@ -49,7 +49,9 @@ export function useNotifications() {
       action: {
         label: 'View',
         onClick: () => {
-          window.location.href = '/achievements';
+          if (typeof window !== 'undefined') {
+            window.location.href = '/achievements';
+          }
         },
       },
     });

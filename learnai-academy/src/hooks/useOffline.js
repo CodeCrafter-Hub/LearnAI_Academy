@@ -13,46 +13,67 @@ export function useOffline() {
   const [offlineService, setOfflineService] = useState(null);
 
   useEffect(() => {
-    const service = getOfflineService();
-    if (!service) return;
+    // Only run on client side
+    if (typeof window === 'undefined') {
+      return;
+    }
 
-    setOfflineService(service);
-
-    // Load queue
-    service.loadQueue().then(() => {
-      setQueueLength(service.getQueueLength());
-    });
-
-    // Check initial status
-    setIsOnline(service.isOnlineStatus());
-
-    // Listen for online/offline
-    const handleOnline = () => {
-      setIsOnline(true);
-      service.syncQueue().then(() => {
-        setQueueLength(service.getQueueLength());
-      });
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Poll queue length
-    const interval = setInterval(() => {
-      if (service) {
-        setQueueLength(service.getQueueLength());
+    try {
+      const service = getOfflineService();
+      if (!service) {
+        setIsOnline(true); // Default to online if service unavailable
+        return;
       }
-    }, 1000);
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      clearInterval(interval);
-    };
+      setOfflineService(service);
+
+      // Load queue
+      service.loadQueue().then(() => {
+        setQueueLength(service.getQueueLength());
+      }).catch((error) => {
+        console.warn('Failed to load offline queue:', error);
+      });
+
+      // Check initial status
+      setIsOnline(service.isOnlineStatus());
+
+      // Listen for online/offline
+      const handleOnline = () => {
+        setIsOnline(true);
+        service.syncQueue().then(() => {
+          setQueueLength(service.getQueueLength());
+        }).catch((error) => {
+          console.warn('Failed to sync queue:', error);
+        });
+      };
+
+      const handleOffline = () => {
+        setIsOnline(false);
+      };
+
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+
+      // Poll queue length
+      const interval = setInterval(() => {
+        if (service) {
+          try {
+            setQueueLength(service.getQueueLength());
+          } catch (error) {
+            console.warn('Failed to get queue length:', error);
+          }
+        }
+      }, 1000);
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+        clearInterval(interval);
+      };
+    } catch (error) {
+      console.error('Failed to initialize offline service:', error);
+      setIsOnline(true); // Default to online on error
+    }
   }, []);
 
   const queueAction = async (action) => {

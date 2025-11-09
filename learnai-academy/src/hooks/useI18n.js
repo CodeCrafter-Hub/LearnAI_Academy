@@ -21,11 +21,19 @@ export function useI18n() {
   // Initialize i18n
   useEffect(() => {
     const initialize = async () => {
-      setIsLoading(true);
-      const lang = await initI18n(locale);
-      setLocale(lang);
-      setIsRTL(isRTL(lang));
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const lang = await initI18n(locale);
+        setLocale(lang);
+        setIsRTL(checkRTL(lang));
+      } catch (error) {
+        console.error('Failed to initialize i18n:', error);
+        // Fallback to English on error
+        setLocale('en');
+        setIsRTL(false);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initialize();
