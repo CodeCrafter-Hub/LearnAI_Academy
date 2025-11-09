@@ -121,14 +121,26 @@ export async function POST(request) {
       throw error;
     }
 
-    // Check account lockout before attempting login
-    const lockoutStatus = await checkAccountLockout(email);
-    if (lockoutStatus.locked) {
-      await auditAuth.accountLocked(null, email, ipAddress, 'too_many_failed_attempts');
-      return errorResponse(
-        new Error(`Account locked. Please try again after ${Math.ceil(lockoutStatus.lockoutDuration / 60)} minutes.`),
-        request
-      );
+    // Check account lockout before attempting login (non-blocking if cache fails)
+    let lockoutStatus;
+    try {
+      lockoutStatus = await checkAccountLockout(email);
+      if (lockoutStatus && lockoutStatus.locked) {
+        try {
+          await auditAuth.accountLocked(null, email, ipAddress, 'too_many_failed_attempts');
+        } catch (auditError) {
+          // Don't block login if audit fails
+          console.log('Audit logging failed (non-critical):', auditError);
+        }
+        return errorResponse(
+          new Error(`Account locked. Please try again after ${Math.ceil(lockoutStatus.lockoutDuration / 60)} minutes.`),
+          request
+        );
+      }
+    } catch (lockoutError) {
+      // Fail open - don't block login if lockout check fails
+      console.log('Account lockout check failed (non-critical):', lockoutError);
+      lockoutStatus = { locked: false, remainingAttempts: 5 };
     }
 
     // Find user
@@ -169,9 +181,17 @@ export async function POST(request) {
 
     if (!user) {
       // Record failed attempt even if user doesn't exist (prevents email enumeration)
-      await recordFailedAttempt(email);
-      await auditAuth.login(null, email, ipAddress, userAgent, false, 'user_not_found');
-      logAuth('login_attempt', email, false, { reason: 'user_not_found' });
+      try {
+        await recordFailedAttempt(email);
+      } catch (lockoutError) {
+        console.log('Failed to record attempt (non-critical):', lockoutError);
+      }
+      try {
+        await auditAuth.login(null, email, ipAddress, userAgent, false, 'user_not_found');
+        logAuth('login_attempt', email, false, { reason: 'user_not_found' });
+      } catch (auditError) {
+        console.log('Audit logging failed (non-critical):', auditError);
+      }
       return errorResponse(
         new Error('Invalid email or password'),
         request
@@ -183,8 +203,16 @@ export async function POST(request) {
     const userPasswordHash = user.password_hash || user.passwordHash;
     if (!userPasswordHash) {
       // Record failed attempt
-      const lockoutResult = await recordFailedAttempt(email);
-      await auditAuth.login(user.id, email, ipAddress, userAgent, false, 'no_password_set');
+      try {
+        await recordFailedAttempt(email);
+      } catch (lockoutError) {
+        console.log('Failed to record attempt (non-critical):', lockoutError);
+      }
+      try {
+        await auditAuth.login(user.id, email, ipAddress, userAgent, false, 'no_password_set');
+      } catch (auditError) {
+        console.log('Audit logging failed (non-critical):', auditError);
+      }
       logError('Login attempt with no password hash', { userId: user.id, email });
       return NextResponse.json(
         { 
@@ -210,28 +238,43 @@ export async function POST(request) {
     }
 
     if (!isValidPassword) {
-      // Record failed attempt
-      const lockoutResult = await recordFailedAttempt(email);
-      
-      if (lockoutResult.locked) {
-        await auditAuth.accountLocked(user.id, email, ipAddress, 'too_many_failed_attempts');
+      // Record failed attempt (non-blocking)
+      let lockoutResult = { locked: false, remainingAttempts: 5 };
+      try {
+        lockoutResult = await recordFailedAttempt(email);
+        if (lockoutResult && lockoutResult.locked) {
+          try {
+            await auditAuth.accountLocked(user.id, email, ipAddress, 'too_many_failed_attempts');
+          } catch (auditError) {
+            console.log('Audit logging failed (non-critical):', auditError);
+          }
+        }
+        try {
+          await auditAuth.login(user.id, email, ipAddress, userAgent, false, 'invalid_password');
+          logAuth('login_attempt', user.id, false, { reason: 'invalid_password' });
+        } catch (auditError) {
+          console.log('Audit logging failed (non-critical):', auditError);
+        }
+      } catch (lockoutError) {
+        console.log('Failed to record attempt (non-critical):', lockoutError);
       }
       
-      await auditAuth.login(user.id, email, ipAddress, userAgent, false, 'invalid_password');
-      logAuth('login_attempt', user.id, false, { reason: 'invalid_password' });
-      
       return errorResponse(
-        new Error(lockoutResult.locked 
+        new Error(lockoutResult && lockoutResult.locked
           ? `Account locked due to too many failed attempts. Please try again after ${Math.ceil(lockoutResult.lockoutDuration / 60)} minutes.`
-          : `Invalid email or password. ${lockoutResult.remainingAttempts} attempts remaining.`),
+          : `Invalid email or password. ${lockoutResult.remainingAttempts || 5} attempts remaining.`),
         request
       );
     }
 
-    // Clear failed attempts on successful login
-    await clearFailedAttempts(email);
+    // Clear failed attempts on successful login (non-blocking)
+    try {
+      await clearFailedAttempts(email);
+    } catch (clearError) {
+      console.log('Failed to clear attempts (non-critical):', clearError);
+    }
 
-    // Update last login (if field exists in schema)
+    // Update last login (if field exists in schema) - non-blocking
     try {
       await prisma.user.update({
         where: { id: user.id },
@@ -245,9 +288,14 @@ export async function POST(request) {
       console.log('Note: Could not update lastLogin field (may not exist in schema)');
     }
 
-    // Log successful authentication
-    await auditAuth.login(user.id, email, ipAddress, userAgent, true);
-    logAuth('login_success', user.id, true, { role: user.role });
+    // Log successful authentication (non-blocking)
+    try {
+      await auditAuth.login(user.id, email, ipAddress, userAgent, true);
+      logAuth('login_success', user.id, true, { role: user.role });
+    } catch (auditError) {
+      // Don't block login if audit logging fails
+      console.log('Audit logging failed (non-critical):', auditError);
+    }
 
     // Generate JWT token
     const token = jwt.sign(
