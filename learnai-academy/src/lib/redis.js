@@ -98,32 +98,33 @@ function createMockRedis() {
 // Export lazy getter with error handling
 export const redis = new Proxy({}, {
   get(target, prop) {
-    const client = getRedisClient();
-    const value = client[prop];
-    
-    // If it's a function, wrap it with error handling
-    if (typeof value === 'function') {
-      return async (...args) => {
-        try {
-          // Check if client is actually a Redis client (not mock)
-          if (client && typeof client.get === 'function' && client.constructor.name === 'Redis') {
-            return await value.apply(client, args);
-          } else {
-            // Mock client - return appropriate default
-            if (prop === 'get') return null;
-            if (prop === 'set' || prop === 'setex') return 'OK';
-            if (prop === 'del') return 0;
-            if (prop === 'keys') return [];
-            if (prop === 'incr') return 1;
-            if (prop === 'expire') return 0;
-            if (prop === 'flushdb') return 'OK';
-            return null;
-          }
-        } catch (error) {
-          // If Redis connection fails, return appropriate defaults
-          if (error.code === 'ECONNREFUSED' || error.message?.includes('connect')) {
+    try {
+      const client = getRedisClient();
+      const value = client[prop];
+      
+      // If it's a function, wrap it with error handling
+      if (typeof value === 'function') {
+        return async (...args) => {
+          try {
+            // Check if client is actually a Redis client (not mock)
+            if (client && typeof client.get === 'function' && client.constructor?.name === 'Redis') {
+              return await value.apply(client, args);
+            } else {
+              // Mock client - return appropriate default
+              if (prop === 'get') return null;
+              if (prop === 'set' || prop === 'setex') return 'OK';
+              if (prop === 'del' || prop === 'delete') return 0;
+              if (prop === 'keys') return [];
+              if (prop === 'incr') return 1;
+              if (prop === 'expire') return 0;
+              if (prop === 'flushdb') return 'OK';
+              return null;
+            }
+          } catch (error) {
+            // If Redis connection fails, return appropriate defaults
+            // Catch ALL errors to prevent crashes
             if (process.env.NODE_ENV === 'development') {
-              console.warn(`Redis operation '${prop}' failed (connection refused), using fallback`);
+              console.warn(`Redis operation '${prop}' failed, using fallback:`, error.message);
             }
             // Return appropriate defaults based on operation
             if (prop === 'get') return null;
@@ -135,12 +136,14 @@ export const redis = new Proxy({}, {
             if (prop === 'flushdb') return 'OK';
             return null;
           }
-          // Re-throw other errors
-          throw error;
-        }
-      };
+        };
+      }
+      return value;
+    } catch (error) {
+      // If getting the client itself fails, return a safe mock
+      console.error('Redis proxy error:', error);
+      return () => Promise.resolve(null);
     }
-    return value;
   },
 });
 
