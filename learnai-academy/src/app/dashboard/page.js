@@ -166,7 +166,7 @@ export default function DashboardPage() {
             marginBottom: 'var(--space-xs)',
             letterSpacing: '-0.03em',
           }}>
-            Welcome back, {student?.firstName}
+            Welcome back, {student?.firstName || user?.email?.split('@')[0] || 'Student'}
           </h1>
           <p style={{
             fontSize: 'var(--text-lg)',
