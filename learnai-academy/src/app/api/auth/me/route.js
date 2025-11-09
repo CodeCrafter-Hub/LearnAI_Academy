@@ -52,8 +52,8 @@ export async function GET(request) {
       );
     }
 
-    // Remove sensitive data
-    const { passwordHash, ...userData } = user;
+    // Remove sensitive data - database uses password_hash field
+    const { password_hash, passwordHash, ...userData } = user;
 
     logAuth('me_endpoint', user.id, true, { role: user.role });
 

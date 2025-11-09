@@ -30,7 +30,21 @@ export function AuthProvider({ children }) {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        // Safe JSON parsing
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid response format');
+        }
+        const text = await response.text();
+        if (!text) {
+          throw new Error('Empty response from server');
+        }
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error('Invalid JSON response from server');
+        }
         setUser(data.user);
         setIsAuthenticated(true);
       } else {
@@ -54,10 +68,29 @@ export function AuthProvider({ children }) {
       credentials: 'include', // Important: include cookies
     });
 
-    const data = await response.json();
+    // Safe JSON parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Invalid response format');
+    }
+    const text = await response.text();
+    if (!text) {
+      throw new Error('Empty response from server');
+    }
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new Error('Invalid JSON response from server');
+    }
 
     if (!response.ok) {
-      throw new Error(data.error || 'Login failed');
+      // Preserve detailed error information
+      const error = new Error(data.message || data.error || 'Login failed');
+      if (data.details) {
+        error.details = data.details;
+      }
+      throw error;
     }
 
     // Set user data from response
@@ -75,7 +108,21 @@ export function AuthProvider({ children }) {
       credentials: 'include', // Important: include cookies
     });
 
-    const data = await response.json();
+    // Safe JSON parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Invalid response format');
+    }
+    const text = await response.text();
+    if (!text) {
+      throw new Error('Empty response from server');
+    }
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new Error('Invalid JSON response from server');
+    }
 
     if (!response.ok) {
       // Preserve detailed error information

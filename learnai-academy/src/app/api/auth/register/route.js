@@ -91,6 +91,15 @@ const registerSchema = z.object({
 
 export async function POST(request) {
   try {
+    // Check if JWT_SECRET is set
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return NextResponse.json(
+        { error: 'Server configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     // Rate limiting: 3 registration attempts per hour per IP
     const { rateLimitMiddleware } = await import('@/middleware/rateLimit');
     const rateLimitResponse = await rateLimitMiddleware(request, 3, 3600);

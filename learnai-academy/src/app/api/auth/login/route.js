@@ -200,7 +200,7 @@ export async function POST(request) {
         id: user.id,
         email: user.email,
         role: user.role,
-        subscriptionTier: user.subscriptionTier,
+        subscriptionTier: user.subscriptionTier || null, // Safe handling if field doesn't exist
         students: user.students.map(s => ({
           id: s.id,
           firstName: s.firstName,
