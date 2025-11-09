@@ -34,9 +34,11 @@ When you first visit your deployed site, you should see:
 
 ### Optional (for full functionality)
 5. **`REDIS_URL`** (Caching)
-   - Format: `redis://user:password@host:port`
-   - Options: Upstash, Redis Cloud, or any Redis provider
+   - **Recommended**: Upstash (free tier available)
+   - Format: `redis://default:PASSWORD@ENDPOINT:6379`
+   - Get from: https://upstash.com/ (see `UPSTASH_REDIS_SETUP.md` for details)
    - ⚠️ **Without this**: App works but caching won't function
+   - ✅ **Free tier**: 10,000 commands/day (perfect for development)
 
 6. **`NEXT_PUBLIC_APP_URL`** (Optional)
    - Your Vercel deployment URL (e.g., `https://your-app.vercel.app`)
