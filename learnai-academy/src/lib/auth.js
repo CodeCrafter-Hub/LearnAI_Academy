@@ -6,12 +6,18 @@ import { cookies } from 'next/headers';
  * Supports both httpOnly cookies (preferred) and Authorization header (legacy)
  *
  * @param {Request} request - Next.js request object
- * @returns {Object|null} Decoded token payload or null if invalid
+ * @returns {Promise<Object|null>} Decoded token payload or null if invalid
  */
-export function verifyToken(request) {
+export async function verifyToken(request) {
   try {
     // Skip during build time
     if (process.env.NEXT_PHASE === 'phase-production-build' || !request) {
+      return null;
+    }
+
+    // Check JWT_SECRET is available
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not configured');
       return null;
     }
 
@@ -19,15 +25,16 @@ export function verifyToken(request) {
 
     // First, try to get token from httpOnly cookie (secure method)
     try {
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
       token = cookieStore.get('auth_token')?.value;
     } catch (error) {
       // cookies() not available in this context, fall back to header
+      // This can happen during build or in certain edge cases
     }
 
     // Fallback to Authorization header for backward compatibility
-    if (!token) {
-      const authHeader = request.headers.get('authorization');
+    if (!token && request) {
+      const authHeader = request.headers?.get('authorization');
       if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.substring(7);
       }
@@ -41,7 +48,10 @@ export function verifyToken(request) {
 
     return decoded;
   } catch (error) {
-    console.error('Token verification error:', error.message);
+    // Don't log JWT errors in production to avoid noise
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Token verification error:', error.message);
+    }
     return null;
   }
 }

@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   try {
     // Verify authentication via httpOnly cookie
-    const tokenData = verifyToken(request);
+    const tokenData = await verifyToken(request);
 
     if (!tokenData) {
       return NextResponse.json(
