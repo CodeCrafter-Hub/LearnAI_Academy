@@ -135,6 +135,36 @@ class CacheService {
       console.error('Error clearing cache:', error);
     }
   }
+
+  /**
+   * Generic cache operations
+   */
+  async get(key) {
+    try {
+      const value = await redis.get(key);
+      return value;
+    } catch (error) {
+      console.error('Error getting cache:', error);
+      return null;
+    }
+  }
+
+  async set(key, value, ttl = 3600) {
+    try {
+      await redis.setex(key, ttl, typeof value === 'string' ? value : JSON.stringify(value));
+    } catch (error) {
+      console.error('Error setting cache:', error);
+    }
+  }
+
+  async delete(key) {
+    try {
+      await redis.del(key);
+    } catch (error) {
+      console.error('Error deleting cache:', error);
+      // Don't throw - fail gracefully
+    }
+  }
 }
 
 export const cacheService = new CacheService();

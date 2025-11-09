@@ -76,17 +76,22 @@ function createMockRedis() {
   return {
     get: async () => null,
     set: async () => 'OK',
+    setex: async () => 'OK',
     del: async () => 0,
+    delete: async () => 0, // Alias for del
     exists: async () => 0,
     expire: async () => 0,
     ttl: async () => -1,
     keys: async () => [],
+    incr: async () => 1,
     flushdb: async () => 'OK',
     quit: async () => 'OK',
     disconnect: async () => {},
     on: () => {},
     once: () => {},
     emit: () => {},
+    // Add constructor name for detection
+    constructor: { name: 'MockRedis' },
   };
 }
 
@@ -123,7 +128,7 @@ export const redis = new Proxy({}, {
             // Return appropriate defaults based on operation
             if (prop === 'get') return null;
             if (prop === 'set' || prop === 'setex') return 'OK';
-            if (prop === 'del') return 0;
+            if (prop === 'del' || prop === 'delete') return 0;
             if (prop === 'keys') return [];
             if (prop === 'incr') return 1;
             if (prop === 'expire') return 0;

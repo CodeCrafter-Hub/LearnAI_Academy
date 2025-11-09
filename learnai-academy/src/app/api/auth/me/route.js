@@ -26,23 +26,40 @@ export async function GET(request) {
     }
 
     // Fetch user with related data
-    const user = await prisma.user.findUnique({
-      where: { id: tokenData.userId },
-      include: {
-        students: {
-          include: {
-            progress: {
-              select: {
-                id: true,
-                topicId: true,
-                masteryLevel: true,
+    // Note: Student model might not exist in database, so we'll try to include it but handle gracefully
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: tokenData.userId },
+        include: {
+          students: {
+            include: {
+              progress: {
+                select: {
+                  id: true,
+                  topicId: true,
+                  masteryLevel: true,
+                },
+                take: 5, // Limit to recent progress
               },
-              take: 5, // Limit to recent progress
             },
           },
         },
-      },
-    });
+      });
+    } catch (prismaError) {
+      // If Student model doesn't exist, fetch user without students
+      if (prismaError.message?.includes('students') || prismaError.message?.includes('Unknown field')) {
+        user = await prisma.user.findUnique({
+          where: { id: tokenData.userId },
+        });
+        // Add empty students array for consistency
+        if (user) {
+          user.students = [];
+        }
+      } else {
+        throw prismaError;
+      }
+    }
 
     if (!user) {
       logAuth('me_endpoint', tokenData.userId, false, { reason: 'user_not_found' });
