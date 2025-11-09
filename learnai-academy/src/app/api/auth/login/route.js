@@ -134,12 +134,27 @@ export async function POST(request) {
     // Find user
     let user;
     try {
-      user = await prisma.user.findUnique({
+      // Try to include students, but don't fail if Student model doesn't exist
+      const userQuery = {
         where: { email: email.toLowerCase().trim() }, // Normalize email
-        include: {
-          students: true,
-        },
-      });
+      };
+      
+      // Only include students if Student model exists
+      try {
+        user = await prisma.user.findUnique({
+          ...userQuery,
+          include: {
+            students: true,
+          },
+        });
+      } catch (includeError) {
+        // If students include fails, try without it
+        console.log('Note: Student model may not exist, fetching user without students');
+        user = await prisma.user.findUnique(userQuery);
+        if (user) {
+          user.students = []; // Set empty array for consistency
+        }
+      }
     } catch (dbError) {
       logError('Database error during login', dbError);
       console.error('Database error details:', dbError);
