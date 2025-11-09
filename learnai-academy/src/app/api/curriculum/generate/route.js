@@ -1,227 +1,141 @@
 import { NextResponse } from 'next/server';
+import { CurriculumAgent } from '@/services/ai/agents/CurriculumAgent';
 import { verifyToken } from '@/lib/auth';
-import { curriculumGeneratorService } from '@/services/curriculum/curriculumGeneratorService.js';
-import { presentationGeneratorService } from '@/services/curriculum/presentationGeneratorService.js';
-import { teachingAidGeneratorService } from '@/services/curriculum/teachingAidGeneratorService.js';
-import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { logError, logInfo } from '@/lib/logger';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-const generateCurriculumSchema = z.object({
-  action: z.enum(['curriculum', 'units', 'lessonPlan', 'lessonPlans', 'presentation', 'teachingAid']),
-  subjectId: z.string().uuid(),
-  gradeLevel: z.number().int().min(-1).max(12), // -1 = Preschool, 0 = Pre-K, 1-12 = Grades
-  academicYear: z.string().optional(),
-  // Curriculum-specific
-  unitCount: z.number().int().min(1).max(20).optional(),
-  // Unit-specific
-  unitId: z.string().uuid().optional(),
-  // Lesson plan-specific
-  lessonPlanId: z.string().uuid().optional(),
-  lessonPlanCount: z.number().int().min(1).max(10).optional(),
-  // Presentation-specific
-  presentationType: z.enum(['SLIDES', 'VIDEO', 'INTERACTIVE', 'AUDIO_ONLY', 'HYBRID']).optional(),
-  // Teaching aid-specific
-  teachingAidType: z.enum(['VISUAL', 'MANIPULATIVE', 'WORKSHEET', 'GAME', 'SIMULATION', 'ANIMATION', 'POSTER', 'FLASHCARD']).optional(),
-  // Options
-  options: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).optional(),
-    durationMinutes: z.number().int().min(15).max(60).optional(),
-    includeAllComponents: z.boolean().optional(),
-  }).optional(),
+const generateSchema = z.object({
+  topic: z.string().min(1, 'Topic is required'),
+  gradeLevel: z.number().int().min(1).max(12),
+  subjectId: z.string().optional(),
+  includeStandards: z.boolean().optional().default(true),
+  includeAssessments: z.boolean().optional().default(true),
+  includePracticeProblems: z.boolean().optional().default(true),
+  difficultyLevel: z.enum(['EASY', 'MEDIUM', 'HARD']).optional().default('MEDIUM'),
 });
 
 /**
  * POST /api/curriculum/generate
- * Generate formal curriculum components
+ * Generate a lesson plan for a topic
  */
 export async function POST(request) {
   try {
     // Verify authentication
-    const user = await verifyToken(request);
-    if (!user) {
+    const tokenData = await verifyToken(request);
+    if (!tokenData) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
+    // Parse and validate request body
     const body = await request.json();
-    const data = generateCurriculumSchema.parse(body);
+    const validated = generateSchema.parse(body);
 
-    let result;
+    logInfo('Curriculum generation requested', {
+      userId: tokenData.userId,
+      topic: validated.topic,
+      gradeLevel: validated.gradeLevel,
+    });
 
-    switch (data.action) {
-      case 'curriculum':
-        // Generate full-year curriculum
-        result = await curriculumGeneratorService.generateCurriculum(
-          data.subjectId,
-          data.gradeLevel,
-          data.academicYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-          {
-            name: data.options?.name,
-            description: data.options?.description,
-            unitCount: data.unitCount || 5,
-            includeScopeSequence: true,
-          }
-        );
-        break;
+    // Create curriculum agent
+    const subjectId = validated.subjectId || 'math'; // Default to math
+    const agent = new CurriculumAgent('Curriculum Agent', subjectId);
 
-      case 'units':
-        // Generate units for existing curriculum
-        if (!data.unitId && !data.academicYear) {
-          return NextResponse.json(
-            { error: 'Either unitId or academicYear with subjectId and gradeLevel required' },
-            { status: 400 }
-          );
-        }
+    // Generate lesson plan
+    const lessonPlan = await agent.generateLessonPlan(
+      validated.topic,
+      validated.gradeLevel,
+      {
+        includeStandards: validated.includeStandards,
+        includeAssessments: validated.includeAssessments,
+        includePracticeProblems: validated.includePracticeProblems,
+        difficultyLevel: validated.difficultyLevel,
+        useCache: true, // Use cache for production
+        maxRetries: 3,
+      }
+    );
 
-        // Find curriculum
-        const curriculum = await prisma.curriculum.findUnique({
-          where: {
-            subjectId_gradeLevel_academicYear: {
-              subjectId: data.subjectId,
-              gradeLevel: data.gradeLevel,
-              academicYear: data.academicYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-            },
-          },
-        });
-
-        if (!curriculum) {
-          return NextResponse.json(
-            { error: 'Curriculum not found. Generate curriculum first.' },
-            { status: 404 }
-          );
-        }
-
-        const subject = await prisma.subject.findUnique({
-          where: { id: data.subjectId },
-        });
-
-        result = await curriculumGeneratorService.generateUnitsForCurriculum(
-          curriculum.id,
-          subject.slug,
-          data.gradeLevel,
-          data.unitCount || 5
-        );
-        break;
-
-      case 'lessonPlan':
-        // Generate single lesson plan
-        if (!data.unitId) {
-          return NextResponse.json(
-            { error: 'unitId is required for lesson plan generation' },
-            { status: 400 }
-          );
-        }
-
-        result = await curriculumGeneratorService.generateLessonPlanForUnit(
-          data.unitId,
-          {
-            name: data.options?.name,
-            description: data.options?.description,
-            durationMinutes: data.options?.durationMinutes || 30,
-            difficulty: data.options?.difficulty || 'MEDIUM',
-            includeAllComponents: data.options?.includeAllComponents !== false,
-          }
-        );
-        break;
-
-      case 'lessonPlans':
-        // Generate multiple lesson plans
-        if (!data.unitId) {
-          return NextResponse.json(
-            { error: 'unitId is required for lesson plans generation' },
-            { status: 400 }
-          );
-        }
-
-        result = await curriculumGeneratorService.generateLessonPlansForUnit(
-          data.unitId,
-          data.lessonPlanCount || 5,
-          {
-            name: data.options?.name,
-            durationMinutes: data.options?.durationMinutes || 30,
-            difficulty: data.options?.difficulty || 'MEDIUM',
-            includeAllComponents: data.options?.includeAllComponents !== false,
-          }
-        );
-        break;
-
-      case 'presentation':
-        // Generate presentation
-        if (!data.lessonPlanId) {
-          return NextResponse.json(
-            { error: 'lessonPlanId is required for presentation generation' },
-            { status: 400 }
-          );
-        }
-
-        result = await presentationGeneratorService.generatePresentation(
-          data.lessonPlanId,
-          data.presentationType || 'SLIDES',
-          {
-            name: data.options?.name,
-          }
-        );
-        break;
-
-      case 'teachingAid':
-        // Generate teaching aid
-        if (!data.lessonPlanId) {
-          return NextResponse.json(
-            { error: 'lessonPlanId is required for teaching aid generation' },
-            { status: 400 }
-          );
-        }
-
-        if (!data.teachingAidType) {
-          return NextResponse.json(
-            { error: 'teachingAidType is required' },
-            { status: 400 }
-          );
-        }
-
-        result = await teachingAidGeneratorService.generateTeachingAid(
-          data.lessonPlanId,
-          data.teachingAidType,
-          {
-            name: data.options?.name,
-            description: data.options?.description,
-          }
-        );
-        break;
-
-      default:
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        );
-    }
+    logInfo('Curriculum generated successfully', {
+      userId: tokenData.userId,
+      topic: validated.topic,
+      objectivesCount: lessonPlan.objectives?.length || 0,
+    });
 
     return NextResponse.json({
       success: true,
-      action: data.action,
-      result,
+      lessonPlan,
+      metadata: {
+        topic: validated.topic,
+        gradeLevel: validated.gradeLevel,
+        subjectId,
+        generatedAt: new Date().toISOString(),
+      },
     });
   } catch (error) {
-    console.error('Error generating curriculum:', error);
+    logError('Curriculum generation error', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        {
+          error: 'Validation error',
+          details: error.errors,
+        },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Failed to generate curriculum', message: error.message },
+      {
+        error: 'Failed to generate curriculum',
+        message: error.message || 'An unexpected error occurred',
+      },
       { status: 500 }
     );
   }
 }
 
+/**
+ * GET /api/curriculum/generate
+ * Get curriculum generation status or test endpoint
+ */
+export async function GET(request) {
+  try {
+    // Verify authentication
+    const tokenData = await verifyToken(request);
+    if (!tokenData) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Return available subjects and test info
+    return NextResponse.json({
+      success: true,
+      message: 'Curriculum generation API is available',
+      endpoints: {
+        generate: 'POST /api/curriculum/generate',
+      },
+      example: {
+        topic: 'Fractions',
+        gradeLevel: 5,
+        subjectId: 'math',
+        includeStandards: true,
+        includeAssessments: true,
+        includePracticeProblems: true,
+        difficultyLevel: 'MEDIUM',
+      },
+    });
+  } catch (error) {
+    logError('Curriculum API error', error);
+    return NextResponse.json(
+      { error: 'API error', message: error.message },
+      { status: 500 }
+    );
+  }
+}
