@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState(null);
   const [student, setStudent] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
+  const [gamification, setGamification] = useState(null);
+  const [streaks, setStreaks] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -58,6 +60,32 @@ export default function DashboardPage() {
       });
       const progressData = await progressRes.json();
       setProgress(progressData);
+
+      // Load gamification data
+      try {
+        const gamificationRes = await fetch('/api/gamification', {
+          credentials: 'include',
+        });
+        if (gamificationRes.ok) {
+          const gamificationData = await gamificationRes.json();
+          setGamification(gamificationData);
+        }
+      } catch (gamError) {
+        console.log('Gamification data not available yet');
+      }
+
+      // Load streaks data
+      try {
+        const streaksRes = await fetch('/api/streaks', {
+          credentials: 'include',
+        });
+        if (streaksRes.ok) {
+          const streaksData = await streaksRes.json();
+          setStreaks(streaksData);
+        }
+      } catch (streakError) {
+        console.log('Streaks data not available yet');
+      }
 
       // Load recommendations
       try {
@@ -135,22 +163,22 @@ export default function DashboardPage() {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn" aria-label="Learning statistics">
           <ProgressCard
             title="Current Streak"
-            value={`${progress?.summary?.currentStreak || 0} days`}
+            value={`${streaks?.current?.currentStreak || gamification?.currentStreak || progress?.summary?.currentStreak || 0} days`}
             subtitle="Keep it going!"
             icon={Flame}
             color="bg-gradient-to-br from-yellow-400 to-orange-500"
           />
           <ProgressCard
             title="Total Points"
-            value={progress?.summary?.totalPoints || 0}
+            value={gamification?.totalPoints || progress?.summary?.totalPoints || 0}
             subtitle="Amazing work!"
             icon={Sparkles}
             color="bg-gradient-to-br from-purple-500 to-pink-500"
           />
           <ProgressCard
-            title="Achievements"
-            value={`${progress?.achievements?.length || 0}/${10}`}
-            subtitle="Badges earned"
+            title="Level & Rank"
+            value={gamification?.level ? `Level ${gamification.level}` : 'Level 1'}
+            subtitle={gamification?.rank?.title || 'Novice'}
             icon={Trophy}
             color="bg-gradient-to-br from-blue-500 to-cyan-500"
           />
