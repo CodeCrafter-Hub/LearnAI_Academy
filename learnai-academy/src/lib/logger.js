@@ -45,6 +45,14 @@ const jsonFormat = winston.format.combine(
   winston.format.json()
 );
 
+// Check if we're in a serverless environment (Vercel, AWS Lambda, etc.)
+// Serverless environments don't allow file system writes
+const isServerless = 
+  process.env.VERCEL || 
+  process.env.AWS_LAMBDA_FUNCTION_NAME || 
+  process.env.VERCEL_ENV ||
+  process.env.NEXT_PUBLIC_VERCEL_ENV;
+
 // Define transports
 const transports = [
   // Console transport for all environments
@@ -53,25 +61,31 @@ const transports = [
   }),
 ];
 
-// Add file transports in production
-if (process.env.NODE_ENV === 'production') {
-  transports.push(
-    // Error logs
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      format: jsonFormat,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    // Combined logs
-    new winston.transports.File({
-      filename: 'logs/combined.log',
-      format: jsonFormat,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    })
-  );
+// Add file transports only in production AND non-serverless environments
+// Vercel and other serverless platforms don't support file system writes
+if (process.env.NODE_ENV === 'production' && !isServerless) {
+  try {
+    transports.push(
+      // Error logs
+      new winston.transports.File({
+        filename: 'logs/error.log',
+        level: 'error',
+        format: jsonFormat,
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }),
+      // Combined logs
+      new winston.transports.File({
+        filename: 'logs/combined.log',
+        format: jsonFormat,
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      })
+    );
+  } catch (fileError) {
+    // If file transport fails (e.g., no write permissions), fall back to console only
+    console.warn('File logging not available, using console only:', fileError.message);
+  }
 }
 
 // Create logger instance
