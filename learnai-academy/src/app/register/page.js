@@ -450,7 +450,7 @@ export default function RegisterPage() {
                   </div>
                   <input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     autoComplete="new-password"
                     value={formData.password}
@@ -461,10 +461,11 @@ export default function RegisterPage() {
                       width: '100%',
                       padding: 'var(--space-md)',
                       paddingLeft: 'calc(var(--space-md) * 2 + 18px)',
+                      paddingRight: 'calc(var(--space-md) * 2 + 18px)',
                       fontSize: 'var(--text-base)',
                       color: 'var(--color-text-primary)',
                       background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-subtle)',
+                      border: `1px solid ${errors.password ? 'var(--color-error)' : 'var(--color-border-subtle)'}`,
                       borderRadius: 'var(--radius-lg)',
                       transition: 'all var(--transition-fast)',
                     }}
@@ -473,20 +474,181 @@ export default function RegisterPage() {
                       e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-subtle)';
                     }}
                     onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+                      e.currentTarget.style.borderColor = errors.password ? 'var(--color-error)' : 'var(--color-border-subtle)';
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: 'var(--space-md)',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 'var(--space-xs)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff style={{ width: '18px', height: '18px', color: 'var(--color-text-tertiary)' }} />
+                    ) : (
+                      <Eye style={{ width: '18px', height: '18px', color: 'var(--color-text-tertiary)' }} />
+                    )}
+                  </button>
                 </div>
-                <p style={{
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--color-text-tertiary)',
-                  marginTop: 'var(--space-xs)',
-                  margin: 0,
-                  paddingTop: 'var(--space-xs)',
-                }}>
-                  Must be at least 6 characters
-                </p>
+                {errors.password && (
+                  <p style={{
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--color-error)',
+                    marginTop: 'var(--space-xs)',
+                    margin: 0,
+                  }}>
+                    {errors.password}
+                  </p>
+                )}
+                {!errors.password && formData.password && (
+                  <div style={{ marginTop: 'var(--space-xs)' }}>
+                    <p style={{
+                      fontSize: 'var(--text-xs)',
+                      color: 'var(--color-text-tertiary)',
+                      marginBottom: 'var(--space-2xs)',
+                      margin: 0,
+                    }}>
+                      Password requirements:
+                    </p>
+                    <ul style={{
+                      fontSize: 'var(--text-xs)',
+                      color: 'var(--color-text-tertiary)',
+                      margin: 0,
+                      paddingLeft: 'var(--space-md)',
+                      listStyle: 'none',
+                    }}>
+                      <li style={{ color: validatePassword(formData.password).minLength ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                        {validatePassword(formData.password).minLength ? '✓' : '○'} At least 12 characters
+                      </li>
+                      <li style={{ color: validatePassword(formData.password).hasUpperCase ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                        {validatePassword(formData.password).hasUpperCase ? '✓' : '○'} One uppercase letter
+                      </li>
+                      <li style={{ color: validatePassword(formData.password).hasLowerCase ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                        {validatePassword(formData.password).hasLowerCase ? '✓' : '○'} One lowercase letter
+                      </li>
+                      <li style={{ color: validatePassword(formData.password).hasNumber ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                        {validatePassword(formData.password).hasNumber ? '✓' : '○'} One number
+                      </li>
+                      <li style={{ color: validatePassword(formData.password).hasSpecial ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                        {validatePassword(formData.password).hasSpecial ? '✓' : '○'} One special character
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <label
+                  htmlFor="confirmPassword"
+                  style={{
+                    display: 'block',
+                    fontSize: 'var(--text-sm)',
+                    fontWeight: 'var(--weight-medium)',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 'var(--space-xs)',
+                  }}
+                >
+                  Confirm Password
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: 'var(--space-md)',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                  }}>
+                    <Lock style={{ width: '18px', height: '18px', color: 'var(--color-text-tertiary)' }} />
+                  </div>
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="new-password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    placeholder="Re-enter your password"
+                    aria-required="true"
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-md)',
+                      paddingLeft: 'calc(var(--space-md) * 2 + 18px)',
+                      paddingRight: 'calc(var(--space-md) * 2 + 18px)',
+                      fontSize: 'var(--text-base)',
+                      color: 'var(--color-text-primary)',
+                      background: 'var(--color-bg-base)',
+                      border: `1px solid ${errors.confirmPassword ? 'var(--color-error)' : 'var(--color-border-subtle)'}`,
+                      borderRadius: 'var(--radius-lg)',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-accent)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-subtle)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = errors.confirmPassword ? 'var(--color-error)' : 'var(--color-border-subtle)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: 'var(--space-md)',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 'var(--space-xs)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff style={{ width: '18px', height: '18px', color: 'var(--color-text-tertiary)' }} />
+                    ) : (
+                      <Eye style={{ width: '18px', height: '18px', color: 'var(--color-text-tertiary)' }} />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p style={{
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--color-error)',
+                    marginTop: 'var(--space-xs)',
+                    margin: 0,
+                  }}>
+                    {errors.confirmPassword}
+                  </p>
+                )}
+                {!errors.confirmPassword && formData.confirmPassword && formData.password === formData.confirmPassword && (
+                  <p style={{
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--color-success)',
+                    marginTop: 'var(--space-xs)',
+                    margin: 0,
+                  }}>
+                    ✓ Passwords match
+                  </p>
+                )}
               </div>
 
               {/* Role Selection */}
