@@ -14,6 +14,7 @@ import SubjectSelector from '@/components/learning/SubjectSelector';
 import TopicSelector from '@/components/learning/TopicSelector';
 import ModeSelector from '@/components/learning/ModeSelector';
 import DifficultySelector from '@/components/learning/DifficultySelector';
+import EnhancedProgressIndicator from '@/components/learning/EnhancedProgressIndicator';
 import GradePasswordPrompt from '@/components/learning/GradePasswordPrompt';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { ArrowLeft, X, TrendingUp } from 'lucide-react';
@@ -309,34 +310,11 @@ function LearnPageContent() {
           )}
         </nav>
 
-        {/* Progress Indicator */}
-        <div style={{
-          display: 'flex',
-          gap: 'var(--space-xs)',
-          marginBottom: 'var(--space-2xl)',
-          justifyContent: 'center',
-          maxWidth: '480px',
-          marginInline: 'auto',
-        }}>
-          {['subject', 'topic', 'mode', 'difficulty'].map((stepName, index) => {
-            const stepIndex = ['subject', 'topic', 'mode', 'difficulty'].indexOf(step);
-            const currentIndex = ['subject', 'topic', 'mode', 'difficulty'].indexOf(stepName);
-            const isActive = currentIndex <= stepIndex;
-
-            return (
-              <div
-                key={stepName}
-                style={{
-                  flex: 1,
-                  height: '4px',
-                  borderRadius: 'var(--radius-full)',
-                  background: isActive ? 'var(--color-accent)' : 'var(--color-bg-muted)',
-                  transition: 'all var(--transition-base)',
-                }}
-              />
-            );
-          })}
-        </div>
+        {/* Enhanced Progress Indicator */}
+        <EnhancedProgressIndicator 
+          currentStep={step} 
+          gradeLevel={gradeLevel}
+        />
 
         {/* Classroom Evaluation Widget - Only on subject selection */}
         {step === 'subject' && (
@@ -350,6 +328,7 @@ function LearnPageContent() {
           <div className="animate-fade-in">
             <SubjectSelector
               subjects={subjects}
+              gradeLevel={gradeLevel}
               onSelect={(subject) => {
                 setSelectedSubject(subject);
                 setStep('topic');
