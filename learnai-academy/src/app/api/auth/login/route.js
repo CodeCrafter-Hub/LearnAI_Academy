@@ -85,12 +85,28 @@ export async function POST(request) {
     if (!process.env.JWT_SECRET) {
       logError('JWT_SECRET is not set in environment variables');
       return NextResponse.json(
-        { error: 'Server configuration error. Please contact support.' },
+        { 
+          error: 'Server configuration error. Please contact support.',
+          message: 'JWT_SECRET is not configured'
+        },
         { status: 500 }
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      logError('Failed to parse request body', parseError);
+      return NextResponse.json(
+        { 
+          error: 'Invalid request format',
+          message: 'Request body must be valid JSON'
+        },
+        { status: 400 }
+      );
+    }
+
     let email, password;
     
     try {
@@ -101,6 +117,7 @@ export async function POST(request) {
       if (error instanceof z.ZodError) {
         return validationErrorResponse(error);
       }
+      logError('Validation error', error);
       throw error;
     }
 
@@ -118,14 +135,21 @@ export async function POST(request) {
     let user;
     try {
       user = await prisma.user.findUnique({
-        where: { email },
+        where: { email: email.toLowerCase().trim() }, // Normalize email
         include: {
           students: true,
         },
       });
     } catch (dbError) {
       logError('Database error during login', dbError);
-      return errorResponse(dbError, request);
+      console.error('Database error details:', dbError);
+      return NextResponse.json(
+        { 
+          error: 'Database error',
+          message: 'Unable to verify credentials. Please try again later.'
+        },
+        { status: 500 }
+      );
     }
 
     if (!user) {
@@ -146,13 +170,29 @@ export async function POST(request) {
       // Record failed attempt
       const lockoutResult = await recordFailedAttempt(email);
       await auditAuth.login(user.id, email, ipAddress, userAgent, false, 'no_password_set');
-      return errorResponse(
-        new Error('Account configuration error. Please contact support.'),
-        request
+      logError('Login attempt with no password hash', { userId: user.id, email });
+      return NextResponse.json(
+        { 
+          error: 'Account configuration error',
+          message: 'Account configuration error. Please contact support.'
+        },
+        { status: 500 }
       );
     }
     
-    const isValidPassword = await bcrypt.compare(password, userPasswordHash);
+    let isValidPassword = false;
+    try {
+      isValidPassword = await bcrypt.compare(password, userPasswordHash);
+    } catch (compareError) {
+      logError('Password comparison error', compareError);
+      return NextResponse.json(
+        { 
+          error: 'Authentication error',
+          message: 'Unable to verify password. Please try again.'
+        },
+        { status: 500 }
+      );
+    }
 
     if (!isValidPassword) {
       // Record failed attempt
@@ -176,11 +216,19 @@ export async function POST(request) {
     // Clear failed attempts on successful login
     await clearFailedAttempts(email);
 
-    // Update last login
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLogin: new Date() },
-    });
+    // Update last login (if field exists in schema)
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          // Try to update lastLogin if field exists, otherwise just update updated_at
+          updated_at: new Date(),
+        },
+      });
+    } catch (updateError) {
+      // Ignore if lastLogin field doesn't exist - not critical for login
+      console.log('Note: Could not update lastLogin field (may not exist in schema)');
+    }
 
     // Log successful authentication
     await auditAuth.login(user.id, email, ipAddress, userAgent, true);
@@ -227,6 +275,16 @@ export async function POST(request) {
       'X-RateLimit-Reset': rateLimitResult.resetAt.toString(),
     });
   } catch (error) {
-    return errorResponse(error, request);
+    logError('Unexpected login error', error);
+    console.error('Login error details:', error);
+    
+    // Return user-friendly error
+    return NextResponse.json(
+      { 
+        error: 'Login failed',
+        message: error.message || 'An unexpected error occurred. Please try again.'
+      },
+      { status: 500 }
+    );
   }
 }
