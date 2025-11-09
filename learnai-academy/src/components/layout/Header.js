@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Home, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import LanguageSelector from '@/components/i18n/LanguageSelector';
 import MobileMenu from './MobileMenu';
 
 export default function Header() {
@@ -232,6 +233,7 @@ export default function Header() {
 
           {/* Desktop User Menu & Theme Toggle */}
           <div className="hidden md:flex" style={{ position: 'relative', alignItems: 'center', gap: 'var(--space-sm)' }}>
+            <LanguageSelector />
             <ThemeToggle />
             <button
               onClick={() => setShowMenu(!showMenu)}

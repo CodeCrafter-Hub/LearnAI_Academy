@@ -1,4 +1,5 @@
 import Groq from 'groq-sdk';
+import PerformanceMonitor from '@/lib/performance.js';
 
 class GroqClient {
   constructor() {
@@ -121,16 +122,38 @@ class GroqClient {
       });
 
       const responseTime = Date.now() - startTime;
+      
+      // Calculate cost (approximate Groq pricing)
+      const promptTokens = response.usage?.prompt_tokens || 0;
+      const completionTokens = response.usage?.completion_tokens || 0;
+      const totalTokens = response.usage?.total_tokens || 0;
+      
+      // Groq pricing (as of 2024): $0.27 per 1M input tokens, $0.27 per 1M output tokens
+      const costPerMillion = 0.27;
+      const cost = (promptTokens / 1_000_000) * costPerMillion + (completionTokens / 1_000_000) * costPerMillion;
+      
+      // Track performance
+      PerformanceMonitor.trackAICall(
+        model,
+        responseTime,
+        totalTokens,
+        cost,
+        {
+          promptTokens,
+          completionTokens,
+        }
+      );
 
       return {
         content: response.choices[0]?.message?.content || '',
         usage: {
-          promptTokens: response.usage?.prompt_tokens || 0,
-          completionTokens: response.usage?.completion_tokens || 0,
-          totalTokens: response.usage?.total_tokens || 0,
+          promptTokens,
+          completionTokens,
+          totalTokens,
         },
         model,
         responseTime,
+        cost,
       };
     }, retries);
   }

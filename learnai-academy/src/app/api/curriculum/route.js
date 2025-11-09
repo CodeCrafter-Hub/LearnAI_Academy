@@ -111,7 +111,10 @@ export async function POST(request) {
           subjectSlug,
           topic.name,
           data.gradeLevel,
-          options
+          {
+            ...options,
+            topicId: topic.id, // Pass topicId for caching
+          }
         );
         break;
 
@@ -124,6 +127,7 @@ export async function POST(request) {
           {
             count: options.count || 10,
             difficulty: options.difficulty || 'MEDIUM',
+            topicId: topic.id, // Pass topicId for caching
           }
         );
         break;

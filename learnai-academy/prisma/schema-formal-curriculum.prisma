@@ -1,0 +1,305 @@
+// FORMAL CURRICULUM SCHEMA ADDITIONS
+// Add these models to the existing schema.prisma file
+
+// ============================================
+// 1. CURRICULUM - Full year scope and sequence
+// ============================================
+model Curriculum {
+  id              String   @id @default(uuid())
+  name            String   // "Common Core Math Grade 1"
+  subjectId       String
+  gradeLevel      Int      // -1 = Preschool, 0 = Pre-K, 1-12 = Grades
+  academicYear    String   // "2024-2025"
+  description     String?
+  standards       Json?    // Standards mapping (Common Core, state)
+  scopeSequence   Json?    // Full year plan with pacing
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subject         Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  units           Unit[]
+
+  @@unique([subjectId, gradeLevel, academicYear])
+  @@index([subjectId, gradeLevel])
+  @@index([isActive])
+  @@map("curricula")
+}
+
+// ============================================
+// 2. UNIT - Thematic grouping (e.g., "Fractions", "Grammar")
+// ============================================
+model Unit {
+  id              String   @id @default(uuid())
+  curriculumId    String
+  name            String
+  description     String?
+  orderIndex      Int      // Sequence in curriculum
+  durationWeeks   Float?   // Estimated weeks
+  prerequisites   Json?    // Required prior knowledge
+  learningGoals   Json?    // Unit objectives
+  standards       Json?    // Aligned standards
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  curriculum      Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  lessonPlans     LessonPlan[]
+
+  @@index([curriculumId, orderIndex])
+  @@index([isActive])
+  @@map("units")
+}
+
+// ============================================
+// 3. LESSON PLAN - Detailed teaching plan
+// ============================================
+model LessonPlan {
+  id              String   @id @default(uuid())
+  unitId          String
+  name            String
+  description     String?
+  orderIndex      Int      // Sequence in unit
+  durationMinutes Int      // Lesson length (30-45 min)
+  difficulty      Difficulty
+  learningObjectives Json   // Specific objectives
+  prerequisites   Json?    // What students need to know
+  materials       Json?    // Teaching aids needed
+  standards       Json?    // Aligned standards
+  lessonStructure Json?    // Warm-up, instruction, practice, assessment, closure
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  unit            Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  lessons         Lesson[]
+  presentations   Presentation[]
+  teachingAids    TeachingAid[]
+  multimedia      MultimediaContent[]
+  activities      LessonActivityTemplate[]
+
+  @@index([unitId, orderIndex])
+  @@index([isActive])
+  @@map("lesson_plans")
+}
+
+// ============================================
+// 4. LESSON - Actual teaching session instance
+// ============================================
+model Lesson {
+  id              String   @id @default(uuid())
+  lessonPlanId    String
+  studentId       String?  // If personalized
+  sessionId       String?  // Link to learning session
+  status          LessonStatus
+  startedAt       DateTime?
+  completedAt     DateTime?
+  progress        Float    @default(0) // 0-1
+  timeSpentMinutes Int?    // Actual time spent
+  score           Float?   // Overall lesson score
+  feedback        String?  // Student/teacher feedback
+  notes           Json?    // Student notes
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lessonPlan      LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+  student         Student?   @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  session         LearningSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  activities      LessonActivity[]
+
+  @@index([lessonPlanId])
+  @@index([studentId])
+  @@index([status])
+  @@map("lessons")
+}
+
+enum LessonStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+  PAUSED
+}
+
+// ============================================
+// 5. PRESENTATION - Slides/Content for teaching
+// ============================================
+model Presentation {
+  id              String   @id @default(uuid())
+  lessonPlanId    String
+  name            String
+  contentType     PresentationType
+  slides          Json     // Array of slide objects
+  voiceScript     String?  // Narration script
+  audioUrl        String?  // Pre-recorded audio
+  videoUrl        String?  // Instructional video
+  orderIndex      Int
+  durationSeconds Int?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lessonPlan      LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId, orderIndex])
+  @@map("presentations")
+}
+
+enum PresentationType {
+  SLIDES          // Text/image slides
+  VIDEO           // Instructional video
+  INTERACTIVE     // Interactive presentation
+  AUDIO_ONLY      // Podcast-style
+  HYBRID          // Combination
+}
+
+// ============================================
+// 6. TEACHING AID - Visuals, manipulatives, worksheets
+// ============================================
+model TeachingAid {
+  id              String   @id @default(uuid())
+  lessonPlanId    String
+  name            String
+  type            TeachingAidType
+  content         Json     // Structured content
+  imageUrl        String?  // Visual aid image
+  pdfUrl          String?  // Printable worksheet
+  interactiveUrl  String?  // Interactive tool
+  description     String?
+  usageInstructions String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lessonPlan      LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId])
+  @@index([type])
+  @@map("teaching_aids")
+}
+
+enum TeachingAidType {
+  VISUAL          // Charts, diagrams, images
+  MANIPULATIVE    // Virtual manipulatives
+  WORKSHEET       // Printable worksheets
+  GAME            // Educational game
+  SIMULATION      // Interactive simulation
+  ANIMATION       // Animated explanation
+  POSTER          // Visual poster
+  FLASHCARD       // Digital flashcards
+}
+
+// ============================================
+// 7. LESSON ACTIVITY TEMPLATE - Activity templates
+// ============================================
+model LessonActivityTemplate {
+  id              String   @id @default(uuid())
+  lessonPlanId    String
+  activityType    ActivityType
+  name            String
+  instructions    String
+  content         Json     // Activity-specific data
+  durationMinutes Int?
+  orderIndex      Int
+  isRequired      Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lessonPlan      LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId, orderIndex])
+  @@map("lesson_activity_templates")
+}
+
+// ============================================
+// 8. LESSON ACTIVITY - Actual activity instance
+// ============================================
+model LessonActivity {
+  id              String   @id @default(uuid())
+  lessonId        String
+  templateId      String?  // Link to template
+  activityType    ActivityType
+  name            String
+  instructions    String
+  content         Json     // Activity-specific data
+  orderIndex      Int
+  completed       Boolean  @default(false)
+  score           Float?
+  feedback        String?
+  timeSpentMinutes Int?
+  attempts        Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, orderIndex])
+  @@index([completed])
+  @@map("lesson_activities")
+}
+
+enum ActivityType {
+  PRACTICE        // Practice problems
+  QUIZ           // Quick check
+  PROJECT        // Hands-on project
+  DISCUSSION     // Guided discussion
+  GAME           // Educational game
+  EXPERIMENT     // Science experiment
+  WRITING        // Writing exercise
+  READING        // Reading comprehension
+  LISTENING      // Listening exercise
+}
+
+// ============================================
+// 9. MULTIMEDIA CONTENT - Videos, audio, interactive
+// ============================================
+model MultimediaContent {
+  id              String   @id @default(uuid())
+  lessonPlanId    String
+  contentType     MultimediaType
+  title           String
+  description     String?
+  url             String   // Video/audio URL
+  thumbnailUrl    String?
+  durationSeconds Int?
+  transcript      String? // For accessibility
+  captions        Json?   // Subtitles/captions (SRT format)
+  interactive     Boolean  @default(false)
+  metadata        Json?   // Additional metadata (resolution, format, etc.)
+  viewCount       Int      @default(0)
+  averageRating   Float?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lessonPlan      LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId])
+  @@index([contentType])
+  @@index([isActive])
+  @@map("multimedia_content")
+}
+
+enum MultimediaType {
+  VIDEO           // Instructional video
+  AUDIO           // Voice narration
+  ANIMATION       // Animated explanation
+  INTERACTIVE     // Interactive content
+  SIMULATION      // Educational simulation
+  PODCAST         // Audio lesson
+}
+
+// ============================================
+// RELATION UPDATES TO EXISTING MODELS
+// ============================================
+
+// Add to Subject model:
+//   curricula     Curriculum[]
+
+// Add to Student model:
+//   lessons       Lesson[]
+
+// Add to LearningSession model:
+//   lessons       Lesson[]
+

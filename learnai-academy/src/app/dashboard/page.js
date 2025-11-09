@@ -3,19 +3,28 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotificationContext } from '@/components/providers/NotificationProvider';
 import Header from '@/components/layout/Header';
 import SubjectCard from '@/components/learning/SubjectCard';
-import { Flame, Sparkles, Trophy, Lightbulb, TrendingUp, Clock } from 'lucide-react';
+import StreakCounter from '@/components/gamification/StreakCounter';
+import ProgressChart from '@/components/visualizations/ProgressChart';
+import Leaderboard from '@/components/gamification/Leaderboard';
+import AchievementBadge from '@/components/gamification/AchievementBadge';
+import { Flame, Sparkles, Trophy, Lightbulb, TrendingUp, Clock, Award, GraduationCap } from 'lucide-react';
+import ClassroomEvaluationWidget from '@/components/ui/ClassroomEvaluationWidget';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { notifyAchievement, notifyStreak } = useNotificationContext();
   const [subjects, setSubjects] = useState([]);
   const [progress, setProgress] = useState(null);
   const [student, setStudent] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showRecentActivity, setShowRecentActivity] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     if (!authLoading) {
@@ -51,6 +60,23 @@ export default function DashboardPage() {
       });
       const progressData = await progressRes.json();
       setProgress(progressData);
+
+      // Prepare chart data from recent sessions
+      if (progressData.recentSessions && progressData.recentSessions.length > 0) {
+        const chartPoints = progressData.recentSessions
+          .slice(-7)
+          .map((session, index) => ({
+            label: new Date(session.startedAt).toLocaleDateString('en-US', { weekday: 'short' }),
+            value: session.pointsEarned || 0,
+          }));
+        setChartData(chartPoints);
+      }
+
+      // Check for streak milestones
+      const currentStreak = progressData.summary?.currentStreak || 0;
+      if (currentStreak > 0 && currentStreak % 7 === 0) {
+        notifyStreak(currentStreak);
+      }
 
       // Load recommendations
       try {
@@ -124,51 +150,150 @@ export default function DashboardPage() {
           </p>
         </section>
 
-        {/* Stats Grid - Glassy Cards */}
-        <section className="grid grid-auto-fit" style={{ gap: 'var(--space-md)', marginBottom: 'var(--space-2xl)' }}>
-          <div className="surface-elevated animate-scale-in" style={{
-            padding: 'var(--space-lg)',
-            transition: 'all var(--transition-base)',
-            cursor: 'default',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: 'var(--radius-lg)',
-                background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: 'var(--shadow-sm)',
-              }}>
-                <Flame className="w-6 h-6 text-white" />
-              </div>
-              <div>
+        {/* Stats Grid - Enhanced with New Components */}
+        <section style={{ marginBottom: 'var(--space-2xl)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+            {/* Streak Counter - Enhanced Component */}
+            <StreakCounter
+              currentStreak={progress?.summary?.currentStreak || 0}
+              targetStreak={30}
+            />
+
+            {/* Points Card */}
+            <div className="surface-elevated animate-scale-in" style={{
+              padding: 'var(--space-lg)',
+              transition: 'all var(--transition-base)',
+              cursor: 'default',
+              animationDelay: '50ms',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
                 <div style={{
-                  fontSize: 'var(--text-sm)',
-                  color: 'var(--color-text-tertiary)',
-                  fontWeight: 'var(--weight-medium)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 'var(--shadow-sm)',
                 }}>
-                  Current Streak
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <div style={{
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--color-text-tertiary)',
+                    fontWeight: 'var(--weight-medium)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Total Points
+                  </div>
                 </div>
               </div>
+              <div style={{
+                fontSize: 'var(--text-4xl)',
+                fontWeight: 'var(--weight-bold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-2xs)',
+              }}>
+                {progress?.summary?.totalPoints?.toLocaleString() || 0}
+              </div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+                Amazing work!
+              </div>
             </div>
-            <div style={{
-              fontSize: 'var(--text-4xl)',
-              fontWeight: 'var(--weight-bold)',
-              color: 'var(--color-text-primary)',
-              marginBottom: 'var(--space-2xs)',
+
+            {/* Achievements Card */}
+            <div className="surface-elevated animate-scale-in" style={{
+              padding: 'var(--space-lg)',
+              transition: 'all var(--transition-base)',
+              cursor: 'default',
+              animationDelay: '100ms',
             }}>
-              {progress?.summary?.currentStreak || 0}
-              <span style={{ fontSize: 'var(--text-xl)', color: 'var(--color-text-tertiary)', marginLeft: 'var(--space-2xs)' }}>days</span>
-            </div>
-            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-              Keep the momentum going!
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 'var(--shadow-sm)',
+                }}>
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <div style={{
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--color-text-tertiary)',
+                    fontWeight: 'var(--weight-medium)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Achievements
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                fontSize: 'var(--text-4xl)',
+                fontWeight: 'var(--weight-bold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-2xs)',
+              }}>
+                {progress?.achievements?.length || 0}
+                <span style={{ fontSize: 'var(--text-xl)', color: 'var(--color-text-tertiary)' }}>/10</span>
+              </div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+                Badges earned
+              </div>
             </div>
           </div>
+
+          {/* Progress Chart */}
+          {chartData.length > 0 && (
+            <div style={{ marginBottom: 'var(--space-lg)' }}>
+              <h3 style={{
+                fontSize: 'var(--text-xl)',
+                fontWeight: 'var(--weight-semibold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-md)',
+              }}>
+                Weekly Progress
+              </h3>
+              <ProgressChart data={chartData} type="line" height={200} showTrend={true} />
+            </div>
+          )}
+
+          {/* Recent Achievements */}
+          {progress?.achievements && progress.achievements.length > 0 && (
+            <div style={{ marginBottom: 'var(--space-lg)' }}>
+              <h3 style={{
+                fontSize: 'var(--text-xl)',
+                fontWeight: 'var(--weight-semibold)',
+                color: 'var(--color-text-primary)',
+                marginBottom: 'var(--space-md)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-sm)',
+              }}>
+                <Award style={{ width: '24px', height: '24px', color: 'var(--color-accent)' }} />
+                Recent Achievements
+              </h3>
+              <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                {progress.achievements.slice(0, 5).map((achievement, idx) => (
+                  <AchievementBadge
+                    key={achievement.id || idx}
+                    achievement={achievement}
+                    size="md"
+                    onClick={() => router.push('/achievements')}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
 
           <div className="surface-elevated animate-scale-in" style={{
             padding: 'var(--space-lg)',
@@ -450,23 +575,59 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* Quick Actions */}
-        <section className="cluster" style={{ justifyContent: 'center', gap: 'var(--space-md)' }}>
-          <button
-            onClick={() => router.push('/progress')}
-            className="btn btn-secondary btn-lg"
-          >
-            <TrendingUp className="w-5 h-5" />
-            View Progress
-          </button>
-          <button
-            onClick={() => router.push('/achievements')}
-            className="btn btn-primary btn-lg"
-          >
-            <Trophy className="w-5 h-5" />
-            Achievements
-          </button>
-        </section>
+        {/* Leaderboard Section */}
+        {leaderboardData.length > 0 && (
+          <section style={{ marginBottom: 'var(--space-2xl)' }}>
+            <Leaderboard
+              entries={leaderboardData}
+              currentUserId={user?.id}
+              timeRange="week"
+              maxEntries={10}
+            />
+          </section>
+        )}
+
+               {/* Classroom Evaluation Widget */}
+               {student && (
+                 <section style={{ marginBottom: 'var(--space-xl)' }}>
+                   <div className="flex items-center gap-2 mb-4">
+                     <GraduationCap className="w-5 h-5 text-blue-600" />
+                     <h2 style={{
+                       fontSize: 'var(--text-2xl)',
+                       fontWeight: 'var(--weight-semibold)',
+                       color: 'var(--color-text-primary)',
+                     }}>
+                       Classroom Experience
+                     </h2>
+                   </div>
+                   <ClassroomEvaluationWidget gradeLevel={student.gradeLevel} />
+                 </section>
+               )}
+
+               {/* Quick Actions */}
+               <section className="cluster" style={{ justifyContent: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                 <button
+                   onClick={() => router.push('/progress')}
+                   className="btn btn-secondary btn-lg hover-lift"
+                 >
+                   <TrendingUp className="w-5 h-5" />
+                   View Progress
+                 </button>
+                 <button
+                   onClick={() => router.push('/achievements')}
+                   className="btn btn-primary btn-lg hover-lift"
+                 >
+                   <Trophy className="w-5 h-5" />
+                   Achievements
+                 </button>
+                 <button
+                   onClick={() => router.push('/grades')}
+                   className="btn btn-secondary btn-lg hover-lift"
+                 >
+                   <GraduationCap className="w-5 h-5" />
+                   All Grades
+                 </button>
+               </section>
       </main>
     </div>
   );

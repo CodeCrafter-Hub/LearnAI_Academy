@@ -1,0 +1,116 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "back": "Retour",
+    "continue": "Continuer",
+    "skip": "Passer",
+    "retry": "Réessayer",
+    "done": "Terminé"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "register": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "rememberMe": "Se souvenir de moi",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "invalidCredentials": "Email ou mot de passe invalide",
+    "accountLocked": "Compte verrouillé. Veuillez réessayer plus tard."
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcomeBack": "Bon retour, {name}",
+    "readyToLearn": "Prêt à poursuivre votre parcours d'apprentissage?",
+    "chooseSubject": "Choisissez votre matière",
+    "recentActivity": "Activité récente",
+    "progress": "Progrès",
+    "achievements": "Réalisations",
+    "streak": "Série actuelle",
+    "points": "Points totaux",
+    "recommended": "Recommandé pour vous"
+  },
+  "learning": {
+    "startSession": "Démarrer une session d'apprentissage",
+    "continueLearning": "Continuer à apprendre",
+    "newTopic": "Nouveau sujet",
+    "practice": "Pratique",
+    "mastery": "Maîtrise",
+    "concepts": "Concepts",
+    "lessons": "Leçons",
+    "topics": "Sujets",
+    "subjects": "Matières",
+    "difficulty": "Difficulté",
+    "easy": "Facile",
+    "medium": "Moyen",
+    "hard": "Difficile"
+  },
+  "progress": {
+    "title": "Vos progrès",
+    "trackJourney": "Suivez votre parcours d'apprentissage et célébrez votre croissance!",
+    "totalPoints": "Points totaux",
+    "currentStreak": "Série actuelle",
+    "achievementsUnlocked": "Réalisations débloquées",
+    "learningActivity": "Activité d'apprentissage",
+    "masteryBySubject": "Maîtrise par matière",
+    "recentSessions": "Sessions récentes",
+    "noActivity": "Aucune activité d'apprentissage dans cette période. Démarrez une session!",
+    "noData": "Aucune donnée disponible pour le moment. Complétez quelques sessions pour voir vos progrès!"
+  },
+  "achievements": {
+    "title": "Vos réalisations",
+    "collectBadges": "Collectez des badges en maîtrisant de nouvelles compétences et en atteignant des jalons!",
+    "unlocked": "Débloqué",
+    "locked": "Verrouillé",
+    "unlockedCount": "{count} / {total} Réalisations Débloquées",
+    "keepLearning": "Continuez à apprendre pour débloquer plus!",
+    "startLearning": "Commencez à apprendre pour débloquer votre première réalisation!"
+  },
+  "streak": {
+    "currentStreak": "Série actuelle",
+    "days": "jours",
+    "keepMomentum": "Maintenez l'élan! Prochain jalon dans {days} jours.",
+    "daysUntil": "{days} jour jusqu'à {milestone}! {emoji}",
+    "daysUntil_plural": "{days} jours jusqu'à {milestone}! {emoji}",
+    "milestoneReached": "{milestone}! {emoji}",
+    "longestStreak": "Série la plus longue: {days} jours",
+    "atRisk": "En danger"
+  },
+  "questions": {
+    "submitAnswer": "Soumettre la réponse",
+    "correct": "Excellent! Vous avez réussi du premier coup! 🎉",
+    "incorrect": "Pas tout à fait correct. Réessayez! 💪",
+    "hint": "Indice",
+    "explanation": "Explication",
+    "mastered": "Maîtrisé! 🎉",
+    "attempts": "Tentatives: {current} / {max}",
+    "tryAgain": "Réessayer ({remaining} tentatives restantes)"
+  },
+  "notifications": {
+    "achievementUnlocked": "Réalisation débloquée!",
+    "streakMilestone": "Jalon de série!",
+    "progressUpdate": "Mise à jour des progrès!",
+    "weeklyReport": "Rapport d'apprentissage hebdomadaire"
+  },
+  "errors": {
+    "generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "network": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+    "notFound": "La ressource demandée n'a pas été trouvée.",
+    "serverError": "Erreur serveur. Veuillez réessayer plus tard."
+  }
+}
+

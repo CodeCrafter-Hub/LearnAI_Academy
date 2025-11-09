@@ -1,6 +1,9 @@
 import { BaseAgent } from './BaseAgent.js';
 import { groqClient } from '../groqClient.js';
 import prisma from '../../../lib/prisma.js';
+import { standardsService } from '../../curriculum/standardsService.js';
+import { contentValidator } from '../../curriculum/contentValidator.js';
+import { curriculumCache } from '../../curriculum/curriculumCache.js';
 
 /**
  * CurriculumAgent - Formal Teacher Role
@@ -22,7 +25,7 @@ export class CurriculumAgent extends BaseAgent {
   }
 
   /**
-   * Generate a complete lesson plan for a topic
+   * Generate a complete lesson plan for a topic (IMPROVED with caching, validation, retry)
    */
   async generateLessonPlan(topic, gradeLevel, options = {}) {
     const {
@@ -30,12 +33,27 @@ export class CurriculumAgent extends BaseAgent {
       includeAssessments = true,
       includePracticeProblems = true,
       difficultyLevel = 'MEDIUM',
+      topicId = null,
+      useCache = true,
+      maxRetries = 3,
     } = options;
+
+    // Check cache first
+    if (useCache && topicId) {
+      const cached = await curriculumCache.getCached(topicId, gradeLevel, 'lessonPlan', options);
+      if (cached) {
+        return cached.content;
+      }
+    }
 
     const gradeBand = this.getGradeBand(gradeLevel);
     const standards = includeStandards ? await this.getLearningStandards(topic, gradeLevel) : null;
 
-    const prompt = `You are a curriculum specialist creating a formal lesson plan for ${topic} at ${gradeLevel}th grade level (${gradeBand}).
+    // Retry logic with exponential backoff
+    let lastError;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const prompt = `You are a curriculum specialist creating a formal lesson plan for ${topic} at ${gradeLevel}th grade level (${gradeBand}).
 
 CURRICULUM CREATION TASK:
 - Topic: ${topic}
@@ -69,12 +87,31 @@ Format the response as structured JSON with clear sections.`;
   }
 
   /**
-   * Generate practice problems for a topic
+   * Generate practice problems for a topic (IMPROVED with caching, validation, retry)
    */
-  async generatePracticeProblems(topic, gradeLevel, count = 10, difficulty = 'MEDIUM') {
-    const gradeBand = this.getGradeBand(gradeLevel);
+  async generatePracticeProblems(topic, gradeLevel, count = 10, difficulty = 'MEDIUM', options = {}) {
+    const {
+      topicId = null,
+      useCache = true,
+      maxRetries = 3,
+    } = options;
 
-    const prompt = `You are a curriculum specialist creating practice problems for ${topic} at ${gradeLevel}th grade level (${gradeBand}).
+    // Check cache first
+    if (useCache && topicId) {
+      const cached = await curriculumCache.getCached(topicId, gradeLevel, 'practiceProblems', { difficulty, count });
+      if (cached) {
+        return cached.content;
+      }
+    }
+
+    const gradeBand = this.getGradeBand(gradeLevel);
+    const standards = await this.getLearningStandards(topic, gradeLevel);
+
+    // Retry logic
+    let lastError;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const prompt = `You are a curriculum specialist creating practice problems for ${topic} at ${gradeLevel}th grade level (${gradeBand}).
 
 Generate ${count} practice problems at ${difficulty} difficulty level.
 
@@ -187,34 +224,93 @@ Format as JSON array.`;
 
   /**
    * Get learning standards for a topic and grade level
-   * TODO: Integrate with actual standards database
+   * Now integrated with StandardsService
    */
   async getLearningStandards(topic, gradeLevel) {
-    // Placeholder - should query actual standards database
-    // For now, return generic standards
-    return [
-      {
-        code: `${this.subjectId.toUpperCase()}.${gradeLevel}.1`,
-        description: `Understand and apply ${topic} concepts appropriate for grade ${gradeLevel}`,
-      },
-    ];
+    try {
+      return await standardsService.getStandards(this.subjectId, gradeLevel, topic);
+    } catch (error) {
+      console.warn('Error fetching standards, using fallback:', error.message);
+      // Fallback to basic standard
+      return [
+        {
+          code: `${this.subjectId.toUpperCase()}.${gradeLevel}.1`,
+          description: `Understand and apply ${topic} concepts appropriate for grade ${gradeLevel}`,
+          gradeLevel,
+          gradeBand: this.getGradeBand(gradeLevel),
+          subject: this.subjectId,
+        },
+      ];
+    }
   }
 
   /**
-   * Parse lesson plan from AI response
+   * Parse lesson plan from AI response (IMPROVED with multiple strategies)
    */
   parseLessonPlan(content) {
-    try {
-      // Try to extract JSON if present
-      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[1]);
-      }
+    const strategies = [
+      // Strategy 1: Markdown code block
+      () => {
+        const match = content.match(/```json\n([\s\S]*?)\n```/);
+        if (match) return JSON.parse(match[1]);
+        return null;
+      },
+      // Strategy 2: Plain JSON object
+      () => {
+        const match = content.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            return JSON.parse(match[0]);
+          } catch {
+            return null;
+          }
+        }
+        return null;
+      },
+      // Strategy 3: Extract JSON between markers
+      () => {
+        const lines = content.split('\n');
+        const jsonStart = lines.findIndex(l => l.trim().startsWith('{'));
+        if (jsonStart >= 0) {
+          let braceCount = 0;
+          let jsonEnd = jsonStart;
+          for (let i = jsonStart; i < lines.length; i++) {
+            const line = lines[i];
+            braceCount += (line.match(/\{/g) || []).length;
+            braceCount -= (line.match(/\}/g) || []).length;
+            if (braceCount === 0 && i > jsonStart) {
+              jsonEnd = i;
+              break;
+            }
+          }
+          if (jsonEnd > jsonStart) {
+            try {
+              return JSON.parse(lines.slice(jsonStart, jsonEnd + 1).join('\n'));
+            } catch {
+              return null;
+            }
+          }
+        }
+        return null;
+      },
+    ];
 
-      // Otherwise, parse structured text
+    // Try each strategy
+    for (const strategy of strategies) {
+      try {
+        const result = strategy();
+        if (result) return result;
+      } catch (error) {
+        continue;
+      }
+    }
+
+    // Fallback: Structured text parsing
+    try {
       return {
         raw: content,
         parsed: this.parseStructuredText(content),
+        note: 'Parsed as structured text (JSON extraction failed)',
       };
     } catch (error) {
       console.error('Error parsing lesson plan:', error);
@@ -223,19 +319,53 @@ Format as JSON array.`;
   }
 
   /**
-   * Parse practice problems from AI response
+   * Parse practice problems from AI response (IMPROVED)
    */
   parseProblems(content) {
-    try {
-      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[1]);
+    const strategies = [
+      () => {
+        const match = content.match(/```json\n([\s\S]*?)\n```/);
+        if (match) return JSON.parse(match[1]);
+        return null;
+      },
+      () => {
+        const match = content.match(/\[[\s\S]*\]/);
+        if (match) {
+          try {
+            return JSON.parse(match[0]);
+          } catch {
+            return null;
+          }
+        }
+        return null;
+      },
+      () => {
+        const match = content.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            const parsed = JSON.parse(match[0]);
+            // If single object, wrap in array
+            return Array.isArray(parsed) ? parsed : [parsed];
+          } catch {
+            return null;
+          }
+        }
+        return null;
+      },
+    ];
+
+    for (const strategy of strategies) {
+      try {
+        const result = strategy();
+        if (result && Array.isArray(result) && result.length > 0) {
+          return result;
+        }
+      } catch (error) {
+        continue;
       }
-      return { raw: content, error: 'Could not parse JSON' };
-    } catch (error) {
-      console.error('Error parsing problems:', error);
-      return { raw: content, error: error.message };
     }
+
+    return { raw: content, error: 'Could not parse problems as JSON array' };
   }
 
   /**
@@ -313,6 +443,65 @@ Format as JSON array.`;
       console.error('Error saving content item:', error);
       throw error;
     }
+  }
+
+  /**
+   * Generate formal lesson plan structure (for new formal curriculum system)
+   * @param {string} unitName - Unit name
+   * @param {number} gradeLevel - Grade level
+   * @param {Object} options - Generation options
+   * @returns {Promise<Object>} Formal lesson plan structure
+   */
+  async generateFormalLessonPlan(unitName, gradeLevel, options = {}) {
+    const {
+      durationMinutes = 30,
+      difficulty = 'MEDIUM',
+      includeAllComponents = true,
+    } = options;
+
+    // Generate base lesson plan
+    const lessonPlan = await this.generateLessonPlan(unitName, gradeLevel, {
+      ...options,
+      difficultyLevel: difficulty,
+      includeStandards: true,
+      includeAssessments: includeAllComponents,
+      includePracticeProblems: includeAllComponents,
+    });
+
+    // Structure it formally
+    return {
+      name: lessonPlan.name || `${unitName} - Lesson`,
+      description: lessonPlan.description || `Lesson plan for ${unitName}`,
+      durationMinutes,
+      difficulty,
+      learningObjectives: lessonPlan.objectives || lessonPlan.learningObjectives || [],
+      prerequisites: lessonPlan.prerequisites || [],
+      materials: lessonPlan.materials || [],
+      standards: lessonPlan.standards || [],
+      lessonStructure: {
+        warmUp: {
+          duration: Math.max(3, Math.round(durationMinutes * 0.1)),
+          activity: lessonPlan.warmUp || 'Review previous concepts',
+        },
+        instruction: {
+          duration: Math.round(durationMinutes * 0.4),
+          content: lessonPlan.keyConcepts || lessonPlan.instruction || [],
+        },
+        practice: {
+          duration: Math.round(durationMinutes * 0.35),
+          activities: lessonPlan.practice || lessonPlan.activities || [],
+          problems: lessonPlan.practiceProblems || [],
+        },
+        assessment: {
+          duration: Math.max(3, Math.round(durationMinutes * 0.1)),
+          quiz: lessonPlan.assessment || null,
+        },
+        closure: {
+          duration: Math.max(2, Math.round(durationMinutes * 0.05)),
+          activity: lessonPlan.closure || 'Review key concepts',
+        },
+      },
+    };
   }
 }
 

@@ -1,0 +1,116 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "skip": "Skip",
+    "retry": "Try Again",
+    "done": "Done"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "invalidCredentials": "Invalid email or password",
+    "accountLocked": "Account locked. Please try again later."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeBack": "Welcome back, {name}",
+    "readyToLearn": "Ready to continue your learning journey?",
+    "chooseSubject": "Choose Your Subject",
+    "recentActivity": "Recent Activity",
+    "progress": "Progress",
+    "achievements": "Achievements",
+    "streak": "Current Streak",
+    "points": "Total Points",
+    "recommended": "Recommended for You"
+  },
+  "learning": {
+    "startSession": "Start Learning Session",
+    "continueLearning": "Continue Learning",
+    "newTopic": "New Topic",
+    "practice": "Practice",
+    "mastery": "Mastery",
+    "concepts": "Concepts",
+    "lessons": "Lessons",
+    "topics": "Topics",
+    "subjects": "Subjects",
+    "difficulty": "Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "progress": {
+    "title": "Your Progress",
+    "trackJourney": "Track your learning journey and celebrate your growth!",
+    "totalPoints": "Total Points",
+    "currentStreak": "Current Streak",
+    "achievementsUnlocked": "Achievements Unlocked",
+    "learningActivity": "Learning Activity",
+    "masteryBySubject": "Mastery by Subject",
+    "recentSessions": "Recent Sessions",
+    "noActivity": "No learning activity in this period. Start a session!",
+    "noData": "No data available yet. Complete some sessions to see your progress!"
+  },
+  "achievements": {
+    "title": "Your Achievements",
+    "collectBadges": "Collect badges as you master new skills and reach milestones!",
+    "unlocked": "Unlocked",
+    "locked": "Locked",
+    "unlockedCount": "{count} / {total} Achievements Unlocked",
+    "keepLearning": "Keep learning to unlock more!",
+    "startLearning": "Start learning to unlock your first achievement!"
+  },
+  "streak": {
+    "currentStreak": "Current Streak",
+    "days": "days",
+    "keepMomentum": "Keep the momentum going! Next milestone at {days} days.",
+    "daysUntil": "{days} day until {milestone}! {emoji}",
+    "daysUntil_plural": "{days} days until {milestone}! {emoji}",
+    "milestoneReached": "{milestone}! {emoji}",
+    "longestStreak": "Longest streak: {days} days",
+    "atRisk": "At Risk"
+  },
+  "questions": {
+    "submitAnswer": "Submit Answer",
+    "correct": "Excellent! You got it right on the first try! 🎉",
+    "incorrect": "Not quite right. Try again! 💪",
+    "hint": "Hint",
+    "explanation": "Explanation",
+    "mastered": "Mastered! 🎉",
+    "attempts": "Attempts: {current} / {max}",
+    "tryAgain": "Try Again ({remaining} attempts left)"
+  },
+  "notifications": {
+    "achievementUnlocked": "Achievement Unlocked!",
+    "streakMilestone": "Streak Milestone!",
+    "progressUpdate": "Progress Update!",
+    "weeklyReport": "Weekly Learning Report"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "serverError": "Server error. Please try again later."
+  }
+}
+

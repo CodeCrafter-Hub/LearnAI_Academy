@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@sentry/nextjs": "^10.23.0",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.0.0",
     "groq-sdk": "^0.3.0",
@@ -28,7 +31,9 @@
     "next": "14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.10.0",
+    "recharts": "^2.15.4",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-react": "^5.30.2",
     "winston": "^3.11.0",
     "zod": "^3.22.4"
   },

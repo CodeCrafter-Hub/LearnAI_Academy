@@ -1,0 +1,116 @@
+{
+  "common": {
+    "welcome": "Bienvenido",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "skip": "Omitir",
+    "retry": "Intentar de nuevo",
+    "done": "Hecho"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "register": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "rememberMe": "Recordarme",
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "invalidCredentials": "Correo electrónico o contraseña inválidos",
+    "accountLocked": "Cuenta bloqueada. Por favor, inténtalo más tarde."
+  },
+  "dashboard": {
+    "title": "Panel de control",
+    "welcomeBack": "Bienvenido de nuevo, {name}",
+    "readyToLearn": "¿Listo para continuar tu viaje de aprendizaje?",
+    "chooseSubject": "Elige tu materia",
+    "recentActivity": "Actividad reciente",
+    "progress": "Progreso",
+    "achievements": "Logros",
+    "streak": "Racha actual",
+    "points": "Puntos totales",
+    "recommended": "Recomendado para ti"
+  },
+  "learning": {
+    "startSession": "Iniciar sesión de aprendizaje",
+    "continueLearning": "Continuar aprendiendo",
+    "newTopic": "Nuevo tema",
+    "practice": "Práctica",
+    "mastery": "Dominio",
+    "concepts": "Conceptos",
+    "lessons": "Lecciones",
+    "topics": "Temas",
+    "subjects": "Materias",
+    "difficulty": "Dificultad",
+    "easy": "Fácil",
+    "medium": "Medio",
+    "hard": "Difícil"
+  },
+  "progress": {
+    "title": "Tu progreso",
+    "trackJourney": "¡Rastrea tu viaje de aprendizaje y celebra tu crecimiento!",
+    "totalPoints": "Puntos totales",
+    "currentStreak": "Racha actual",
+    "achievementsUnlocked": "Logros desbloqueados",
+    "learningActivity": "Actividad de aprendizaje",
+    "masteryBySubject": "Dominio por materia",
+    "recentSessions": "Sesiones recientes",
+    "noActivity": "No hay actividad de aprendizaje en este período. ¡Inicia una sesión!",
+    "noData": "Aún no hay datos disponibles. ¡Completa algunas sesiones para ver tu progreso!"
+  },
+  "achievements": {
+    "title": "Tus logros",
+    "collectBadges": "¡Colecciona insignias mientras dominas nuevas habilidades y alcanzas hitos!",
+    "unlocked": "Desbloqueado",
+    "locked": "Bloqueado",
+    "unlockedCount": "{count} / {total} Logros Desbloqueados",
+    "keepLearning": "¡Sigue aprendiendo para desbloquear más!",
+    "startLearning": "¡Comienza a aprender para desbloquear tu primer logro!"
+  },
+  "streak": {
+    "currentStreak": "Racha actual",
+    "days": "días",
+    "keepMomentum": "¡Mantén el impulso! Próximo hito en {days} días.",
+    "daysUntil": "¡{days} día hasta {milestone}! {emoji}",
+    "daysUntil_plural": "¡{days} días hasta {milestone}! {emoji}",
+    "milestoneReached": "¡{milestone}! {emoji}",
+    "longestStreak": "Racha más larga: {days} días",
+    "atRisk": "En riesgo"
+  },
+  "questions": {
+    "submitAnswer": "Enviar respuesta",
+    "correct": "¡Excelente! ¡Lo hiciste bien en el primer intento! 🎉",
+    "incorrect": "No es correcto. ¡Inténtalo de nuevo! 💪",
+    "hint": "Pista",
+    "explanation": "Explicación",
+    "mastered": "¡Dominado! 🎉",
+    "attempts": "Intentos: {current} / {max}",
+    "tryAgain": "Intentar de nuevo ({remaining} intentos restantes)"
+  },
+  "notifications": {
+    "achievementUnlocked": "¡Logro desbloqueado!",
+    "streakMilestone": "¡Hito de racha!",
+    "progressUpdate": "¡Actualización de progreso!",
+    "weeklyReport": "Informe semanal de aprendizaje"
+  },
+  "errors": {
+    "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+    "network": "Error de red. Por favor, verifica tu conexión.",
+    "unauthorized": "No estás autorizado para realizar esta acción.",
+    "notFound": "El recurso solicitado no se encontró.",
+    "serverError": "Error del servidor. Por favor, inténtalo más tarde."
+  }
+}
+

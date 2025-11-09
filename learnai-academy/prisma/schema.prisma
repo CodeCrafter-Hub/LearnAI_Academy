@@ -25,7 +25,7 @@ model User {
 }
 
 model Student {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   userId      String
   parentId    String?
   firstName   String
@@ -34,16 +34,17 @@ model Student {
   birthDate   DateTime?
   avatarUrl   String?
   preferences Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent            User?               @relation("ParentRelation", fields: [parentId], references: [id])
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent            User?                @relation("ParentRelation", fields: [parentId], references: [id])
   progress          StudentProgress[]
   sessions          LearningSession[]
   achievements      StudentAchievement[]
   dailyActivity     DailyActivity[]
   assessmentResults AssessmentResult[]
+  lessons           Lesson[]
 
   @@index([userId])
   @@index([parentId])
@@ -64,9 +65,11 @@ model Subject {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  topics   Topic[]
-  progress StudentProgress[]
-  sessions LearningSession[]
+  topics    Topic[]
+  progress  StudentProgress[]
+  sessions  LearningSession[]
+  curricula Curriculum[]
+  conceptReviews ConceptReview[]
 
   @@index([isActive, orderIndex])
   @@index([minGrade, maxGrade])
@@ -74,27 +77,27 @@ model Subject {
 }
 
 model Topic {
-  id                 String   @id @default(uuid())
-  subjectId          String
-  parentTopicId      String?
-  name               String
-  slug               String
-  description        String?
-  gradeLevel         Int
-  difficulty         Difficulty
-  learningStandards  Json?
-  prerequisites      Json?
-  estimatedHours     Float?
-  orderIndex         Int
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now())
+  id                String     @id @default(uuid())
+  subjectId         String
+  parentTopicId     String?
+  name              String
+  slug              String
+  description       String?
+  gradeLevel        Int
+  difficulty        Difficulty
+  learningStandards Json?
+  prerequisites     Json?
+  estimatedHours    Float?
+  orderIndex        Int
+  isActive          Boolean    @default(true)
+  createdAt         DateTime   @default(now())
 
-  subject       Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  parentTopic   Topic?            @relation("TopicHierarchy", fields: [parentTopicId], references: [id])
-  childTopics   Topic[]           @relation("TopicHierarchy")
-  contentItems  ContentItem[]
-  progress      StudentProgress[]
-  sessions      LearningSession[]
+  subject      Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  parentTopic  Topic?            @relation("TopicHierarchy", fields: [parentTopicId], references: [id])
+  childTopics  Topic[]           @relation("TopicHierarchy")
+  contentItems ContentItem[]
+  progress     StudentProgress[]
+  sessions     LearningSession[]
 
   @@unique([subjectId, slug])
   @@index([subjectId, gradeLevel])
@@ -126,19 +129,19 @@ model ContentItem {
 }
 
 model StudentProgress {
-  id                      String   @id @default(uuid())
-  studentId               String
-  subjectId               String
-  topicId                 String
-  masteryLevel            Float    @default(0)
-  totalTimeMinutes        Int      @default(0)
-  sessionsCount           Int      @default(0)
-  lastPracticedAt         DateTime?
-  strengths               Json?
-  weaknesses              Json?
-  nextRecommendedTopics   Json?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                    String    @id @default(uuid())
+  studentId             String
+  subjectId             String
+  topicId               String
+  masteryLevel          Float     @default(0)
+  totalTimeMinutes      Int       @default(0)
+  sessionsCount         Int       @default(0)
+  lastPracticedAt       DateTime?
+  strengths             Json?
+  weaknesses            Json?
+  nextRecommendedTopics Json?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -171,12 +174,13 @@ model LearningSession {
   qualityRating     Int?
   createdAt         DateTime    @default(now())
 
-  student          Student                @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject          Subject?               @relation(fields: [subjectId], references: [id])
-  topic            Topic?                 @relation(fields: [topicId], references: [id])
-  messages         SessionMessage[]
-  agentLogs        AgentLog[]
+  student           Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject           Subject?           @relation(fields: [subjectId], references: [id])
+  topic             Topic?             @relation(fields: [topicId], references: [id])
+  messages          SessionMessage[]
+  agentLogs         AgentLog[]
   assessmentResults AssessmentResult[]
+  lessons           Lesson[]
 
   @@index([studentId, startedAt])
   @@index([subjectId, sessionMode])
@@ -203,18 +207,18 @@ model SessionMessage {
 }
 
 model Achievement {
-  id          String   @id @default(uuid())
-  code        String   @unique
-  name        String
-  description String
-  icon        String
-  category    String
-  condition   Json
-  pointsReward Int     @default(0)
-  rarity      String
-  orderIndex  Int
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  description  String
+  icon         String
+  category     String
+  condition    Json
+  pointsReward Int      @default(0)
+  rarity       String
+  orderIndex   Int
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   studentAchievements StudentAchievement[]
 
@@ -236,15 +240,15 @@ model StudentAchievement {
 }
 
 model DailyActivity {
-  id            String   @id @default(uuid())
-  studentId     String
-  activityDate  DateTime @db.Date
-  minutesLearned Int     @default(0)
-  sessionsCount Int      @default(0)
-  pointsEarned  Int      @default(0)
-  topicsStudied Json?
-  streakDay     Int?
-  createdAt     DateTime @default(now())
+  id             String   @id @default(uuid())
+  studentId      String
+  activityDate   DateTime @db.Date
+  minutesLearned Int      @default(0)
+  sessionsCount  Int      @default(0)
+  pointsEarned   Int      @default(0)
+  topicsStudied  Json?
+  streakDay      Int?
+  createdAt      DateTime @default(now())
 
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -255,17 +259,17 @@ model DailyActivity {
 }
 
 model Assessment {
-  id              String   @id @default(uuid())
-  name            String
-  assessmentType  String
-  subjectId       String?
-  topics          Json?
-  gradeLevel      Int?
-  totalQuestions  Int
+  id               String   @id @default(uuid())
+  name             String
+  assessmentType   String
+  subjectId        String?
+  topics           Json?
+  gradeLevel       Int?
+  totalQuestions   Int
   timeLimitMinutes Int?
-  passingScore    Float?
-  metadata        Json?
-  createdAt       DateTime @default(now())
+  passingScore     Float?
+  metadata         Json?
+  createdAt        DateTime @default(now())
 
   results AssessmentResult[]
 
@@ -273,17 +277,17 @@ model Assessment {
 }
 
 model AssessmentResult {
-  id              String   @id @default(uuid())
-  assessmentId    String
-  studentId       String
-  sessionId       String?
-  score           Float
-  totalCorrect    Int
-  totalQuestions  Int
-  timeTakenMinutes Int?
-  questionResults Json?
+  id                String   @id @default(uuid())
+  assessmentId      String
+  studentId         String
+  sessionId         String?
+  score             Float
+  totalCorrect      Int
+  totalQuestions    Int
+  timeTakenMinutes  Int?
+  questionResults   Json?
   recommendedTopics Json?
-  takenAt         DateTime @default(now())
+  takenAt           DateTime @default(now())
 
   assessment Assessment       @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   student    Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -295,16 +299,16 @@ model AssessmentResult {
 }
 
 model AgentLog {
-  id              String   @id @default(uuid())
-  sessionId       String
-  agentType       String
-  promptTokens    Int?
+  id               String   @id @default(uuid())
+  sessionId        String
+  agentType        String
+  promptTokens     Int?
   completionTokens Int?
-  totalCost       Float?
-  responseTimeMs  Int?
-  modelUsed       String?
-  errorMessage    String?
-  createdAt       DateTime @default(now())
+  totalCost        Float?
+  responseTimeMs   Int?
+  modelUsed        String?
+  errorMessage     String?
+  createdAt        DateTime @default(now())
 
   session LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
@@ -346,4 +350,375 @@ enum ContentType {
   PRACTICE
   QUIZ
   PROJECT
+}
+
+// ============================================
+// FORMAL CURRICULUM MODELS
+// ============================================
+
+// 1. CURRICULUM - Full year scope and sequence
+model Curriculum {
+  id            String   @id @default(uuid())
+  name          String // "Common Core Math Grade 1"
+  subjectId     String
+  gradeLevel    Int // -1 = Preschool, 0 = Pre-K, 1-12 = Grades
+  academicYear  String // "2024-2025"
+  description   String?
+  standards     Json? // Standards mapping (Common Core, state)
+  scopeSequence Json? // Full year plan with pacing
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  units   Unit[]
+
+  @@unique([subjectId, gradeLevel, academicYear])
+  @@index([subjectId, gradeLevel])
+  @@index([isActive])
+  @@map("curricula")
+}
+
+// 2. UNIT - Thematic grouping (e.g., "Fractions", "Grammar")
+model Unit {
+  id            String   @id @default(uuid())
+  curriculumId  String
+  name          String
+  description   String?
+  orderIndex    Int // Sequence in curriculum
+  durationWeeks Float? // Estimated weeks
+  prerequisites Json? // Required prior knowledge
+  learningGoals Json? // Unit objectives
+  standards     Json? // Aligned standards
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  curriculum  Curriculum   @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  lessonPlans LessonPlan[]
+
+  @@index([curriculumId, orderIndex])
+  @@index([isActive])
+  @@map("units")
+}
+
+// 3. LESSON PLAN - Detailed teaching plan
+model LessonPlan {
+  id                 String     @id @default(uuid())
+  unitId             String
+  name               String
+  description        String?
+  orderIndex         Int // Sequence in unit
+  durationMinutes    Int // Lesson length (30-45 min)
+  difficulty         Difficulty
+  learningObjectives Json // Specific objectives
+  prerequisites      Json? // What students need to know
+  materials          Json? // Teaching aids needed
+  standards          Json? // Aligned standards
+  lessonStructure    Json? // Warm-up, instruction, practice, assessment, closure
+  isActive           Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  unit          Unit                     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  lessons       Lesson[]
+  presentations Presentation[]
+  teachingAids  TeachingAid[]
+  multimedia    MultimediaContent[]
+  activities    LessonActivityTemplate[]
+
+  @@index([unitId, orderIndex])
+  @@index([isActive])
+  @@map("lesson_plans")
+}
+
+// 4. LESSON - Actual teaching session instance
+model Lesson {
+  id               String       @id @default(uuid())
+  lessonPlanId     String
+  studentId        String? // If personalized
+  sessionId        String? // Link to learning session
+  status           LessonStatus
+  startedAt        DateTime?
+  completedAt      DateTime?
+  progress         Float        @default(0) // 0-1
+  timeSpentMinutes Int? // Actual time spent
+  score            Float? // Overall lesson score
+  feedback         String? // Student/teacher feedback
+  notes            Json? // Student notes
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  lessonPlan LessonPlan       @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+  student    Student?         @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  session    LearningSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  activities LessonActivity[]
+  questions  FormativeQuestion[]
+
+  @@index([lessonPlanId])
+  @@index([studentId])
+  @@index([status])
+  @@map("lessons")
+}
+
+enum LessonStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+  PAUSED
+}
+
+// 5. PRESENTATION - Slides/Content for teaching
+model Presentation {
+  id              String           @id @default(uuid())
+  lessonPlanId    String
+  name            String
+  contentType     PresentationType
+  slides          Json // Array of slide objects
+  voiceScript     String? // Narration script
+  audioUrl        String? // Pre-recorded audio
+  videoUrl        String? // Instructional video
+  orderIndex      Int
+  durationSeconds Int?
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  lessonPlan LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId, orderIndex])
+  @@map("presentations")
+}
+
+enum PresentationType {
+  SLIDES // Text/image slides
+  VIDEO // Instructional video
+  INTERACTIVE // Interactive presentation
+  AUDIO_ONLY // Podcast-style
+  HYBRID // Combination
+}
+
+// 6. TEACHING AID - Visuals, manipulatives, worksheets
+model TeachingAid {
+  id                String          @id @default(uuid())
+  lessonPlanId      String
+  name              String
+  type              TeachingAidType
+  content           Json // Structured content
+  imageUrl          String? // Visual aid image
+  pdfUrl            String? // Printable worksheet
+  interactiveUrl    String? // Interactive tool
+  description       String?
+  usageInstructions String?
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  lessonPlan LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId])
+  @@index([type])
+  @@map("teaching_aids")
+}
+
+enum TeachingAidType {
+  VISUAL // Charts, diagrams, images
+  MANIPULATIVE // Virtual manipulatives
+  WORKSHEET // Printable worksheets
+  GAME // Educational game
+  SIMULATION // Interactive simulation
+  ANIMATION // Animated explanation
+  POSTER // Visual poster
+  FLASHCARD // Digital flashcards
+}
+
+// 7. LESSON ACTIVITY TEMPLATE - Activity templates
+model LessonActivityTemplate {
+  id              String       @id @default(uuid())
+  lessonPlanId    String
+  activityType    ActivityType
+  name            String
+  instructions    String
+  content         Json // Activity-specific data
+  durationMinutes Int?
+  orderIndex      Int
+  isRequired      Boolean      @default(true)
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  lessonPlan LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId, orderIndex])
+  @@map("lesson_activity_templates")
+}
+
+// 8. LESSON ACTIVITY - Actual activity instance
+model LessonActivity {
+  id               String       @id @default(uuid())
+  lessonId         String
+  templateId       String? // Link to template
+  activityType     ActivityType
+  name             String
+  instructions     String
+  content          Json // Activity-specific data
+  orderIndex       Int
+  completed        Boolean      @default(false)
+  score            Float?
+  feedback         String?
+  timeSpentMinutes Int?
+  attempts         Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, orderIndex])
+  @@index([completed])
+  @@map("lesson_activities")
+}
+
+enum ActivityType {
+  PRACTICE // Practice problems
+  QUIZ // Quick check
+  PROJECT // Hands-on project
+  DISCUSSION // Guided discussion
+  GAME // Educational game
+  EXPERIMENT // Science experiment
+  WRITING // Writing exercise
+  READING // Reading comprehension
+  LISTENING // Listening exercise
+}
+
+// 9. MULTIMEDIA CONTENT - Videos, audio, interactive
+model MultimediaContent {
+  id              String         @id @default(uuid())
+  lessonPlanId    String
+  contentType     MultimediaType
+  title           String
+  description     String?
+  url             String // Video/audio URL
+  thumbnailUrl    String?
+  durationSeconds Int?
+  transcript      String? // For accessibility
+  captions        Json? // Subtitles/captions (SRT format)
+  interactive     Boolean        @default(false)
+  metadata        Json? // Additional metadata (resolution, format, etc.)
+  viewCount       Int            @default(0)
+  averageRating   Float?
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  lessonPlan LessonPlan @relation(fields: [lessonPlanId], references: [id], onDelete: Cascade)
+
+  @@index([lessonPlanId])
+  @@index([contentType])
+  @@index([isActive])
+  @@map("multimedia_content")
+}
+
+enum MultimediaType {
+  VIDEO // Instructional video
+  AUDIO // Voice narration
+  ANIMATION // Animated explanation
+  INTERACTIVE // Interactive content
+  SIMULATION // Educational simulation
+  PODCAST // Audio lesson
+}
+
+// ============================================
+// SPACED REPETITION MODELS
+// ============================================
+
+// Concept Review - Tracks spaced repetition for concepts
+model ConceptReview {
+  id              String    @id @default(uuid())
+  studentId       String
+  conceptId       String // Topic or concept identifier
+  subjectId       String?
+  easeFactor      Float     @default(2.5) // SM-2 ease factor
+  interval        Int       @default(1) // Days until next review
+  repetitions     Int       @default(0) // Number of successful reviews
+  nextReviewDate  DateTime // When to review next
+  lastReviewedAt  DateTime?
+  totalReviews    Int       @default(0)
+  averageQuality  Float? // Average review quality (0-5)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  student    Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject    Subject?        @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  sessions   ReviewSession[]
+
+  @@unique([studentId, conceptId])
+  @@index([studentId, nextReviewDate])
+  @@index([studentId, subjectId])
+  @@index([nextReviewDate])
+  @@map("concept_reviews")
+}
+
+// Review Session - Individual review attempt
+model ReviewSession {
+  id        String   @id @default(uuid())
+  reviewId  String
+  sessionId String? // Link to learning session
+  quality   Int // Review quality (0-5)
+  reviewedAt DateTime @default(now())
+
+  review ConceptReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId, reviewedAt])
+  @@index([sessionId])
+  @@map("review_sessions")
+}
+
+// ============================================
+// FORMATIVE ASSESSMENT MODELS
+// ============================================
+
+// Formative Question - Embedded questions in lessons
+model FormativeQuestion {
+  id            String   @id @default(uuid())
+  lessonId      String
+  questionType  String // multiple-choice, short-answer, true-false, fill-blank
+  question      String
+  options       Json? // For multiple-choice
+  correctAnswer Json // Answer or answer index
+  explanation   String?
+  hints         Json? // Array of hints
+  difficulty    String
+  concept       String
+  orderIndex    Int
+  isActive      Boolean  @default(true)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  lesson   Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts FormativeAttempt[]
+
+  @@index([lessonId, orderIndex])
+  @@index([concept])
+  @@map("formative_questions")
+}
+
+// Formative Attempt - Student answer attempts
+model FormativeAttempt {
+  id           String   @id @default(uuid())
+  questionId   String
+  studentId    String
+  answer       Json // Student's answer
+  isCorrect    Boolean
+  attemptNumber Int
+  timeSpentSeconds Int?
+  submittedAt  DateTime @default(now())
+
+  question FormativeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  student  Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([questionId, studentId])
+  @@index([studentId, submittedAt])
+  @@map("formative_attempts")
 }

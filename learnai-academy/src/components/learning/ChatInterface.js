@@ -3,14 +3,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import InteractiveFeedback from '@/components/learning/InteractiveFeedback';
+import { useNotificationContext } from '@/components/providers/NotificationProvider';
 
 export default function ChatInterface({ sessionId, onSessionEnd }) {
   const { addToast } = useToast();
+  const { notifyAchievement, notifyProgress } = useNotificationContext();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [feedback, setFeedback] = useState({ show: false, type: 'correct', message: '' });
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -88,6 +92,34 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
         };
         setMessages(prev => [...prev, assistantMessage]);
 
+        // Check for achievements or milestones in response
+        if (data.achievement) {
+          notifyAchievement(data.achievement);
+          setFeedback({
+            show: true,
+            type: 'celebration',
+            message: `Achievement Unlocked: ${data.achievement.name}! 🎉`,
+          });
+        }
+
+        if (data.milestone) {
+          notifyProgress(data.milestone);
+          setFeedback({
+            show: true,
+            type: 'celebration',
+            message: data.milestone.message || 'Great progress!',
+          });
+        }
+
+        // Show feedback for correct answers
+        if (data.isCorrect !== undefined) {
+          setFeedback({
+            show: true,
+            type: data.isCorrect ? 'correct' : 'incorrect',
+            message: data.isCorrect ? 'Excellent! Keep it up! 🎉' : 'Not quite right. Try again! 💪',
+          });
+        }
+
         // Speak response if voice enabled
         if (voiceEnabled) {
           speak(data.message.content);
@@ -130,7 +162,15 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <>
+      <InteractiveFeedback
+        type={feedback.type}
+        message={feedback.message}
+        show={feedback.show}
+        duration={3000}
+        onClose={() => setFeedback({ show: false, type: 'correct', message: '' })}
+      />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Messages */}
       <div style={{
         flex: 1,
@@ -359,5 +399,6 @@ export default function ChatInterface({ sessionId, onSessionEnd }) {
         </div>
       </div>
     </div>
+    </>
   );
 }

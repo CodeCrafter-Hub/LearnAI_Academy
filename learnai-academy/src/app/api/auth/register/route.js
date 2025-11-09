@@ -19,6 +19,73 @@ const registerSchema = z.object({
   birthDate: z.string().optional(),
 });
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Must be at least 12 characters with uppercase, lowercase, number, and special character
+ *                 example: SecurePassword123!
+ *               firstName:
+ *                 type: string
+ *                 example: John
+ *               lastName:
+ *                 type: string
+ *                 example: Doe
+ *               role:
+ *                 type: string
+ *                 enum: [STUDENT, PARENT]
+ *                 default: PARENT
+ *               gradeLevel:
+ *                 type: integer
+ *                 minimum: 0
+ *                 maximum: 12
+ *                 example: 5
+ *               birthDate:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: Registration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error or user already exists
+ *         $ref: '#/components/responses/ValidationError'
+ *       429:
+ *         description: Too many registration attempts
+ *         $ref: '#/components/responses/RateLimitError'
+ */
+
 export async function POST(request) {
   try {
     // Rate limiting: 3 registration attempts per hour per IP

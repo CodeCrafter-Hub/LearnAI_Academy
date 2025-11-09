@@ -6,13 +6,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
 import Header from '@/components/layout/Header';
 import ChatInterface from '@/components/learning/ChatInterface';
+import AdaptiveClassroom from '@/components/learning/AdaptiveClassroom';
+import BreakReminder from '@/components/study/BreakReminder';
+import FocusMode, { FocusModeToggle } from '@/components/study/FocusMode';
 import SubjectSelector from '@/components/learning/SubjectSelector';
 import TopicSelector from '@/components/learning/TopicSelector';
 import ModeSelector from '@/components/learning/ModeSelector';
 import DifficultySelector from '@/components/learning/DifficultySelector';
 import GradePasswordPrompt from '@/components/learning/GradePasswordPrompt';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, TrendingUp } from 'lucide-react';
+import ClassroomEvaluationWidget from '@/components/ui/ClassroomEvaluationWidget';
 
 function LearnPageContent() {
   const router = useRouter();
@@ -28,6 +32,8 @@ function LearnPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [requestedGrade, setRequestedGrade] = useState(null);
+  const [sessionStartTime, setSessionStartTime] = useState(null);
+  const [focusModeEnabled, setFocusModeEnabled] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
@@ -151,53 +157,82 @@ function LearnPageContent() {
 
   // Session View (Chat Interface)
   if (step === 'session' && sessionId) {
+    // Set session start time if not set
+    if (!sessionStartTime) {
+      setSessionStartTime(new Date().toISOString());
+    }
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--color-bg-base)' }}>
-        {/* Session Header - Glassy */}
-        <div className="glass" style={{
-          padding: 'var(--space-md)',
-          borderBottom: '1px solid var(--color-border-subtle)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 'var(--z-sticky)',
-        }}>
-          <div className="container" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+      <FocusMode enabled={focusModeEnabled} onToggle={() => setFocusModeEnabled(!focusModeEnabled)}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--color-bg-base)' }}>
+          {/* Break Reminder */}
+          {sessionStartTime && (
+            <BreakReminder
+              sessionStartTime={sessionStartTime}
+              gradeLevel={user?.students?.[0]?.gradeLevel || 5}
+              onBreakStart={(duration) => {
+                addToast(`Taking a ${duration}-minute break. Great work!`, 'info');
+              }}
+            />
+          )}
+
+          {/* Session Header - Glassy */}
+          <div className="glass" style={{
+            padding: 'var(--space-md)',
+            borderBottom: '1px solid var(--color-border-subtle)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 'var(--z-sticky)',
           }}>
-            <div>
-              <h2 style={{
-                fontSize: 'var(--text-xl)',
-                fontWeight: 'var(--weight-semibold)',
-                color: 'var(--color-text-primary)',
-                marginBottom: 'var(--space-3xs)',
-              }}>
-                {selectedTopic.name}
-              </h2>
-              <p style={{
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-text-secondary)',
-              }}>
-                {selectedMode === 'PRACTICE' ? 'Practice Mode' : 'Help Mode'}
-              </p>
+            <div className="container" style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <h2 style={{
+                  fontSize: 'var(--text-xl)',
+                  fontWeight: 'var(--weight-semibold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--space-3xs)',
+                }}>
+                  {selectedTopic.name}
+                </h2>
+                <p style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--color-text-secondary)',
+                }}>
+                  {selectedMode === 'PRACTICE' ? 'Practice Mode' : 'Help Mode'}
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+                <FocusModeToggle 
+                  enabled={focusModeEnabled} 
+                  onToggle={() => setFocusModeEnabled(!focusModeEnabled)} 
+                />
+                <button
+                  onClick={endSession}
+                  className="btn btn-secondary"
+                  style={{ gap: 'var(--space-2xs)' }}
+                >
+                  <X className="w-4 h-4" />
+                  End Session
+                </button>
+              </div>
             </div>
-            <button
-              onClick={endSession}
-              className="btn btn-secondary"
-              style={{ gap: 'var(--space-2xs)' }}
-            >
-              <X className="w-4 h-4" />
-              End Session
-            </button>
+          </div>
+
+          {/* Adaptive Classroom */}
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <AdaptiveClassroom
+              sessionId={sessionId}
+              subjectSlug={selectedSubject?.slug}
+              gradeLevel={user?.students?.[0]?.gradeLevel}
+              onSessionEnd={endSession}
+            />
           </div>
         </div>
-
-        {/* Chat Interface */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
-          <ChatInterface sessionId={sessionId} onSessionEnd={endSession} />
-        </div>
-      </div>
+      </FocusMode>
     );
   }
 
@@ -246,6 +281,14 @@ function LearnPageContent() {
                   <option key={i + 1} value={i + 1}>Grade {i + 1}</option>
                 ))}
               </select>
+              <button
+                onClick={() => router.push(`/learn/grade/${user?.students?.[0]?.gradeLevel || 5}`)}
+                className="btn btn-ghost flex items-center gap-2"
+                style={{ fontSize: 'var(--text-sm)' }}
+              >
+                <TrendingUp className="w-4 h-4" />
+                Grade Hub
+              </button>
             </div>
           )}
         </nav>
@@ -278,6 +321,13 @@ function LearnPageContent() {
             );
           })}
         </div>
+
+        {/* Classroom Evaluation Widget - Only on subject selection */}
+        {step === 'subject' && (
+          <div style={{ marginBottom: 'var(--space-xl)' }}>
+            <ClassroomEvaluationWidget gradeLevel={user?.students?.[0]?.gradeLevel || 5} />
+          </div>
+        )}
 
         {/* Subject Selection */}
         {step === 'subject' && (

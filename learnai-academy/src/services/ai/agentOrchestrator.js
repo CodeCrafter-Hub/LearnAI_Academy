@@ -145,7 +145,8 @@ class AgentOrchestrator {
             topic,
             gradeLevel,
             options.count || 10,
-            options.difficulty || 'MEDIUM'
+            options.difficulty || 'MEDIUM',
+            options // Pass all options including topicId
           );
         
         case 'contentItems':
@@ -153,7 +154,8 @@ class AgentOrchestrator {
             topic,
             gradeLevel,
             options.contentType || 'EXPLANATION',
-            options.count || 5
+            options.count || 5,
+            options // Pass all options including topicId
           );
         
         default:

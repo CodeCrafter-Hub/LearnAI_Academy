@@ -101,6 +101,29 @@ class ProgressTracker {
       // Update daily activity
       await this.updateDailyActivity(studentId, durationMinutes || 0, sessionData);
 
+      // Schedule spaced repetition reviews for concepts learned
+      if (sessionData.concepts && sessionData.concepts.length > 0) {
+        try {
+          const { spacedRepetitionService } = await import('../learning/spacedRepetitionService.js');
+          const initialQuality = sessionData.problemsAttempted > 0
+            ? Math.min(5, Math.round((sessionData.problemsCorrect / sessionData.problemsAttempted) * 5))
+            : 3;
+
+          for (const conceptId of sessionData.concepts) {
+            await spacedRepetitionService.scheduleInitialReview(
+              studentId,
+              conceptId,
+              session.subjectId,
+              initialQuality
+            ).catch(err => {
+              console.error('Error scheduling spaced repetition:', err);
+            });
+          }
+        } catch (error) {
+          console.error('Error importing spaced repetition service:', error);
+        }
+      }
+
       return progress;
     } catch (error) {
       console.error('Error tracking progress:', error);
