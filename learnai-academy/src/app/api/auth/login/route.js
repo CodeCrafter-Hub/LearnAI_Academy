@@ -137,7 +137,19 @@ export async function POST(request) {
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    // Check password - database uses password_hash field
+    const userPasswordHash = user.password_hash || user.passwordHash;
+    if (!userPasswordHash) {
+      // Record failed attempt
+      const lockoutResult = await recordFailedAttempt(email);
+      await auditAuth.login(user.id, email, ipAddress, userAgent, false, 'no_password_set');
+      return errorResponse(
+        new Error('Account configuration error. Please contact support.'),
+        request
+      );
+    }
+    
+    const isValidPassword = await bcrypt.compare(password, userPasswordHash);
 
     if (!isValidPassword) {
       // Record failed attempt
