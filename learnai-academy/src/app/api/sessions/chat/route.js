@@ -22,7 +22,7 @@ const chatSchema = z.object({
 export async function POST(request) {
   try {
     // Verify authentication
-    const user = verifyToken(request);
+    const user = await verifyToken(request);
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },

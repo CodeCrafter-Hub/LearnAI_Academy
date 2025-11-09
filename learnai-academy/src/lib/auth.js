@@ -83,7 +83,7 @@ export function generateToken(payload) {
  * @returns {Promise<Object>} Decoded user token
  */
 export async function requireAuth(request) {
-  const user = verifyToken(request);
+  const user = await verifyToken(request);
 
   if (!user) {
     throw new Error('Authentication required');
