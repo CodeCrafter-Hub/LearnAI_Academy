@@ -128,7 +128,8 @@ export default function DashboardPage() {
     router.push(`/learn?subject=${subject.slug}`);
   };
 
-  if (isLoading) {
+  // Show loading state
+  if (authLoading || isLoading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
         <Header />
@@ -150,6 +151,43 @@ export default function DashboardPage() {
         </main>
       </div>
     );
+  }
+
+  // Show admin dashboard if user is admin
+  if ((user?.role === 'ADMIN' || user?.is_admin) && !student) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
+        <Header />
+        <main className="container" style={{ paddingBlock: 'var(--space-xl)' }}>
+          <h1 style={{
+            fontSize: 'var(--text-5xl)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--color-text-primary)',
+            marginBottom: 'var(--space-md)',
+          }}>
+            Admin Dashboard
+          </h1>
+          <p style={{
+            fontSize: 'var(--text-lg)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: 'var(--space-xl)',
+          }}>
+            Welcome to the admin dashboard. System management features coming soon.
+          </p>
+        </main>
+      </div>
+    );
+  }
+
+  // Show onboarding redirect if no student profile (but not admin)
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && !student && !(user?.role === 'ADMIN' || user?.is_admin)) {
+      router.push('/onboarding');
+    }
+  }, [authLoading, isAuthenticated, student, user, router]);
+
+  if (!student && !(user?.role === 'ADMIN' || user?.is_admin)) {
+    return null; // Will redirect via useEffect
   }
 
   return (
