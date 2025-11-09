@@ -250,13 +250,14 @@ Generate ${count} high-quality ${contentType} items that:
 
 Format as JSON array.`;
 
-    const response = await groqClient.chat([
+    // Use unified AI provider with automatic fallback
+    const response = await aiProvider.chat([
       { role: 'system', content: prompt },
       { role: 'user', content: `Generate ${count} ${contentType} items.` },
     ], {
-      model: groqClient.models.smart,
       temperature: 0.5,
       maxTokens: 3000,
+      preferredProvider: 'groq', // Prefer Groq, but fallback if needed
     });
 
     return this.parseContentItems(response.content);
