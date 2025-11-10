@@ -50,9 +50,9 @@ export default function Logo({
         src="/logo.png" 
         alt="Aigents Academy - Ignited Minds, Powered by AI" 
         style={{
-          maxWidth: '100%', // Only constraint: prevent overflow
-          height: 'auto', // Natural height
-          width: 'auto', // Natural width
+          width: '50%', // Half of natural size
+          height: 'auto', // Maintain aspect ratio
+          maxWidth: '100%', // Prevent overflow
           display: 'block',
         }}
       />
