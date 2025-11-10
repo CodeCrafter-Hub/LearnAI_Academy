@@ -297,38 +297,15 @@ export default function EnterpriseHeader() {
           <div className="flex items-center flex-shrink-0">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-3 group transition-transform hover:scale-105"
+              className="flex items-center group transition-transform hover:scale-105"
               aria-label="Go to dashboard"
             >
-              <div className="relative w-10 h-10">
-                {/* Outer glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg blur-md opacity-40 group-hover:opacity-60 transition-opacity" />
-                {/* Shield container with border */}
-                <div className="relative w-full h-full bg-blue-700 dark:bg-blue-800 rounded-lg shadow-lg group-hover:shadow-xl transition-all border-2 border-cyan-400/40 flex items-center justify-center overflow-hidden">
-                  {/* Shield icon - larger, as background */}
-                  <Shield className="w-8 h-8 text-blue-600 dark:text-blue-700 absolute" fill="currentColor" strokeWidth={1} />
-                  {/* Brain icon - centered, glowing cyan */}
-                  <Brain 
-                    className="w-5 h-5 text-cyan-300 dark:text-cyan-400 absolute z-10" 
-                    strokeWidth={2}
-                    style={{ 
-                      filter: 'drop-shadow(0 0 6px rgba(103, 232, 249, 0.8))',
-                    }} 
-                  />
-                  {/* Sparkles from top of brain */}
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20">
-                    <Sparkles className="w-2.5 h-2.5 text-cyan-300 dark:text-cyan-400 opacity-90" style={{ filter: 'drop-shadow(0 0 3px rgba(103, 232, 249, 1))' }} />
-                  </div>
-                </div>
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-lg font-bold text-blue-700 dark:text-blue-400">
-                  Aigents Academy
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 -mt-0.5 font-medium">
-                  Ignited Minds, Powered by AI
-                </div>
-              </div>
+              {/* Logo image - contains full branding */}
+              <img 
+                src="/logo.png" 
+                alt="Aigents Academy - Ignited Minds, Powered by AI" 
+                className="h-12 sm:h-14 w-auto object-contain transition-transform group-hover:scale-105"
+              />
             </button>
           </div>
 
