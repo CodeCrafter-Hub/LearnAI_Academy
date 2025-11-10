@@ -35,18 +35,19 @@ export default function Logo({
   const sizeMap = {
     small: {
       // Mobile menu, footer, compact contexts
-      // 32-40px height range (still substantial, not icon-like)
-      height: 'clamp(2rem, 2vw + 1.5rem, 2.5rem)',
+      // 40-48px height range - still substantial
+      height: 'clamp(2.5rem, 2vw + 2rem, 3rem)',
     },
     default: {
       // Standard header (most common use case)
-      // 40-56px height range - proper logo size for enterprise apps
-      height: 'clamp(2.5rem, 2.5vw + 2rem, 3.5rem)',
+      // 56-80px height range - proper logo size for enterprise apps
+      // Increased from 40-56px to ensure it doesn't look icon-like
+      height: 'clamp(3.5rem, 3vw + 2.5rem, 5rem)',
     },
     large: {
       // Hero sections, landing pages, prominent displays
-      // 48-72px height range - maximum brand presence
-      height: 'clamp(3rem, 3vw + 2.5rem, 4.5rem)',
+      // 64-96px height range - maximum brand presence
+      height: 'clamp(4rem, 4vw + 3rem, 6rem)',
     },
   };
 
