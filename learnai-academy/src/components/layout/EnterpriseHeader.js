@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Home, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageSelector from '@/components/i18n/LanguageSelector';
 import MobileMenu from './MobileMenu';
+import Logo from '@/components/common/Logo';
 
 export default function EnterpriseHeader() {
   const router = useRouter();
@@ -34,49 +34,7 @@ export default function EnterpriseHeader() {
           justifyContent: 'space-between',
         }}>
           {/* Logo */}
-          <button
-            onClick={() => router.push('/dashboard')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-xs)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'opacity var(--transition-fast)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.8';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
-            }}
-            aria-label="Go to dashboard"
-          >
-            <div style={{
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Image 
-                src="/logo.png" 
-                alt="Aigents Academy Logo" 
-                width={40}
-                height={40}
-                className="object-contain"
-                priority
-              />
-            </div>
-            <span className="hidden sm:inline" style={{
-              fontSize: 'var(--text-xl)',
-              fontWeight: 'var(--weight-bold)',
-              color: 'var(--color-text-primary)',
-            }}>
-              Aigents Academy
-            </span>
-          </button>
+          <Logo size="default" />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex" style={{

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Mail, Lock, User, GraduationCap, CheckCircle, Zap, Shield } from 'lucide-react';
+import Logo from '@/components/common/Logo';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -63,27 +64,10 @@ export default function RegisterForm() {
           justifyContent: 'space-between',
           padding: 'var(--space-lg) var(--space-xl)',
         }}>
-          <button
+          <Logo 
+            size="default" 
             onClick={() => router.push('/')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-xs)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-            }}
-          >
-            <GraduationCap style={{ width: '32px', height: '32px', color: 'var(--color-accent)' }} />
-            <span style={{
-              fontSize: 'var(--text-xl)',
-              fontWeight: 'var(--weight-bold)',
-              color: 'var(--color-text-primary)',
-            }}>
-              LearnAI Academy
-            </span>
-          </button>
+          />
 
           <a
             href="/login"

@@ -26,6 +26,7 @@ import {
   BarChart3,
   Play
 } from 'lucide-react';
+import Logo from '@/components/common/Logo';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -77,13 +78,7 @@ export default function Home() {
           justifyContent: 'space-between',
           padding: 'var(--space-md) var(--space-lg)',
         }}>
-          <div style={{
-            fontSize: 'var(--text-xl)',
-            fontWeight: 'var(--weight-bold)',
-            color: 'var(--color-text-primary)',
-          }}>
-            LearnAI
-          </div>
+          <Logo size="default" onClick={() => router.push('/')} />
           <div className="cluster" style={{ gap: 'var(--space-lg)', alignItems: 'center' }}>
             <a href="#services" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>Services</a>
             <a href="#how-it-works" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', fontWeight: 'var(--weight-medium)' }}>How it works</a>
