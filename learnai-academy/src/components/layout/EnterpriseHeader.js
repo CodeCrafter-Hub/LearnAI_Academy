@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   Home,
   BookOpen,
@@ -290,27 +291,41 @@ export default function EnterpriseHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center flex-shrink-0">
+    <header className="sticky top-0 z-50 bg-white/98 dark:bg-gray-900/98 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-800/60 shadow-sm">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo & Brand - Improved sizing and spacing */}
+          <div className="flex items-center flex-shrink-0 min-w-0">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center group transition-transform hover:scale-105"
+              className="flex items-center gap-3 sm:gap-4 group transition-all duration-200 hover:opacity-90"
               aria-label="Go to dashboard"
             >
-              {/* Logo image - contains full branding */}
-              <img 
-                src="/logo.png" 
-                alt="Aigents Academy - Ignited Minds, Powered by AI" 
-                className="h-12 sm:h-14 w-auto object-contain transition-transform group-hover:scale-105"
-              />
+              {/* Logo image - Better sizing */}
+              <div className="relative h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0">
+                <Image 
+                  src="/logo.png" 
+                  alt="Aigents Academy Logo" 
+                  width={56}
+                  height={56}
+                  className="object-contain transition-transform duration-200 group-hover:scale-105"
+                  priority
+                />
+              </div>
+              {/* Brand text - Better typography and spacing */}
+              <div className="hidden sm:block min-w-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight tracking-tight">
+                  Aigents Academy
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 font-medium leading-tight">
+                  Ignited Minds, Powered by AI
+                </div>
+              </div>
             </button>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center max-w-4xl">
+          {/* Desktop Navigation - Better spacing and sizing */}
+          <nav className="hidden lg:flex items-center gap-1.5 flex-1 justify-center max-w-5xl mx-8">
             {navigation.map((item) => {
               const Icon = item.icon;
               const hasSubmenu = item.submenu && item.submenu.length > 0;
@@ -328,36 +343,35 @@ export default function EnterpriseHeader() {
                     }}
                     onMouseEnter={() => {
                       if (hasSubmenu) {
-                        // Auto-open on hover for better UX
                         setTimeout(() => {
                           if (activeDropdown !== item.path) {
                             setActiveDropdown(item.path);
                           }
-                        }, 200);
+                        }, 150);
                       }
                     }}
                     className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                      flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
                       ${active
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100'
                       }
                     `}
                   >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
+                    <Icon className="w-4.5 h-4.5 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{item.label}</span>
                     {hasSubmenu && (
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
+                        className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${
                           activeDropdown === item.path ? 'rotate-180' : ''
                         }`}
                       />
                     )}
                   </button>
 
-                  {/* Dropdown Menu */}
+                  {/* Dropdown Menu - Better styling */}
                   {hasSubmenu && activeDropdown === item.path && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-full left-0 mt-2.5 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                       {item.submenu.map((subitem) => (
                         <button
                           key={subitem.path}
@@ -366,10 +380,10 @@ export default function EnterpriseHeader() {
                             setActiveDropdown(null);
                           }}
                           className={`
-                            w-full text-left px-4 py-2.5 text-sm transition-colors duration-150
+                            w-full text-left px-5 py-3 text-sm font-medium transition-colors duration-150
                             ${isActive(subitem.path)
-                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                             }
                           `}
                         >
@@ -383,9 +397,9 @@ export default function EnterpriseHeader() {
             })}
           </nav>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
-            {/* Search */}
+          {/* Right Side Actions - Better spacing and sizing */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            {/* Search - Improved */}
             <div className="relative">
               {showSearch ? (
                 <form onSubmit={handleSearch} className="flex items-center">
@@ -397,14 +411,14 @@ export default function EnterpriseHeader() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search lessons, topics, videos..."
                       autoFocus
-                      className="w-80 px-4 py-2 pl-10 pr-20 bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+                      className="w-80 sm:w-96 px-5 py-2.5 pl-11 pr-20 bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
                       onBlur={() => {
                         setTimeout(() => setShowSearch(false), 200);
                       }}
                     />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-gray-400">
-                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">Esc</kbd>
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-gray-400">
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Esc</kbd>
                     </div>
                   </div>
                 </form>
@@ -414,47 +428,44 @@ export default function EnterpriseHeader() {
                     setShowSearch(true);
                     setTimeout(() => searchInputRef.current?.focus(), 100);
                   }}
-                  className="relative p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group"
+                  className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors group"
                   aria-label="Search"
                   title="Search (Ctrl+K)"
                 >
                   <Search className="w-5 h-5" />
-                  <div className="absolute -bottom-1 -right-1 hidden group-hover:block px-1.5 py-0.5 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 text-xs rounded">
-                    <Command className="w-3 h-3 inline" />K
-                  </div>
                 </button>
               )}
             </div>
 
-            {/* Notifications */}
+            {/* Notifications - Improved */}
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => {
                   setShowNotifications(!showNotifications);
                   setActiveDropdown(null);
                 }}
-                className="relative p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-xs font-bold rounded-full">
+                  <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white dark:border-gray-900">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
 
-              {/* Notifications Dropdown */}
+              {/* Notifications Dropdown - Improved */}
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <div className="absolute right-0 mt-3 w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                       Notifications
                     </h3>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllRead}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
                       >
                         Mark all read
                       </button>
@@ -462,8 +473,8 @@ export default function EnterpriseHeader() {
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                        <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <div className="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <Bell className="w-10 h-10 mx-auto mb-3 opacity-50" />
                         <p>No notifications</p>
                       </div>
                     ) : (
@@ -480,28 +491,28 @@ export default function EnterpriseHeader() {
                               }
                             }}
                             className={`
-                              w-full text-left px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0
+                              w-full text-left px-5 py-4 border-b border-gray-100 dark:border-gray-700 last:border-0
                               transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50
                               ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}
                             `}
                           >
-                            <div className="flex items-start gap-3">
-                              <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${getNotificationColor(notification.type)}`}>
-                                <Icon className="w-5 h-5" />
+                            <div className="flex items-start gap-3.5">
+                              <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${getNotificationColor(notification.type)}`}>
+                                <Icon className="w-5.5 h-5.5" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {notification.title}
                                   </p>
                                   {!notification.read && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5" />
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
                                   )}
                                 </div>
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5 leading-relaxed">
                                   {notification.message}
                                 </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                                   {notification.time}
                                 </p>
                               </div>
@@ -512,13 +523,13 @@ export default function EnterpriseHeader() {
                     )}
                   </div>
                   {notifications.length > 0 && (
-                    <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700">
                       <button
                         onClick={() => {
                           router.push('/notifications');
                           setShowNotifications(false);
                         }}
-                        className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
                       >
                         View all notifications
                       </button>
@@ -529,14 +540,16 @@ export default function EnterpriseHeader() {
             </div>
 
             {/* Theme Toggle */}
-            <ThemeToggle />
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
 
             {/* Language Selector */}
             <div className="hidden md:block">
               <LanguageSelector />
             </div>
 
-            {/* User Menu */}
+            {/* User Menu - Improved */}
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => {
@@ -544,34 +557,34 @@ export default function EnterpriseHeader() {
                   setShowNotifications(false);
                   setActiveDropdown(null);
                 }}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors border border-gray-200 dark:border-gray-700"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
-                  <User className="w-4 h-4 text-white" />
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+                  <User className="w-4.5 h-4.5 text-white" />
                 </div>
-                <div className="hidden xl:block text-left">
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <div className="hidden xl:block text-left min-w-0">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                     {user?.name || user?.email?.split('@')[0] || 'User'}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {user?.role || 'Student'}
                   </div>
                 </div>
                 <ChevronDown
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
+                  className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
                     showUserMenu ? 'rotate-180' : ''
                   }`}
                 />
               </button>
 
-              {/* User Dropdown */}
+              {/* User Dropdown - Improved */}
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {user?.name || 'User'}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                       {user?.email}
                     </div>
                   </div>
@@ -581,9 +594,9 @@ export default function EnterpriseHeader() {
                       router.push('/settings');
                       setShowUserMenu(false);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-3 transition-colors font-medium"
                   >
-                    <Settings className="w-4 h-4" />
+                    <Settings className="w-4.5 h-4.5" />
                     Settings
                   </button>
                   
@@ -592,19 +605,19 @@ export default function EnterpriseHeader() {
                       router.push('/help');
                       setShowUserMenu(false);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-3 transition-colors font-medium"
                   >
-                    <HelpCircle className="w-4 h-4" />
+                    <HelpCircle className="w-4.5 h-4.5" />
                     Help & Support
                   </button>
                   
-                  <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                  <div className="border-t border-gray-200 dark:border-gray-700 my-1.5" />
                   
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors font-medium"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4.5 h-4.5" />
                     Sign Out
                   </button>
                 </div>
@@ -614,7 +627,7 @@ export default function EnterpriseHeader() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="lg:hidden p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
               aria-label="Menu"
             >
               {showMobileMenu ? (
@@ -627,10 +640,10 @@ export default function EnterpriseHeader() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Improved */}
       {showMobileMenu && (
         <div className="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 animate-in slide-in-from-top duration-200">
-          <nav className="px-4 py-4 space-y-1">
+          <nav className="px-4 py-4 space-y-1.5">
             {navigation.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path, item.exact);
@@ -647,18 +660,18 @@ export default function EnterpriseHeader() {
                       }
                     }}
                     className={`
-                      w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
+                      w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors
                       ${active
                         ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                       }
                     `}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-5 h-5 flex-shrink-0" />
                     <span>{item.label}</span>
                     {item.submenu && (
                       <ChevronDown
-                        className={`w-4 h-4 ml-auto transition-transform ${
+                        className={`w-4 h-4 ml-auto flex-shrink-0 transition-transform ${
                           activeDropdown === item.path ? 'rotate-180' : ''
                         }`}
                       />
@@ -667,7 +680,7 @@ export default function EnterpriseHeader() {
 
                   {/* Mobile Submenu */}
                   {item.submenu && activeDropdown === item.path && (
-                    <div className="ml-8 mt-1 space-y-1 animate-in slide-in-from-left duration-200">
+                    <div className="ml-8 mt-1.5 space-y-1 animate-in slide-in-from-left duration-200">
                       {item.submenu.map((subitem) => (
                         <button
                           key={subitem.path}
@@ -677,7 +690,7 @@ export default function EnterpriseHeader() {
                             setActiveDropdown(null);
                           }}
                           className={`
-                            w-full text-left px-4 py-2 rounded-lg text-sm transition-colors
+                            w-full text-left px-4 py-2.5 rounded-lg text-sm transition-colors font-medium
                             ${isActive(subitem.path)
                               ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
