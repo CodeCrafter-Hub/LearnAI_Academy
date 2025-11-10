@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -75,18 +74,16 @@ export default function Logo({
       aria-label="Go to dashboard"
       className={className}
     >
-      <Image 
+      <img 
         src="/logo.png" 
         alt="Aigents Academy - Ignited Minds, Powered by AI" 
-        width={1024}  // Actual image width
-        height={1024} // Actual image height
         style={{
           height: logoStyle.height,
-          width: 'auto', // Let width follow natural aspect ratio (don't force square)
+          width: 'auto', // Let width follow natural aspect ratio
           maxWidth: '100%', // Prevent overflow on small screens
           objectFit: 'contain', // Preserve aspect ratio, show full image
+          display: 'block', // Remove inline spacing
         }}
-        priority
       />
     </button>
   );
