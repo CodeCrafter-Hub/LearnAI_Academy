@@ -50,10 +50,11 @@ export default function Logo({
         src="/logo.svg" 
         alt="Aigents Academy - Ignited Minds, Powered by AI" 
         style={{
-          height: 'clamp(3.5rem, 3vw + 2.5rem, 5rem)', // 56-80px - proper header logo size
-          width: 'auto', // Maintain aspect ratio
+          height: '4.5rem', // 72px - proper header logo size (not icon size)
+          width: '4.5rem', // Square logo maintains aspect ratio
           maxWidth: '100%', // Prevent overflow
           display: 'block',
+          objectFit: 'contain', // Show full logo without cropping
         }}
       />
     </button>
