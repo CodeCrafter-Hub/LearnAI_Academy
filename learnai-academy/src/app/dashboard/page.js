@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotificationContext } from '@/components/providers/NotificationProvider';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import SubjectCard from '@/components/learning/SubjectCard';
 import StreakCounter from '@/components/gamification/StreakCounter';
 import ProgressChart from '@/components/visualizations/ProgressChart';
@@ -142,7 +142,7 @@ export default function DashboardPage() {
   if (authLoading || isLoading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-        <Header />
+        <EnterpriseHeader />
         <main className="container" style={{ paddingBlock: 'var(--space-xl)' }}>
           <div className="skeleton" style={{ height: '40px', width: '300px', marginBottom: 'var(--space-sm)' }}></div>
           <div className="skeleton" style={{ height: '24px', width: '400px', marginBottom: 'var(--space-xl)' }}></div>
@@ -167,7 +167,7 @@ export default function DashboardPage() {
   if ((user?.role === 'ADMIN' || user?.is_admin) && !student) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-        <Header />
+        <EnterpriseHeader />
         <main className="container" style={{ paddingBlock: 'var(--space-xl)' }}>
           <h1 style={{
             fontSize: 'var(--text-5xl)',
@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-      <Header />
+      <EnterpriseHeader />
 
       <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
         {/* Hero Welcome */}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import AssessmentCard from '@/components/assessment/AssessmentCard';
 import Loading from '@/components/ui/Loading';
 import { FileText, Plus, Search, Filter } from 'lucide-react';
@@ -123,7 +123,7 @@ export default function AssessmentsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}

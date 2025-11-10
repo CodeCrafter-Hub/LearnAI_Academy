@@ -69,7 +69,7 @@ export default function Header() {
               fontWeight: 'var(--weight-bold)',
               color: 'var(--color-text-primary)',
             }}>
-              LearnAI Academy
+              Aigents Academy
             </span>
           </button>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import Loading from '@/components/ui/Loading';
 import Card from '@/components/ui/Card';
 import { BookOpen, ArrowLeft, Clock, Target, Users, Award, FileText, Lightbulb, CheckCircle } from 'lucide-react';
@@ -64,7 +64,7 @@ function LessonPlanDetailContent() {
   if (!lessonPlan) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-        <Header />
+        <EnterpriseHeader />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center py-16">
             <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -98,7 +98,7 @@ function LessonPlanDetailContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}

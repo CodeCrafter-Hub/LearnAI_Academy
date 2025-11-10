@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import QuestionCard from '@/components/assessment/QuestionCard';
 import Loading from '@/components/ui/Loading';
 import { Trophy, CheckCircle, XCircle, ArrowLeft, Home } from 'lucide-react';
@@ -88,7 +88,7 @@ function AssessmentResultsContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Results Summary */}

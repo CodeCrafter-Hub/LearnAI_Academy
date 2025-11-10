@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import ProgressChart from '@/components/progress/ProgressChart';
 import { useAuth } from '@/hooks/useAuth';
 import { Home, Download, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
@@ -86,7 +86,7 @@ export default function ParentDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import QuestionCard from '@/components/assessment/QuestionCard';
 import Loading from '@/components/ui/Loading';
 import { Clock, CheckCircle, ArrowRight, ArrowLeft, AlertTriangle } from 'lucide-react';
@@ -164,7 +164,7 @@ export default function TakeAssessmentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header with timer */}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import ProgressChart from '@/components/visualizations/ProgressChart';
 import { TrendingUp, Target, Award, BookOpen, Calendar } from 'lucide-react';
 
@@ -47,7 +47,7 @@ export default function ProgressPage() {
   if (isLoading || authLoading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-        <Header />
+        <EnterpriseHeader />
         <main className="container" style={{ paddingBlock: 'var(--space-xl)' }}>
           <div className="skeleton" style={{ height: '40px', width: '300px', marginBottom: 'var(--space-xl)' }}></div>
           <div className="skeleton" style={{ height: '300px', borderRadius: 'var(--radius-xl)' }}></div>
@@ -68,7 +68,7 @@ export default function ProgressPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-      <Header />
+      <EnterpriseHeader />
       <main className="container animate-fade-in" style={{ paddingBlock: 'var(--space-xl)' }}>
         {/* Header */}
         <section style={{ marginBottom: 'var(--space-2xl)' }}>

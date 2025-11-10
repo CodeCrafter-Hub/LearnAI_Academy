@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import ClassroomEvaluationWidget from '@/components/ui/ClassroomEvaluationWidget';
 import SubjectCard from '@/components/learning/SubjectCard';
 import Loading from '@/components/ui/Loading';
@@ -74,7 +74,7 @@ function GradePageContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-        <Header />
+        <EnterpriseHeader />
         <main className="container py-12">
           <Loading message="Loading grade page..." />
         </main>
@@ -84,7 +84,7 @@ function GradePageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <main className="container py-12 animate-fade-in">
         {/* Header */}

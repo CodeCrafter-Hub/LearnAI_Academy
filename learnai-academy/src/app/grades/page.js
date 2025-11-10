@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import ClassroomEvaluationWidget from '@/components/ui/ClassroomEvaluationWidget';
 import Loading from '@/components/ui/Loading';
 import { GraduationCap, ArrowRight, BookOpen, TrendingUp } from 'lucide-react';
@@ -42,7 +42,7 @@ export default function GradesPage() {
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-        <Header />
+        <EnterpriseHeader />
         <main className="container py-12">
           <Loading message="Loading grades..." />
         </main>
@@ -52,7 +52,7 @@ export default function GradesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <main className="container py-12 animate-fade-in">
         {/* Header */}

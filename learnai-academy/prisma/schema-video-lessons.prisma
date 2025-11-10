@@ -1,0 +1,85 @@
+// VIDEO LESSON INFRASTRUCTURE SCHEMA ADDITIONS
+// Add these models to the existing schema.prisma file
+
+// ============================================
+// VIDEO LESSON MODELS
+// ============================================
+
+model VideoLesson {
+  id              String   @id @default(uuid())
+  subjectId       String
+  topic           String?  // Topic name (e.g., "Adding Fractions")
+  gradeLevelMin   Int      // Minimum grade level
+  gradeLevelMax   Int      // Maximum grade level
+  title           String
+  description     String?
+  durationSeconds Int      // Video duration in seconds
+  thumbnailUrl    String?
+  videoUrl        String   // CDN URL (Cloudflare R2)
+  transcript      String?  // Full transcript
+  captionsUrl     String?  // SRT/VTT captions file URL
+  difficulty      VideoDifficulty
+  script          Json?    // Generated script with timestamps
+  visualCues      Json?    // Visual cue suggestions
+  practiceProblems Json?   // Embedded practice problems
+  viewCount       Int      @default(0)
+  averageRating   Float?   @default(0)
+  totalRatings    Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subject         Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  views           VideoLessonView[]
+
+  @@index([subjectId])
+  @@index([gradeLevelMin, gradeLevelMax])
+  @@index([difficulty])
+  @@index([isActive])
+  @@index([createdAt(sort: Desc)])
+  @@map("video_lessons")
+}
+
+enum VideoDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model VideoLessonView {
+  id                  String   @id @default(uuid())
+  videoLessonId       String
+  studentId           String
+  watchedDurationSeconds Int    @default(0) // Total seconds watched
+  lastPositionSeconds    Int    @default(0) // Last watched position
+  completed           Boolean  @default(false)
+  rating              Int?     // 1-5 rating
+  review              String?  // Optional review text
+  bookmarks           Json?    // Array of bookmarks with timestamps
+  notes               Json?    // Timestamped notes
+  interactions        Json?    // Quiz responses, polls, etc.
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  completedAt         DateTime?
+
+  videoLesson         VideoLesson @relation(fields: [videoLessonId], references: [id], onDelete: Cascade)
+  student             Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([videoLessonId, studentId])
+  @@index([studentId])
+  @@index([videoLessonId])
+  @@index([completed])
+  @@index([createdAt(sort: Desc)])
+  @@map("video_lesson_views")
+}
+
+// ============================================
+// RELATION UPDATES TO EXISTING MODELS
+// ============================================
+//
+// Add to Subject model:
+//   videoLessons    VideoLesson[]
+// 
+// Add to Student model:
+//   videoLessonViews VideoLessonView[]
+

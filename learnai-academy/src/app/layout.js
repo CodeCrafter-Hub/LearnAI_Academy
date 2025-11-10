@@ -12,7 +12,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 
 export const metadata = {
-  title: "LearnAI Academy",
+  title: "Aigents Academy",
   description: "AI-powered K-12 tutoring platform with personalized learning experiences.",
   icons: {
     icon: [

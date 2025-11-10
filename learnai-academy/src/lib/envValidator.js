@@ -43,6 +43,19 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().optional().describe('Google Gemini API key'),
   KIMI_API_KEY: z.string().optional().describe('Kimi (Moonshot AI) API key'),
 
+  // Video Generation API (Optional - for video lesson generation)
+  VIDEO_GENERATION_PROVIDER: z.enum(['heygen', 'd-id', 'synthesia']).optional().describe('Video generation provider'),
+  VIDEO_GENERATION_API_KEY: z.string().optional().describe('Video generation API key'),
+  VIDEO_AVATAR_ID: z.string().optional().describe('Default avatar ID for video generation'),
+  VIDEO_VOICE_ID: z.string().optional().describe('Default voice ID for video generation'),
+
+  // Cloudflare R2 Storage (Optional - for video storage)
+  CLOUDFLARE_ACCOUNT_ID: z.string().optional().describe('Cloudflare account ID'),
+  CLOUDFLARE_R2_ACCESS_KEY_ID: z.string().optional().describe('Cloudflare R2 access key ID'),
+  CLOUDFLARE_R2_SECRET_ACCESS_KEY: z.string().optional().describe('Cloudflare R2 secret access key'),
+  CLOUDFLARE_R2_BUCKET_NAME: z.string().optional().describe('Cloudflare R2 bucket name'),
+  CLOUDFLARE_R2_PUBLIC_URL: z.string().url().optional().describe('Cloudflare R2 public CDN URL'),
+
   // Application Settings
   PORT: z.string().default('3000').transform(Number).pipe(z.number().int().positive()),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
@@ -108,6 +121,25 @@ export function checkOptionalEnv() {
     .filter(([key]) => process.env[key])
     .map(([_, name]) => name);
 
+  // Check for video generation API
+  if (process.env.VIDEO_GENERATION_API_KEY) {
+    const provider = process.env.VIDEO_GENERATION_PROVIDER || 'heygen';
+    console.log(`✅ Video Generation API configured: ${provider}`);
+  } else {
+    warnings.push('VIDEO_GENERATION_API_KEY is not set (video lesson generation will be disabled)');
+  }
+
+  // Check for Cloudflare R2
+  const r2Required = ['CLOUDFLARE_ACCOUNT_ID', 'CLOUDFLARE_R2_ACCESS_KEY_ID', 'CLOUDFLARE_R2_SECRET_ACCESS_KEY', 'CLOUDFLARE_R2_BUCKET_NAME', 'CLOUDFLARE_R2_PUBLIC_URL'];
+  const r2Configured = r2Required.filter(key => process.env[key]).length;
+  if (r2Configured === r2Required.length) {
+    console.log('✅ Cloudflare R2 storage configured');
+  } else if (r2Configured > 0) {
+    warnings.push('Cloudflare R2 partially configured. All R2 variables are required for video storage.');
+  } else {
+    warnings.push('Cloudflare R2 not configured (video storage will be disabled)');
+  }
+
   if (process.env.NODE_ENV === 'production') {
     if (availableProviders.length === 0) {
       errors.push('At least one AI provider API key is required in production. Set one of: GROQ_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, or KIMI_API_KEY');
@@ -165,6 +197,17 @@ export function getEnvConfig() {
     openaiApiKey: process.env.OPENAI_API_KEY,
     geminiApiKey: process.env.GEMINI_API_KEY,
     kimiApiKey: process.env.KIMI_API_KEY,
+    // Video Generation API
+    videoGenerationProvider: process.env.VIDEO_GENERATION_PROVIDER,
+    videoGenerationApiKey: process.env.VIDEO_GENERATION_API_KEY,
+    videoAvatarId: process.env.VIDEO_AVATAR_ID,
+    videoVoiceId: process.env.VIDEO_VOICE_ID,
+    // Cloudflare R2
+    cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+    cloudflareR2AccessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
+    cloudflareR2SecretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
+    cloudflareR2BucketName: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+    cloudflareR2PublicUrl: process.env.CLOUDFLARE_R2_PUBLIC_URL,
     port: parseInt(process.env.PORT || '3000', 10),
     logLevel: process.env.LOG_LEVEL || 'info',
     isProduction: process.env.NODE_ENV === 'production',
@@ -191,6 +234,13 @@ export function displayEnvConfig() {
   console.log(`    OpenAI: ${config.openaiApiKey ? '✅ Configured' : '❌ Not configured'}`);
   console.log(`    Gemini: ${config.geminiApiKey ? '✅ Configured' : '❌ Not configured'}`);
   console.log(`    Kimi: ${config.kimiApiKey ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`  Video Generation:`);
+  console.log(`    Provider: ${config.videoGenerationProvider || 'Not set'}`);
+  console.log(`    API Key: ${config.videoGenerationApiKey ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`  Cloudflare R2:`);
+  console.log(`    Account ID: ${config.cloudflareAccountId ? '✅ Configured' : '❌ Not configured'}`);
+  console.log(`    Bucket: ${config.cloudflareR2BucketName || 'Not set'}`);
+  console.log(`    Public URL: ${config.cloudflareR2PublicUrl ? '✅ Configured' : '❌ Not configured'}`);
   console.log('');
 }
 

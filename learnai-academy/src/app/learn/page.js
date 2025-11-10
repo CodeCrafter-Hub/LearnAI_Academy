@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import AdaptiveSidebar from '@/components/layout/AdaptiveSidebar';
 import ChatInterface from '@/components/learning/ChatInterface';
 import AdaptiveClassroom from '@/components/learning/AdaptiveClassroom';
@@ -224,7 +224,7 @@ function LearnPageContent() {
       )}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <Header />
+        <EnterpriseHeader />
 
         <main className="container" style={{ 
           paddingBlock: gradeLevel <= 2 ? 'var(--space-2xl)' : 'var(--space-xl)', 

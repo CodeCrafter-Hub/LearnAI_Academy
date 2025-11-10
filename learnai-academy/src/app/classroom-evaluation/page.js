@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import Header from '@/components/layout/Header';
+import EnterpriseHeader from '@/components/layout/EnterpriseHeader';
 import ClassroomEvaluationRunner from '@/components/ui/ClassroomEvaluationRunner';
 import Loading from '@/components/ui/Loading';
 import { BookOpen, TrendingUp, Award } from 'lucide-react';
@@ -44,7 +44,7 @@ export default function ClassroomEvaluationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <Header />
+      <EnterpriseHeader />
 
       <main className="container py-12 animate-fade-in">
         {/* Header */}
