@@ -1,713 +1,363 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import {
-  Home,
-  BookOpen,
-  GraduationCap,
-  ClipboardList,
-  TrendingUp,
-  Video,
-  Settings,
-  User,
-  LogOut,
-  Bell,
-  Search,
-  ChevronDown,
-  Menu,
-  X,
-  HelpCircle,
-  MessageSquare,
-  CheckCircle,
-  Clock,
-  Award,
-  Sparkles,
-  Command,
-  Shield,
-  Brain,
-} from 'lucide-react';
+import { Home, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-// import { useNotificationContext } from '@/components/providers/NotificationProvider';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageSelector from '@/components/i18n/LanguageSelector';
+import MobileMenu from './MobileMenu';
 
-/**
- * Enterprise-Grade Navigation Header
- * 
- * Features:
- * - Clean, professional design with glassmorphism
- * - Organized dropdown menus
- * - Active state indicators with smooth transitions
- * - Advanced search with keyboard shortcuts (Cmd/Ctrl+K)
- * - Notifications dropdown with real-time updates
- * - Responsive mobile menu with animations
- * - Keyboard navigation support
- * - Breadcrumbs for deep navigation
- * - User menu with profile information
- */
 export default function EnterpriseHeader() {
   const router = useRouter();
-  const pathname = usePathname();
   const { user, logout } = useAuth();
-  // const { notifications: contextNotifications } = useNotificationContext() || { notifications: [] };
-  const contextNotifications = [];
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const dropdownRef = useRef(null);
-  const userMenuRef = useRef(null);
-  const notificationsRef = useRef(null);
-  const searchInputRef = useRef(null);
-
-  // Load notifications
-  useEffect(() => {
-    loadNotifications();
-    const interval = setInterval(loadNotifications, 30000); // Refresh every 30s
-    return () => clearInterval(interval);
-  }, [user]);
-
-  const loadNotifications = async () => {
-    try {
-      // Use context notifications or fetch from API
-      if (contextNotifications && contextNotifications.length > 0) {
-        setNotifications(contextNotifications);
-        setUnreadCount(contextNotifications.filter(n => !n.read).length);
-      } else {
-        // Fallback: Mock notifications for demo
-        const mockNotifications = [
-          {
-            id: '1',
-            type: 'achievement',
-            title: 'Achievement Unlocked! 🎉',
-            message: 'You earned the "Math Master" badge',
-            time: '2 hours ago',
-            read: false,
-            icon: Award,
-          },
-          {
-            id: '2',
-            type: 'streak',
-            title: 'Keep Your Streak Alive! 🔥',
-            message: 'You\'re on a 7-day streak!',
-            time: '5 hours ago',
-            read: false,
-            icon: Sparkles,
-          },
-          {
-            id: '3',
-            type: 'review',
-            title: 'Time to Review! 📚',
-            message: '3 items are ready for review',
-            time: '1 day ago',
-            read: true,
-            icon: Clock,
-          },
-        ];
-        setNotifications(mockNotifications);
-        setUnreadCount(mockNotifications.filter(n => !n.read).length);
-      }
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-    }
-  };
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Cmd/Ctrl + K for search
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setShowSearch(true);
-        setTimeout(() => searchInputRef.current?.focus(), 100);
-      }
-      // Escape to close modals
-      if (e.key === 'Escape') {
-        setShowSearch(false);
-        setShowUserMenu(false);
-        setShowNotifications(false);
-        setActiveDropdown(null);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setActiveDropdown(null);
-      }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setShowMobileMenu(false);
-  }, [pathname]);
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleLogout = async () => {
     await logout();
-    setShowUserMenu(false);
-  };
-
-  const markNotificationRead = async (id) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
-    setUnreadCount(prev => Math.max(0, prev - 1));
-  };
-
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-  };
-
-  // Navigation structure
-  const navigation = [
-    {
-      label: 'Dashboard',
-      path: '/dashboard',
-      icon: Home,
-      exact: true,
-    },
-    {
-      label: 'Learn',
-      path: '/learn',
-      icon: BookOpen,
-      submenu: [
-        { label: 'Browse Topics', path: '/learn' },
-        { label: 'Video Lessons', path: '/learn/videos' },
-        { label: 'Practice', path: '/learn/practice' },
-        { label: 'Study Tools', path: '/learn/tools' },
-      ],
-    },
-    {
-      label: 'Curriculum',
-      path: '/curriculum',
-      icon: GraduationCap,
-      submenu: [
-        { label: 'My Curriculum', path: '/curriculum' },
-        { label: 'Subjects', path: '/curriculum/subjects' },
-        { label: 'Units', path: '/curriculum/units' },
-        { label: 'Lessons', path: '/curriculum/lessons' },
-      ],
-    },
-    {
-      label: 'Assessments',
-      path: '/assessments',
-      icon: ClipboardList,
-      submenu: [
-        { label: 'Take Assessment', path: '/assessments' },
-        { label: 'My Results', path: '/assessments/results' },
-        { label: 'Practice Tests', path: '/assessments/practice' },
-      ],
-    },
-    {
-      label: 'Progress',
-      path: '/progress',
-      icon: TrendingUp,
-      submenu: [
-        { label: 'Overview', path: '/progress' },
-        { label: 'Analytics', path: '/progress/analytics' },
-        { label: 'Achievements', path: '/progress/achievements' },
-        { label: 'Reports', path: '/progress/reports' },
-      ],
-    },
-  ];
-
-  // Add parent-specific navigation
-  if (user?.role === 'PARENT') {
-    navigation.push({
-      label: 'Parent',
-      path: '/parent',
-      icon: User,
-      submenu: [
-        { label: 'Dashboard', path: '/parent' },
-        { label: 'Children', path: '/parent/children' },
-        { label: 'Reports', path: '/parent/reports' },
-        { label: 'Settings', path: '/parent/settings' },
-      ],
-    });
-  }
-
-  const isActive = (path, exact = false) => {
-    if (exact) {
-      return pathname === path;
-    }
-    return pathname?.startsWith(path);
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearch(false);
-      setSearchQuery('');
-    }
-  };
-
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'achievement':
-        return Award;
-      case 'streak':
-        return Sparkles;
-      case 'review':
-        return Clock;
-      default:
-        return Bell;
-    }
-  };
-
-  const getNotificationColor = (type) => {
-    switch (type) {
-      case 'achievement':
-        return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20';
-      case 'streak':
-        return 'text-orange-600 bg-orange-50 dark:bg-orange-900/20';
-      case 'review':
-        return 'text-blue-600 bg-blue-50 dark:bg-blue-900/20';
-      default:
-        return 'text-gray-600 bg-gray-50 dark:bg-gray-800';
-    }
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/98 dark:bg-gray-900/98 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-800/60 shadow-sm">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo & Brand - Improved sizing and spacing */}
-          <div className="flex items-center flex-shrink-0 min-w-0">
+    <header className="glass" style={{
+      borderBottom: '1px solid var(--color-border-subtle)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 'var(--z-sticky)',
+    }}>
+      <div className="container" style={{
+        padding: 'var(--space-md)',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          {/* Logo */}
+          <button
+            onClick={() => router.push('/dashboard')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-xs)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'opacity var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+            aria-label="Go to dashboard"
+          >
+            <div style={{
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Image 
+                src="/logo.png" 
+                alt="Aigents Academy Logo" 
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <span className="hidden sm:inline" style={{
+              fontSize: 'var(--text-xl)',
+              fontWeight: 'var(--weight-bold)',
+              color: 'var(--color-text-primary)',
+            }}>
+              Aigents Academy
+            </span>
+          </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-md)',
+          }}>
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-3 sm:gap-4 group transition-all duration-200 hover:opacity-90"
-              aria-label="Go to dashboard"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2xs)',
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
             >
-              {/* Logo image - Better sizing */}
-              <div className="relative h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0">
-                <Image 
-                  src="/logo.png" 
-                  alt="Aigents Academy Logo" 
-                  width={56}
-                  height={56}
-                  className="object-contain transition-transform duration-200 group-hover:scale-105"
-                  priority
-                />
-              </div>
-              {/* Brand text - Better typography and spacing */}
-              <div className="hidden sm:block min-w-0">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight tracking-tight">
-                  Aigents Academy
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 font-medium leading-tight">
-                  Ignited Minds, Powered by AI
-                </div>
-              </div>
+              <Home className="w-5 h-5" aria-hidden="true" />
+              <span>Dashboard</span>
             </button>
-          </div>
-
-          {/* Desktop Navigation - Better spacing and sizing */}
-          <nav className="hidden lg:flex items-center gap-1.5 flex-1 justify-center max-w-5xl mx-8">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const hasSubmenu = item.submenu && item.submenu.length > 0;
-              const active = isActive(item.path, item.exact);
-
-              return (
-                <div key={item.path} className="relative" ref={hasSubmenu ? dropdownRef : null}>
-                  <button
-                    onClick={() => {
-                      if (hasSubmenu) {
-                        setActiveDropdown(activeDropdown === item.path ? null : item.path);
-                      } else {
-                        router.push(item.path);
-                      }
-                    }}
-                    onMouseEnter={() => {
-                      if (hasSubmenu) {
-                        setTimeout(() => {
-                          if (activeDropdown !== item.path) {
-                            setActiveDropdown(item.path);
-                          }
-                        }, 150);
-                      }
-                    }}
-                    className={`
-                      flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
-                      ${active
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100'
-                      }
-                    `}
-                  >
-                    <Icon className="w-4.5 h-4.5 flex-shrink-0" />
-                    <span className="whitespace-nowrap">{item.label}</span>
-                    {hasSubmenu && (
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${
-                          activeDropdown === item.path ? 'rotate-180' : ''
-                        }`}
-                      />
-                    )}
-                  </button>
-
-                  {/* Dropdown Menu - Better styling */}
-                  {hasSubmenu && activeDropdown === item.path && (
-                    <div className="absolute top-full left-0 mt-2.5 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      {item.submenu.map((subitem) => (
-                        <button
-                          key={subitem.path}
-                          onClick={() => {
-                            router.push(subitem.path);
-                            setActiveDropdown(null);
-                          }}
-                          className={`
-                            w-full text-left px-5 py-3 text-sm font-medium transition-colors duration-150
-                            ${isActive(subitem.path)
-                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                            }
-                          `}
-                        >
-                          {subitem.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            <button
+              onClick={() => router.push('/learn')}
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              Learn
+            </button>
+            <button
+              onClick={() => router.push('/curriculum')}
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              Curriculum
+            </button>
+            <button
+              onClick={() => router.push('/assessments')}
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              Assessments
+            </button>
+            <button
+              onClick={() => router.push('/progress')}
+              style={{
+                padding: 'var(--space-xs) var(--space-sm)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--weight-medium)',
+                fontSize: 'var(--text-base)',
+                cursor: 'pointer',
+                borderRadius: 'var(--radius-lg)',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              Progress
+            </button>
+            {user?.role === 'PARENT' && (
+              <button
+                onClick={() => router.push('/parent')}
+                style={{
+                  padding: 'var(--space-xs) var(--space-sm)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-secondary)',
+                  fontWeight: 'var(--weight-medium)',
+                  fontSize: 'var(--text-base)',
+                  cursor: 'pointer',
+                  borderRadius: 'var(--radius-lg)',
+                  transition: 'all var(--transition-fast)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-accent)';
+                  e.currentTarget.style.background = 'var(--color-bg-muted)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                Parent Dashboard
+              </button>
+            )}
           </nav>
 
-          {/* Right Side Actions - Better spacing and sizing */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            {/* Search - Improved */}
-            <div className="relative">
-              {showSearch ? (
-                <form onSubmit={handleSearch} className="flex items-center">
-                  <div className="relative">
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search lessons, topics, videos..."
-                      autoFocus
-                      className="w-80 sm:w-96 px-5 py-2.5 pl-11 pr-20 bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
-                      onBlur={() => {
-                        setTimeout(() => setShowSearch(false), 200);
-                      }}
-                    />
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" />
-                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-gray-400">
-                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Esc</kbd>
-                    </div>
-                  </div>
-                </form>
-              ) : (
-                <button
-                  onClick={() => {
-                    setShowSearch(true);
-                    setTimeout(() => searchInputRef.current?.focus(), 100);
+          {/* Desktop User Menu & Theme Toggle */}
+          <div className="hidden md:flex" style={{ position: 'relative', alignItems: 'center', gap: 'var(--space-sm)' }}>
+            <LanguageSelector />
+            <ThemeToggle />
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-xs)',
+                background: 'var(--color-bg-muted)',
+                border: 'none',
+                borderRadius: 'var(--radius-full)',
+                padding: 'var(--space-xs) var(--space-md)',
+                cursor: 'pointer',
+                transition: 'all var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-elevated)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-muted)';
+              }}
+              aria-label="User menu"
+            >
+              <User className="w-5 h-5" style={{ color: 'var(--color-text-secondary)' }} />
+              <span className="hidden lg:inline" style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-text-secondary)',
+              }}>
+                {user?.email}
+              </span>
+            </button>
+
+            {showMenu && (
+              <>
+                <div
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 10,
                   }}
-                  className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors group"
-                  aria-label="Search"
-                  title="Search (Ctrl+K)"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-
-            {/* Notifications - Improved */}
-            <div className="relative" ref={notificationsRef}>
-              <button
-                onClick={() => {
-                  setShowNotifications(!showNotifications);
-                  setActiveDropdown(null);
-                }}
-                className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white dark:border-gray-900">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {/* Notifications Dropdown - Improved */}
-              {showNotifications && (
-                <div className="absolute right-0 mt-3 w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
-                      Notifications
-                    </h3>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={markAllRead}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                      >
-                        Mark all read
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                        <Bell className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                        <p>No notifications</p>
-                      </div>
-                    ) : (
-                      notifications.map((notification) => {
-                        const Icon = getNotificationIcon(notification.type);
-                        return (
-                          <button
-                            key={notification.id}
-                            onClick={() => {
-                              markNotificationRead(notification.id);
-                              if (notification.action?.route) {
-                                router.push(notification.action.route);
-                                setShowNotifications(false);
-                              }
-                            }}
-                            className={`
-                              w-full text-left px-5 py-4 border-b border-gray-100 dark:border-gray-700 last:border-0
-                              transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50
-                              ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}
-                            `}
-                          >
-                            <div className="flex items-start gap-3.5">
-                              <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${getNotificationColor(notification.type)}`}>
-                                <Icon className="w-5.5 h-5.5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2">
-                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {notification.title}
-                                  </p>
-                                  {!notification.read && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5 leading-relaxed">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                                  {notification.time}
-                                </p>
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                  {notifications.length > 0 && (
-                    <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700">
-                      <button
-                        onClick={() => {
-                          router.push('/notifications');
-                          setShowNotifications(false);
-                        }}
-                        className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                      >
-                        View all notifications
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Theme Toggle */}
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
-
-            {/* Language Selector */}
-            <div className="hidden md:block">
-              <LanguageSelector />
-            </div>
-
-            {/* User Menu - Improved */}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => {
-                  setShowUserMenu(!showUserMenu);
-                  setShowNotifications(false);
-                  setActiveDropdown(null);
-                }}
-                className="flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors border border-gray-200 dark:border-gray-700"
-              >
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
-                  <User className="w-4.5 h-4.5 text-white" />
-                </div>
-                <div className="hidden xl:block text-left min-w-0">
-                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                    {user?.name || user?.email?.split('@')[0] || 'User'}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user?.role || 'Student'}
-                  </div>
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
-                    showUserMenu ? 'rotate-180' : ''
-                  }`}
+                  onClick={() => setShowMenu(false)}
+                  aria-hidden="true"
                 />
-              </button>
-
-              {/* User Dropdown - Improved */}
-              {showUserMenu && (
-                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                      {user?.name || 'User'}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                      {user?.email}
-                    </div>
-                  </div>
-                  
+                <div className="surface-elevated animate-fade-in" style={{
+                  position: 'absolute',
+                  right: 0,
+                  marginTop: 'var(--space-xs)',
+                  width: '192px',
+                  padding: 'var(--space-xs)',
+                  zIndex: 20,
+                }}>
                   <button
                     onClick={() => {
+                      setShowMenu(false);
                       router.push('/settings');
-                      setShowUserMenu(false);
                     }}
-                    className="w-full text-left px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-3 transition-colors font-medium"
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm) var(--space-md)',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-xs)',
+                      background: 'none',
+                      border: 'none',
+                      borderRadius: 'var(--radius-lg)',
+                      color: 'var(--color-text-primary)',
+                      fontSize: 'var(--text-sm)',
+                      cursor: 'pointer',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--color-bg-muted)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
                   >
-                    <Settings className="w-4.5 h-4.5" />
+                    <Settings className="w-4 h-4" aria-hidden="true" />
                     Settings
                   </button>
-                  
                   <button
                     onClick={() => {
-                      router.push('/help');
-                      setShowUserMenu(false);
+                      setShowMenu(false);
+                      handleLogout();
                     }}
-                    className="w-full text-left px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-3 transition-colors font-medium"
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm) var(--space-md)',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-xs)',
+                      background: 'none',
+                      border: 'none',
+                      borderRadius: 'var(--radius-lg)',
+                      color: 'hsl(0, 70%, 55%)',
+                      fontSize: 'var(--text-sm)',
+                      cursor: 'pointer',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'hsla(0, 70%, 95%, 1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
                   >
-                    <HelpCircle className="w-4.5 h-4.5" />
-                    Help & Support
-                  </button>
-                  
-                  <div className="border-t border-gray-200 dark:border-gray-700 my-1.5" />
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors font-medium"
-                  >
-                    <LogOut className="w-4.5 h-4.5" />
-                    Sign Out
+                    <LogOut className="w-4 h-4" aria-hidden="true" />
+                    Logout
                   </button>
                 </div>
-              )}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-              aria-label="Menu"
-            >
-              {showMobileMenu ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
+              </>
+            )}
           </div>
+
+          {/* Mobile Menu */}
+          <MobileMenu user={user} onLogout={handleLogout} />
         </div>
       </div>
-
-      {/* Mobile Menu - Improved */}
-      {showMobileMenu && (
-        <div className="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 animate-in slide-in-from-top duration-200">
-          <nav className="px-4 py-4 space-y-1.5">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.path, item.exact);
-
-              return (
-                <div key={item.path}>
-                  <button
-                    onClick={() => {
-                      if (item.submenu) {
-                        setActiveDropdown(activeDropdown === item.path ? null : item.path);
-                      } else {
-                        router.push(item.path);
-                        setShowMobileMenu(false);
-                      }
-                    }}
-                    className={`
-                      w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors
-                      ${active
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                      }
-                    `}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    <span>{item.label}</span>
-                    {item.submenu && (
-                      <ChevronDown
-                        className={`w-4 h-4 ml-auto flex-shrink-0 transition-transform ${
-                          activeDropdown === item.path ? 'rotate-180' : ''
-                        }`}
-                      />
-                    )}
-                  </button>
-
-                  {/* Mobile Submenu */}
-                  {item.submenu && activeDropdown === item.path && (
-                    <div className="ml-8 mt-1.5 space-y-1 animate-in slide-in-from-left duration-200">
-                      {item.submenu.map((subitem) => (
-                        <button
-                          key={subitem.path}
-                          onClick={() => {
-                            router.push(subitem.path);
-                            setShowMobileMenu(false);
-                            setActiveDropdown(null);
-                          }}
-                          className={`
-                            w-full text-left px-4 py-2.5 rounded-lg text-sm transition-colors font-medium
-                            ${isActive(subitem.path)
-                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                            }
-                          `}
-                        >
-                          {subitem.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </nav>
-        </div>
-      )}
     </header>
   );
 }
