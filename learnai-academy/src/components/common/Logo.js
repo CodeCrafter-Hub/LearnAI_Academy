@@ -47,11 +47,11 @@ export default function Logo({
       className={className}
     >
       <img 
-        src="/logo.png" 
+        src="/logo.svg" 
         alt="Aigents Academy - Ignited Minds, Powered by AI" 
         style={{
-          width: '50%', // Half of natural size
-          height: 'auto', // Maintain aspect ratio
+          height: 'clamp(3.5rem, 3vw + 2.5rem, 5rem)', // 56-80px - proper header logo size
+          width: 'auto', // Maintain aspect ratio
           maxWidth: '100%', // Prevent overflow
           display: 'block',
         }}
