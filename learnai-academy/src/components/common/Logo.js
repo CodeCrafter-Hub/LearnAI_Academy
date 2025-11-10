@@ -5,11 +5,17 @@ import { useRouter } from 'next/navigation';
 
 /**
  * Global Logo Component
- * Used consistently across the entire application
+ * 
+ * A proper logo implementation that scales fluidly with the design system.
+ * Uses height-based sizing to maintain brand presence while respecting
+ * responsive design principles.
+ * 
+ * @param {string} size - Logo size: 'small' (mobile/compact), 'default' (header), 'large' (hero)
+ * @param {function} onClick - Optional click handler (defaults to navigating to dashboard)
+ * @param {string} className - Additional CSS classes
  */
 export default function Logo({ 
-  size = 'default', // 'small', 'default', 'large'
-  showText = false, // Whether to show text (logo image already contains text)
+  size = 'default',
   onClick,
   className = '',
 }) {
@@ -23,13 +29,28 @@ export default function Logo({
     }
   };
 
+  // Fluid logo sizing aligned with design system
+  // Height-based scaling ensures proper logo presence (not icon-like)
+  // Width follows naturally from aspect ratio
   const sizeMap = {
-    small: { width: 120, height: 40, maxHeight: '32px' },
-    default: { width: 180, height: 60, maxHeight: '50px' },
-    large: { width: 240, height: 80, maxHeight: '70px' },
+    small: {
+      // Mobile menu, footer, compact contexts
+      // 32-40px height range (still substantial, not icon-like)
+      height: 'clamp(2rem, 2vw + 1.5rem, 2.5rem)',
+    },
+    default: {
+      // Standard header (most common use case)
+      // 40-56px height range - proper logo size for enterprise apps
+      height: 'clamp(2.5rem, 2.5vw + 2rem, 3.5rem)',
+    },
+    large: {
+      // Hero sections, landing pages, prominent displays
+      // 48-72px height range - maximum brand presence
+      height: 'clamp(3rem, 3vw + 2.5rem, 4.5rem)',
+    },
   };
 
-  const dimensions = sizeMap[size] || sizeMap.default;
+  const logoStyle = sizeMap[size] || sizeMap.default;
 
   return (
     <button
@@ -42,6 +63,7 @@ export default function Logo({
         cursor: 'pointer',
         transition: 'opacity var(--transition-fast)',
         padding: 0,
+        lineHeight: 0, // Remove extra spacing from inline elements
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.opacity = '0.8';
@@ -55,13 +77,13 @@ export default function Logo({
       <Image 
         src="/logo.png" 
         alt="Aigents Academy - Ignited Minds, Powered by AI" 
-        width={dimensions.width}
-        height={dimensions.height}
+        width={300}  // High-resolution source width (Next.js optimization)
+        height={100} // High-resolution source height (maintains aspect ratio)
         className="object-contain"
         style={{
-          height: 'auto',
-          maxHeight: dimensions.maxHeight,
-          width: 'auto',
+          height: logoStyle.height,
+          width: 'auto', // Width follows from aspect ratio
+          maxWidth: '100%', // Prevent overflow on small screens
         }}
         priority
       />
