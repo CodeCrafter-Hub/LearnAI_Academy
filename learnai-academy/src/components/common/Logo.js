@@ -77,12 +77,12 @@ export default function Logo({
       <Image 
         src="/logo.png" 
         alt="Aigents Academy - Ignited Minds, Powered by AI" 
-        width={300}  // High-resolution source width (Next.js optimization)
-        height={100} // High-resolution source height (maintains aspect ratio)
+        width={1024}  // Actual image width (square logo)
+        height={1024} // Actual image height (square logo, 1:1 aspect ratio)
         className="object-contain"
         style={{
           height: logoStyle.height,
-          width: 'auto', // Width follows from aspect ratio
+          width: logoStyle.height, // Square logo: width matches height
           maxWidth: '100%', // Prevent overflow on small screens
         }}
         priority
